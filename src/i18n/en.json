@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "title": "9:47",
+    "subtitle": "The Memory I Forgot",
+    "city": "Clearhaven"
+  },
+  "ui": {
+    "loading": "Loading the city…",
+    "newGame": "New Game",
+    "continue": "Continue",
+    "settings": "Settings",
+    "headphones": "Best with headphones · Played with keyboard and mouse",
+    "paused": "Paused",
+    "resume": "Resume",
+    "clickToResume": "Click to continue",
+    "toTitle": "Back to Title",
+    "journal": "Journal",
+    "controlsHint": "WASD move · Shift run · Space jump · C crouch · E interact · F flashlight · J journal · P pause"
+  },
+  "regions": {
+    "r1": "Residential District",
+    "r2": "Commercial District",
+    "under": "Underground",
+    "r3": "City Center"
+  },
+  "signs": {
+    "laundry": "LAUNDROMAT",
+    "store": "CHEONGAN MART 24",
+    "garage": "BLOCK 3 PARKING",
+    "restricted": "RESTRICTED AREA",
+    "noEntry": "NO ENTRY · BRIDGE COLLAPSED",
+    "sticker": "Registered Household",
+    "graffiti": "DON'T LOOK AT THE TOWER LIGHT",
+    "pharmacy": "PHARMACY",
+    "cafe": "CAFÉ AFTERNOON",
+    "cafe2": "CLOCKTOWER CAFÉ",
+    "bookstore": "WIND BOOKS",
+    "bakery": "SODAM BAKERY",
+    "florist": "WILDFLOWER FLORIST",
+    "music": "RECORDS",
+    "mall": "CHEONGAN MALL",
+    "studio": "SPRINGLIGHT PHOTO STUDIO",
+    "institute": "MEMORY PRESERVATION INSTITUTE",
+    "ceremony": "Clearhaven Archive Launch Ceremony",
+    "archiveSlogan": "Every moment, forever",
+    "stall1": "Cotton Candy",
+    "stall2": "Tteokbokki",
+    "stall3": "Balloons",
+    "stall4": "Souvenirs",
+    "photoNone": "",
+    "photoDate": "With Haram, spring",
+    "billboard": {
+      "org": "Memory Preservation Institute",
+      "headline": "The Archive",
+      "copy": "Every moment of Clearhaven, forever.",
+      "name": "Lead Researcher Han Yujin"
+    },
+    "notice": {
+      "title": "Clearhaven Emergency Evacuation",
+      "lines": [
+        "This is a restricted area.",
+        "The Depleted have been moved to shelters.",
+        "Do not approach the tower.",
+        "",
+        "Clearhaven Disaster Response HQ"
+      ]
+    },
+    "gateSign": {
+      "title": "Emergency Power",
+      "lines": [
+        "Gate power: OFF",
+        "Spare fuse stored at:",
+        "Block 3 underground parking",
+        "Fuse cabinet (east wall)"
+      ]
+    }
+  },
+  "time": {
+    "fmt": "{h}:{mm} {ampm}",
+    "am": "AM",
+    "pm": "PM"
+  },
+  "hud": {
+    "crouch": "CROUCHING",
+    "lightOff": "OFF"
+  }
+}

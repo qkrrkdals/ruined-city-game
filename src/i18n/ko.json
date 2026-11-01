@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "title": "9시 47분",
+    "subtitle": "내가 잊은 기억",
+    "city": "청안시"
+  },
+  "ui": {
+    "loading": "도시를 불러오는 중…",
+    "newGame": "새 게임",
+    "continue": "이어하기",
+    "settings": "설정",
+    "headphones": "헤드폰을 쓰면 더 좋아요 · 키보드와 마우스로 플레이합니다",
+    "paused": "일시정지",
+    "resume": "계속하기",
+    "clickToResume": "클릭하면 이어집니다",
+    "toTitle": "타이틀로",
+    "journal": "일지",
+    "controlsHint": "WASD 이동 · Shift 달리기 · Space 점프 · C 앉기 · E 상호작용 · F 손전등 · J 일지 · P 일시정지"
+  },
+  "regions": {
+    "r1": "주거 지구",
+    "r2": "상업 지구",
+    "under": "지하 구간",
+    "r3": "도시 중심부"
+  },
+  "signs": {
+    "laundry": "빨래방",
+    "store": "청안마트 24",
+    "garage": "3단지 지하 주차장",
+    "restricted": "출입 통제 구역",
+    "noEntry": "통행 금지 · 교량 붕괴",
+    "sticker": "보존 등록 가구",
+    "graffiti": "탑의 불빛을 보지 마",
+    "pharmacy": "온누리 약국",
+    "cafe": "카페 오후",
+    "cafe2": "카페 시계탑",
+    "bookstore": "책방 바람",
+    "bakery": "빵집 소담",
+    "florist": "꽃집 들",
+    "music": "음반 가게",
+    "mall": "청안 쇼핑몰",
+    "studio": "봄빛 사진관",
+    "institute": "기억보존연구소",
+    "ceremony": "청안시 아카이브 가동 기념식",
+    "archiveSlogan": "모든 순간을 영원히",
+    "stall1": "솜사탕",
+    "stall2": "떡볶이",
+    "stall3": "풍선",
+    "stall4": "기념품",
+    "photoNone": "",
+    "photoDate": "하람이랑, 봄",
+    "billboard": {
+      "org": "기억보존연구소",
+      "headline": "아카이브",
+      "copy": "청안시의 모든 순간을, 영원히.",
+      "name": "수석 연구원 한유진"
+    },
+    "notice": {
+      "title": "청안시 긴급 대피 안내",
+      "lines": [
+        "본 구역은 출입 통제 구역입니다.",
+        "기억 소실자는 보호소로 이송되었습니다.",
+        "탑 쪽으로 접근하지 마십시오.",
+        "",
+        "청안시 재난대책본부"
+      ]
+    },
+    "gateSign": {
+      "title": "비상 전원 안내",
+      "lines": [
+        "게이트 전원 차단됨",
+        "예비 퓨즈 보관 위치:",
+        "3단지 지하 주차장",
+        "전기함 (동쪽 벽)"
+      ]
+    }
+  },
+  "time": {
+    "fmt": "{ampm} {h}시 {m}분",
+    "am": "오전",
+    "pm": "오후"
+  },
+  "hud": {
+    "crouch": "앉음",
+    "lightOff": "꺼짐"
+  }
+}
