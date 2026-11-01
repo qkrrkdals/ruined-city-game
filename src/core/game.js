@@ -11,6 +11,10 @@ import { TITLE_PATH } from '../world/layout.js';
 import { Player } from '../player/player.js';
 import { TimeOfDay } from '../systems/timeofday.js';
 import { LightPool } from '../systems/lights.js';
+import { Interact } from '../player/interact.js';
+import { Props } from '../player/props.js';
+import { Hands } from '../player/hands.js';
+import { placeProps } from '../story/placement.js';
 import { UI, clockText } from '../ui/ui.js';
 
 const raf = () => new Promise((r) => requestAnimationFrame(r));
@@ -32,7 +36,11 @@ export async function startGame() {
   G.player = new Player(G);
   G.lights = new LightPool(G, 3);
   for (const [, a] of G.world.anchors) if (a.lamp) G.lights.add({ pos: a.lamp, intensity: 11, distance: 11 });
-  G.systems.push(G.lights);
+  G.interact = new Interact(G);
+  G.props = new Props(G);
+  G.hands = new Hands(G);
+  placeProps(G);
+  G.systems.push(G.lights, G.props, G.interact, G.hands);
   G.events.on('quality', (q) => G.world.setDensity(q.density));
   G.gfx.setQuality(G.settings.quality);
   G.time.set(14.2, true);

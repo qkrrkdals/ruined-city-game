@@ -22,6 +22,9 @@ export function installDebug(G) {
       return { state: G.state, pos: [+p.x.toFixed(2), +p.y.toFixed(2), +p.z.toFixed(2)], yaw: +G.player.yaw.toFixed(2), hour: +G.time.hour.toFixed(2), region: G.world.regionAt(p), zone: G.world.zoneAt(p)?.id ?? null, onFloor: G.player.onFloor, story: G.story?.debugState?.() };
     },
     teleports: Object.keys(TP),
+    props() { return G.props.list.map((p) => ({ id: p.id, state: p.state, pos: p.pos.toArray().map((v) => +v.toFixed(2)) })); },
+    press(code) { G.input.hit.add(code); },
+    target() { return G.interact.target?.id ?? null; },
     // headless helpers: stop per-frame rendering, simulate n frames, render exactly once
     freeze(on = true) { G.freeze = on; },
     sim(n = 10, dt = 1 / 30) { const f = G.freeze; G.freeze = true; for (let i = 0; i < n; i++) tick(G, dt); G.freeze = f; },

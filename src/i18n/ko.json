@@ -82,6 +82,28 @@
   },
   "hud": {
     "crouch": "앉음",
-    "lightOff": "꺼짐"
+    "lightOff": "꺼짐",
+    "holding": "들고 있음: {name}",
+    "click": "클릭",
+    "standingOnIt": "올라서 있는 상자는 들 수 없다."
+  },
+  "verb": {
+    "read": "읽기",
+    "examine": "살펴보기",
+    "pickup": "줍기",
+    "carry": "들기",
+    "drop": "내려놓기",
+    "throw": "던지기",
+    "insert": "꽂기",
+    "use": "작동하기",
+    "enter": "입력하기",
+    "take": "챙기기"
+  },
+  "items": {
+    "crate": "나무 상자",
+    "fuse": "퓨즈",
+    "bottle": "빈 병",
+    "battery": "배터리",
+    "flashlight": "손전등"
   }
 }

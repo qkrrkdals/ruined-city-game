@@ -82,6 +82,28 @@
   },
   "hud": {
     "crouch": "CROUCHING",
-    "lightOff": "OFF"
+    "lightOff": "OFF",
+    "holding": "Holding: {name}",
+    "click": "Click",
+    "standingOnIt": "You can't lift a crate you're standing on."
+  },
+  "verb": {
+    "read": "Read",
+    "examine": "Examine",
+    "pickup": "Pick up",
+    "carry": "Lift",
+    "drop": "Put down",
+    "throw": "Throw",
+    "insert": "Insert",
+    "use": "Use",
+    "enter": "Enter code",
+    "take": "Take"
+  },
+  "items": {
+    "crate": "Wooden crate",
+    "fuse": "Fuse",
+    "bottle": "Empty bottle",
+    "battery": "Battery",
+    "flashlight": "Flashlight"
   }
 }
