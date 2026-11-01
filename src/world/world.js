@@ -20,7 +20,7 @@ function makeKit(G, W, name, seed, pal) {
   const k = {
     G, W, name, rand, pal, col: W.col,
     geo: new Geo(rand), soft: new Geo(rand), glow: new Geo(rand), stone: new Geo(rand),
-    inst: {}, greens: [], vineWalls: [], signs: [], noVegRects: [], extra: [],
+    inst: {}, greens: [], vineWalls: [], signs: [], noVegRects: [], extra: [], extraLights: [],
     add(type, item) { (this.inst[type] ||= []).push(item); },
     green(x0, z0, x1, z1, o = {}) { this.greens.push({ x0: Math.min(x0, x1), z0: Math.min(z0, z1), x1: Math.max(x0, x1), z1: Math.max(z0, z1), ...o }); },
     noVeg(r) { this.noVegRects.push(r); },
@@ -60,7 +60,7 @@ function finishKit(k) {
 const REGION_Z = { r1: [120, 266], r2: [-10, 120], under: [-100, 70], r3: [-190, -40] };
 
 export function buildWorld(G) {
-  const W = { G, groups: {}, details: {}, anchors: new Map(), zones: [], surfaces: [], textDraws: [], density: [], col: new CollisionWorld() };
+  const W = { G, groups: {}, details: {}, anchors: new Map(), zones: [], surfaces: [], textDraws: [], density: [], portals: [], lightSpecs: [], tallCells: new Map(), col: new CollisionWorld() };
   W.M = createMaterials();
   W.sky = new Sky(G.scene);
   W.landmark = new THREE.Group(); G.scene.add(W.landmark);
@@ -69,7 +69,7 @@ export function buildWorld(G) {
   const occ = new Occupancy(-95, -200, 95, 280, 1);
   occ.fromBoxes(W.col.boxes);
   kits.forEach((k) => k.noVegRects.forEach((r) => occ.block(r)));
-  for (const k of kits) { scatter(k, occ); finishKit(k); }
+  for (const k of kits) { scatter(k, occ); finishKit(k); W.lightSpecs.push(...k.extraLights); }
   farCity(W, G.scene);
   W.col.build();
   const redraw = () => W.textDraws.forEach((f) => f());
@@ -86,6 +86,7 @@ export function buildWorld(G) {
     for (let i = W.surfaces.length - 1; i >= 0; i--) { const s = W.surfaces[i], r = s.r; if (p.x >= r[0] && p.x <= r[2] && p.z >= r[1] && p.z <= r[3]) return s.type; }
     const reg = W.regionAt(p); return reg === 'r1' ? 'grass' : reg === 'under' ? 'tile' : 'stone';
   };
+  W.tallAt = (p) => (W.tallCells.get(Math.floor(p.x / 2) + ',' + Math.floor(p.z / 2)) || 0) >= 2;
   W.setDensity = (d) => { for (const e of W.density) e.mesh.count = Math.floor(e.total * d); };
   W.update = (dt, cam) => {
     U.uTime.value += dt;
@@ -98,7 +99,6 @@ export function buildWorld(G) {
       const det = W.details[name]; if (det) det.visible = grp.visible && dz < 140;
     }
   };
-  W.portals = [];
   W.nearPortal = (p) => W.portals.some((q) => Math.hypot(p.x - q[0], p.z - q[1]) < q[2]);
   return W;
 }

@@ -21,6 +21,7 @@ KEYS.forEach((k) => COLS.forEach((c) => { k[c] = new THREE.Color(k[c]); }));
 // indoor / underground modifiers
 const ZONES = {
   indoor: { sun: 0.45, hemi: 1.12, fogMul: 1.3, tint: new THREE.Color('#5a5060'), tintAmt: 0.15 },
+  dim: { sun: 0.12, hemi: 0.42, fogMul: 1.6, tint: new THREE.Color('#2a2833'), tintAmt: 0.45 },
   garage: { sun: 0, hemi: 0, fogMul: 0, hs: new THREE.Color('#61686a'), hg: new THREE.Color('#1d2021'), hi: 0.32, fog: new THREE.Color('#1c1f21'), fd: 0.034 },
   underground: { sun: 0, hemi: 0, fogMul: 0, hs: new THREE.Color('#3d7a80'), hg: new THREE.Color('#0f2328'), hi: 0.32, fog: new THREE.Color('#122c35'), fd: 0.03 },
 };

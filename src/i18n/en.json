@@ -73,7 +73,16 @@
         "Block 3 underground parking",
         "Fuse cabinet (east wall)"
       ]
-    }
+    },
+    "station": "Clearhaven Station",
+    "station3": "Clearhaven Plaza Station",
+    "platform": "Platform · To City Center",
+    "shop1": "Clothing",
+    "shop2": "Electronics",
+    "shop3": "Snacks",
+    "shop4": "Stationery",
+    "shop5": "Optician",
+    "shop6": "Café Below"
   },
   "time": {
     "fmt": "{h}:{mm} {ampm}",
@@ -85,7 +94,14 @@
     "lightOff": "OFF",
     "holding": "Holding: {name}",
     "click": "Click",
-    "standingOnIt": "You can't lift a crate you're standing on."
+    "standingOnIt": "You can't lift a crate you're standing on.",
+    "batteryEmpty": "The battery is dead.",
+    "caught": "…Everything went dark. You wake up in the shelter.",
+    "shelter": "Shelter · Safe inside the lamplight",
+    "batteryFull": "The battery is already full.",
+    "batteryPlus": "Battery +35%",
+    "noFlashlight": "You have no flashlight to use this with.",
+    "gotFlashlight": "Got the flashlight · F to toggle"
   },
   "verb": {
     "read": "Read",

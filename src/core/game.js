@@ -15,6 +15,9 @@ import { Interact } from '../player/interact.js';
 import { Props } from '../player/props.js';
 import { Hands } from '../player/hands.js';
 import { placeProps } from '../story/placement.js';
+import { Flashlight } from '../systems/flashlight.js';
+import { Shelters } from '../systems/shelters.js';
+import { Remnants } from '../systems/remnants.js';
 import { UI, clockText } from '../ui/ui.js';
 
 const raf = () => new Promise((r) => requestAnimationFrame(r));
@@ -36,11 +39,15 @@ export async function startGame() {
   G.player = new Player(G);
   G.lights = new LightPool(G, 3);
   for (const [, a] of G.world.anchors) if (a.lamp) G.lights.add({ pos: a.lamp, intensity: 11, distance: 11 });
+  for (const l of G.world.lightSpecs) G.lights.add(l);
   G.interact = new Interact(G);
   G.props = new Props(G);
   G.hands = new Hands(G);
+  G.flashlight = new Flashlight(G);
+  G.shelters = new Shelters(G);
   placeProps(G);
-  G.systems.push(G.lights, G.props, G.interact, G.hands);
+  G.remnants = new Remnants(G);
+  G.systems.push(G.lights, G.props, G.interact, G.hands, G.flashlight, G.shelters, G.remnants);
   G.events.on('quality', (q) => G.world.setDensity(q.density));
   G.gfx.setQuality(G.settings.quality);
   G.time.set(14.2, true);
@@ -100,7 +107,7 @@ function flow(G) {
     if (code === 'KeyP') { if (G.state === 'playing') { G.input.unlock(true); pause(G); } else if (G.state === 'paused') resume(G); }
   });
   G.renderer.domElement.addEventListener('click', () => { if (G.state === 'paused') resume(G); else if (G.state === 'playing' && !G.input.locked) G.input.lock(); });
-  G.events.on('fellOut', () => G.events.emit('respawn'));
+  G.events.on('fellOut', () => { G.props.returnCarried(); G.shelters.respawnPlayer(); });
 }
 
 function titleCam(G, time) {

@@ -1,6 +1,8 @@
 // Region 2 — Commercial district (sunset -> night). z: -10..120. Underground lives in under.js.
 import { bld, room, shade, rubblePile } from '../buildings.js';
 import { groundTiles, groundBoxes, road, sidewalk, tree, lamp, car, wire, CAR_COLORS } from '../streets.js';
+import { stationEntranceR2 } from './under.js';
+import { buildMall } from './r2_mall.js';
 
 const LANT = ['#ffd6a0', '#ffc0cf', '#c9f0e6', '#e6d6ff', '#fff2b0'];
 
@@ -8,7 +10,8 @@ export function buildR2(k) {
   const P = k.pal, R = k.rand, g = k.geo;
   const roads = [[-6, -2, 6, 120], [-80, 70, -6, 80], [6, 20, 80, 28]];
   const walks = [[-10, -2, -6, 70], [-10, 80, -6, 120], [6, -2, 10, 20], [6, 28, 10, 120], [-80, 68, -10, 70], [-80, 80, -10, 82], [10, 18, 80, 20], [10, 28, 80, 30]];
-  const holes = k.holes || [];
+  const holes = [[-28, 38, -12, 42]];
+  k.noVeg([-29, 37, -11, 43]);
   groundTiles(k, -80, -2, 80, 120, P.ground, [...roads, ...walks, ...holes, [10, 100, 22, 112]], { dry: P.dry });
   groundBoxes(k, -80, -10, 80, 120, holes);
   roads.forEach((r) => road(k, r, P));
@@ -22,14 +25,14 @@ export function buildR2(k) {
   g.box(0, 1.1, -9.6, 160, 0.08, 0.12, '#8f88a3'); g.box(0, 0.6, -9.6, 160, 0.05, 0.05, '#8f88a3');
   for (let x = -70; x <= 70; x += 20) if (Math.abs(x) > 8) { lamp(k, x, -8.6, -Math.PI / 2); if (R() < 0.7) { k.add('bench', { x: x + 6, y: 0, z: -7.4, ry: Math.PI }); k.col.addBox(x + 6, 0.45, -7.4, 1.9, 0.9, 0.6); } }
   // canal (visual): walls, bed, reeds, puddles
-  g.box(0, -2.5, -10.3, 160, 3, 0.6, '#9e97ad'); g.box(0, -2.5, -40.3, 160, 3, 0.6, '#9e97ad'); g.box(0, 0.06, -40.3, 160, 0.12, 0.8, '#bdb4cc');
-  for (let x = -80; x < 80; x += 4) for (let z = -40; z < -10; z += 4) g.flat(x, z, x + 4, z + 4, -3.9, R() < 0.3 ? '#6f9a8e' : '#80897a', 0.08);
-  for (let i = 0; i < 14; i++) g.box(-70 + R() * 140, -3.86, -36 + R() * 22, 3 + R() * 6, 0.02, 1 + R() * 3, '#8fc1c4', { ry: R() * 3, skip: [0, 1, 2, 3] });
-  k.green(-80, -39, 80, -11, { d: 0.25, tall: 0.5, y: -3.9 });
+  g.box(0, -1.2, -10.3, 160, 2.4, 0.6, '#9e97ad'); g.box(0, -1.2, -40.3, 160, 2.4, 0.6, '#9e97ad'); g.box(0, 0.06, -40.3, 160, 0.12, 0.8, '#bdb4cc');
+  for (let x = -80; x < 80; x += 4) for (let z = -40; z < -10; z += 4) g.flat(x, z, x + 4, z + 4, -2.4, R() < 0.3 ? '#6f9a8e' : '#80897a', 0.08);
+  for (let i = 0; i < 14; i++) g.box(-70 + R() * 140, -2.36, -36 + R() * 22, 3 + R() * 6, 0.02, 1 + R() * 3, '#8fc1c4', { ry: R() * 3, skip: [0, 1, 2, 3] });
+  k.green(-80, -39, 80, -11, { d: 0.25, tall: 0.5, y: -2.4 });
   // collapsed bridge
-  g.box(0, -1.1, -14, 12, 0.6, 9, '#b6aec4', { rx: 0.42 }); g.box(0, -1.2, -36, 12, 0.6, 8, '#b6aec4', { rx: -0.5 });
-  for (const x of [-6, 6]) { g.box(x, -0.3, -14, 0.25, 1, 9, '#8f88a3', { rx: 0.42 }); g.box(x, -0.4, -36, 0.25, 1, 8, '#8f88a3', { rx: -0.5 }); }
-  rubblePile(g, R, 0, -25, 4, '#a9a1b8');
+  g.box(0, -0.9, -14, 12, 0.6, 9, '#b6aec4', { rx: 0.32 }); g.box(0, -1.0, -36, 12, 0.6, 8, '#b6aec4', { rx: -0.36 });
+  for (const x of [-6, 6]) { g.box(x, -0.2, -14, 0.25, 1, 9, '#8f88a3', { rx: 0.32 }); g.box(x, -0.3, -36, 0.25, 1, 8, '#8f88a3', { rx: -0.36 }); }
+  rubblePile(g, R, 0, -25, 4, '#a9a1b8', -2.4);
   for (const x of [-4, 0, 4]) g.box(x, 0.45, -6.5, 1.8, 0.9, 0.5, '#e8e1d6', { ry: (R() - 0.5) * 0.4 });
   k.col.addBox(0, 0.8, -6.6, 12, 1.6, 0.6);
   k.sign({ kind: 'banner', key: 'signs.noEntry', x: 0, y: 1.9, z: -6.25, w: 4.2, h: 0.75, bg: '#c9625a', bg2: '#d98a6a' });
@@ -46,12 +49,13 @@ export function buildR2(k) {
   H(26, 86, 44, 100, 3, 's'); H(48, 84, 62, 100, 4, 's', { ruin: 0.55 }); H(66, 84, 79, 104, 3, 'w');
   H(26, 104, 40, 118, 3, 'n'); H(44, 104, 60, 118, 2, 'n', { style: 'shop', sign: 'signs.music' }); H(64, 106, 79, 118, 3, 'n');
   H(10, -1, 24, 16, 4, 'w'); H(28, -1, 44, 16, 5, 'n', { ruin: 0.5 }); H(48, -1, 62, 16, 3, 'n'); H(66, -1, 79, 16, 4, 'n');
-  if (!k.mallInterior) H(18, 32, 70, 80, 3, 'w', { fh: 4, style: 'block', ruin: 0.2, sign: 'signs.mall', vines: 0.8 });
-  if (k.mallInterior) k.mallInterior(k);
+  buildMall(k);
   studio(k);
   ceremonyStreet(k);
   billboard(k);
-  if (k.stationEntrance) k.stationEntrance(k);
+  stationEntranceR2(k);
+  k.anchor('rem_r2_cer', -40, 0, 75, { zone: [-64, 70.6, -14, 79.4], nav: 'surface' });
+  k.anchor('rem_r2_ave', 0, 0, 30, { zone: [-9, 2, 9, 64], nav: 'surface' });
 
   for (let z = 4; z < 118; z += 13) { if (Math.abs(z - 75) < 9 || Math.abs(z - 24) < 7) continue; if (R() < 0.7) tree(k, -8, z, R() < 0.25 ? 'treeC' : 'treeA'); if (R() < 0.7) tree(k, 8, z + 6, 'treeA'); }
   for (let z = 6; z < 118; z += 22) { lamp(k, -9.2, z, 0); lamp(k, 9.2, z + 11, Math.PI); }

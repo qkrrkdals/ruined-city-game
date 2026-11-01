@@ -25,6 +25,9 @@ export function installDebug(G) {
     props() { return G.props.list.map((p) => ({ id: p.id, state: p.state, pos: p.pos.toArray().map((v) => +v.toFixed(2)) })); },
     press(code) { G.input.hit.add(code); },
     target() { return G.interact.target?.id ?? null; },
+    give(what) { if (what === 'flashlight') G.flashlight.give(); },
+    remnants() { return G.remnants.list.filter((r) => r.enabled).map((r) => ({ id: r.id, state: r.state, aw: +r.aw.toFixed(2), d: +r.dist.toFixed(1), pos: [+r.pos.x.toFixed(1), +r.pos.z.toFixed(1)] })); },
+    noRemnants(on = true) { G.remnants.disabled = on; },
     // headless helpers: stop per-frame rendering, simulate n frames, render exactly once
     freeze(on = true) { G.freeze = on; },
     sim(n = 10, dt = 1 / 30) { const f = G.freeze; G.freeze = true; for (let i = 0; i < n; i++) tick(G, dt); G.freeze = f; },

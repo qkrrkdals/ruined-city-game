@@ -36,7 +36,7 @@ export class Interact {
   }
   update() {
     const G = this.G, props = G.props, carrying = props.carrying;
-    this.target = this.pick(carrying);
+    this.target = G.player.onFloor || carrying ? this.pick(carrying) : null;
     const tg = this.target;
     let prompt = '';
     if (tg) prompt = `${key('E')}${t('verb.' + (carrying ? 'insert' : tg.verb))}<span class="sub">${t(tg.name)}</span>`;

@@ -42,7 +42,7 @@ export function scatter(k, occ) {
       const x = a.x0 + R() * (a.x1 - a.x0), z = a.z0 + R() * (a.z1 - a.z0), y = a.y ?? 0;
       if (y < 0.5 && !occ.free(x, z)) continue;
       const r = R();
-      if (a.tall && r < a.tall) k.add('tall', { x, y, z, ry: R() * 6.28, s: 0.8 + R() * 0.5 });
+      if (a.tall && r < a.tall) { k.add('tall', { x, y, z, ry: R() * 6.28, s: 0.8 + R() * 0.5 }); const key = Math.floor(x / 2) + ',' + Math.floor(z / 2); k.W.tallCells.set(key, (k.W.tallCells.get(key) || 0) + 1); }
       else if (r < (a.tall || 0) + (a.flowers ?? 0.08)) k.add('flower', { x, y, z, ry: R() * 6.28, s: 0.8 + R() * 0.7, c: FLOWERS[Math.floor(R() * FLOWERS.length)] });
       else k.add('grass', { x, y, z, ry: R() * 6.28, s: 0.65 + R() * 0.8 });
     }

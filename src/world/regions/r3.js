@@ -3,12 +3,14 @@ import * as THREE from 'three';
 import { bld, shade, rubblePile } from '../buildings.js';
 import { groundTiles, groundBoxes, road, sidewalk, tree, lamp, car, CAR_COLORS } from '../streets.js';
 import { buildInstitute } from './r3_institute.js';
+import { stationExitR3 } from './under.js';
 
 export function buildR3(k) {
   const P = k.pal, R = k.rand, g = k.geo;
   const roads = [[-80, -56, 80, -48], [-66, -190, -56, -60], [56, -190, 66, -60]];
   const walks = [[-80, -48, 80, -40], [-80, -60, 80, -56], [-56, -190, -52, -60], [52, -190, 56, -60], [-70, -190, -66, -60], [66, -190, 70, -60]];
-  const plaza = [-52, -136, 52, -60], holes = k.holes || [];
+  const plaza = [-52, -136, 52, -60], holes = [[-44, -74, -28, -70]];
+  k.noVeg([-45, -75, -27, -69]);
   groundTiles(k, -80, -190, 80, -40, P.ground, [...roads, ...walks, plaza, ...holes, [-52, -140, 52, -136]], { dry: P.dry });
   groundBoxes(k, -80, -190, 80, -40, holes);
   roads.forEach((r) => road(k, r, P));
@@ -70,6 +72,9 @@ export function buildR3(k) {
   for (let z = -180; z < -62; z += 16) { if (R() < 0.75) tree(k, -54, z, 'treeA'); if (R() < 0.75) tree(k, 54, z + 8, 'treeB'); }
   k.green(-80, -190, 80, -40, { d: 0.18, flowers: 0.1, tall: 0.06 });
   buildInstitute(k);
+  stationExitR3(k);
+  k.anchor('rem_plaza_w', -20, 0, -96, { zone: [-40, -128, -4, -64], nav: 'surface' });
+  k.anchor('rem_plaza_e', 20, 0, -110, { zone: [4, -128, 40, -84], nav: 'surface' });
   k.anchor('s4', 34, 0, -70, { yaw: Math.PI, lamp: [34, 2.3, -70], r: 4.6 });
   k.anchor('bat_s4', 32.6, 0.5, -71.2);
 }

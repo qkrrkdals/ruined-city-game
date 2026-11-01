@@ -26,9 +26,7 @@ export class Hands {
     const geo = armGeo();
     this.left = new THREE.Mesh(geo, mat); this.right = new THREE.Mesh(geo, mat);
     this.torch = new THREE.Mesh(torchGeo(), mat); this.torch.position.set(0, 0.04, -0.5); this.left.add(this.torch);
-    this.lens = new THREE.Mesh(new THREE.CircleGeometry(0.034, 10), new THREE.MeshBasicMaterial({ color: '#fff3c4', depthTest: false, depthWrite: false, fog: false }));
-    this.lens.position.set(0, 0, -0.231); this.torch.add(this.lens);
-    for (const m of [this.left, this.right, this.torch, this.lens]) { m.renderOrder = 1000; m.frustumCulled = false; }
+    for (const m of [this.left, this.right, this.torch]) { m.renderOrder = 1000; m.frustumCulled = false; }
     G.camera.add(this.left, this.right);
     this.l = 0; this.r = 0; this.t = 0;
   }
@@ -44,7 +42,7 @@ export class Hands {
       this.left.position.set(-0.34 + sway, -0.42 - down(this.l) + bob, -0.3); this.left.rotation.set(0.18, -0.32, 0.25);
       this.right.position.set(0.34 + sway, -0.42 - down(this.r) + bob, -0.3); this.right.rotation.set(0.18, 0.32, -0.25);
     } else {
-      this.left.position.set(-0.27 + sway, -0.31 - down(this.l) + bob, -0.12); this.left.rotation.set(0.05, 0.1, 0.1);
+      this.left.position.set(-0.3 + sway, -0.37 - down(this.l) + bob, -0.1); this.left.rotation.set(0.12, 0.06, 0.12);
       this.right.position.set(0.25 + sway, -0.32 - down(this.r) + bob, -0.12); this.right.rotation.set(0.12, -0.05, -0.15);
     }
     this.torch.visible = torchOn && !crate;

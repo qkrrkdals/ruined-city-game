@@ -151,12 +151,12 @@ function balconies(g, R, W, D, F, FH, trim) {
   }
 }
 
-export function rubblePile(g, R, x, z, r, col) {
+export function rubblePile(g, R, x, z, r, col, y = 0) {
   const n = 5 + Math.floor(R() * 6);
   for (let i = 0; i < n; i++) {
     const a = R() * 6.28, d = R() * r, s = 0.3 + R() * 0.7, px = x + Math.cos(a) * d, pz = z + Math.sin(a) * d;
-    if (R() < 0.5) g.ico(px, s * 0.25, pz, s, shade(col, 0.8 + R() * 0.3), { sy: 0.6 });
-    else g.box(px, s * 0.2, pz, s * 1.6, s * 0.3, s, shade(col, 0.85 + R() * 0.2), { ry: R() * 3, rx: (R() - 0.5) * 0.5, rz: (R() - 0.5) * 0.5 });
+    if (R() < 0.5) g.ico(px, y + s * 0.25, pz, s, shade(col, 0.8 + R() * 0.3), { sy: 0.6 });
+    else g.box(px, y + s * 0.2, pz, s * 1.6, s * 0.3, s, shade(col, 0.85 + R() * 0.2), { ry: R() * 3, rx: (R() - 0.5) * 0.5, rz: (R() - 0.5) * 0.5 });
   }
 }
 

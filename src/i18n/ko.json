@@ -73,7 +73,16 @@
         "3단지 지하 주차장",
         "전기함 (동쪽 벽)"
       ]
-    }
+    },
+    "station": "청안역",
+    "station3": "청안 광장역",
+    "platform": "승강장 · 도심 방면",
+    "shop1": "옷가게",
+    "shop2": "전자상가",
+    "shop3": "분식",
+    "shop4": "문구",
+    "shop5": "안경점",
+    "shop6": "카페 지하"
   },
   "time": {
     "fmt": "{ampm} {h}시 {m}분",
@@ -85,7 +94,14 @@
     "lightOff": "꺼짐",
     "holding": "들고 있음: {name}",
     "click": "클릭",
-    "standingOnIt": "올라서 있는 상자는 들 수 없다."
+    "standingOnIt": "올라서 있는 상자는 들 수 없다.",
+    "batteryEmpty": "배터리가 다 됐다.",
+    "caught": "…정신을 잃었다. 쉼터에서 다시 눈을 떴다.",
+    "shelter": "쉼터 · 램프 불빛 안은 안전하다",
+    "batteryFull": "배터리가 가득 차 있다.",
+    "batteryPlus": "배터리 +35%",
+    "noFlashlight": "아직 쓸 손전등이 없다.",
+    "gotFlashlight": "손전등을 챙겼다 · F로 켜고 끈다"
   },
   "verb": {
     "read": "읽기",
