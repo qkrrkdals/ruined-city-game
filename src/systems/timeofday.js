@@ -43,10 +43,11 @@ export class TimeOfDay {
     G.events.on('quality', (q) => { this.sun.castShadow = q.shadows; this.sun.shadow.mapSize.set(q.sunMap, q.sunMap); if (this.sun.shadow.map) { this.sun.shadow.map.dispose(); this.sun.shadow.map = null; } });
   }
   set(h, force) { this.hour = h; if (force || h > this.max) this.max = h; this.apply(0); }
-  range(min, max, rate) { if (this.hour < min) this.hour = min; this.max = max; if (rate) this.rate = rate; }
+  range(min, max, rate) { this.min = min; this.max = Math.max(max, min); this.rate = rate || 1 / 150; }
   get clock() { const h = this.hour % 24, hh = Math.floor(h), mm = Math.floor((h - hh) * 60); return [hh, mm]; }
   update(dt, zone) {
-    if (this.hour < this.max) this.hour = Math.min(this.max, this.hour + this.rate * dt);
+    if (this.min !== undefined && this.hour < this.min - 0.01) this.hour = Math.min(this.min, this.hour + Math.max(0.35, (this.min - this.hour) * 0.6) * dt);
+    else if (this.hour < this.max) this.hour = Math.min(this.max, this.hour + this.rate * dt);
     const kind = zone && ZONES[zone.kind] ? zone.kind : null;
     if (kind) this.zoneKind = kind;
     this.zb += ((kind ? 1 : 0) - this.zb) * Math.min(1, dt * 2.2);

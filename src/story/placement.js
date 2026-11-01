@@ -32,6 +32,9 @@ export function placeProps(G) {
   G.props.addItem('fuse_r1', 'fuse', A('fuse_r1'), { bounds: BOUNDS.r1, lying: true });
   for (const id of ['crate_u_a', 'crate_u_b']) if (A(id)) G.props.addCrate(id, A(id), BOUNDS.under);
   for (const id of ['fuse_u_a', 'fuse_u_b']) if (A(id)) G.props.addItem(id, 'fuse', A(id), { bounds: BOUNDS.under, lying: true });
+  if (A('fuse_r3')) G.props.addItem('fuse_r3', 'fuse', A('fuse_r3'), { bounds: [-45, -1, -185, 45, 5, -138], lying: true });
+  const tb = W.anchors.get('tower_bounds');
+  for (const id of ['crate_t_a', 'crate_t_b', 'crate_t_c']) if (A(id)) G.props.addCrate(id, A(id), [tb.pos.x, tb.pos.y, tb.pos.z, ...tb.max]);
   // batteries
   const bg = batteryGeo(), glow = new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffd585').multiplyScalar(1.5) });
   G.batteries = [];
@@ -49,7 +52,7 @@ export function placeProps(G) {
   const fp = A('flashlight');
   if (fp) {
     const mesh = new THREE.Mesh(torchGeo(), W.M.world); mesh.position.copy(fp); mesh.rotation.y = 0.4; G.scene.add(mesh);
-    const it = G.interact.add({ id: 'flashlight', pos: fp, r: 0.25, verb: 'take', name: 'items.flashlight', enabled: () => !G.flashlight.has, onUse: () => { G.flashlight.give(); mesh.visible = false; G.interact.remove(it); G.ui.toast(t('hud.gotFlashlight')); } });
+    const it = G.interact.add({ id: 'flashlight', pos: fp, r: 0.25, verb: 'take', name: 'items.flashlight', enabled: () => !G.flashlight.has, onUse: () => { G.flashlight.give(); mesh.visible = false; G.interact.remove(it); G.ui.toast(t('hud.gotFlashlight')); G.story.advanceTo('gate'); } });
     G.flashlightPickup = { mesh, it };
   }
 }

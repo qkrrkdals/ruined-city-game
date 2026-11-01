@@ -82,7 +82,12 @@
     "shop3": "Snacks",
     "shop4": "Stationery",
     "shop5": "Optician",
-    "shop6": "Café Below"
+    "shop6": "Café Below",
+    "lab": "LAB",
+    "archive": "ARCHIVE ROOM",
+    "generator": "GENERATOR",
+    "nameplate": "Lead Researcher Han Yujin",
+    "formula": "Output ×12 → one night · cut links by 21:40?"
   },
   "time": {
     "fmt": "{h}:{mm} {ampm}",
@@ -120,6 +125,364 @@
     "fuse": "Fuse",
     "bottle": "Empty bottle",
     "battery": "Battery",
-    "flashlight": "Flashlight"
+    "flashlight": "Flashlight",
+    "gatebox": "Gate power box",
+    "panel": "Power panel",
+    "generator": "Emergency generator",
+    "towerDoor": "Tower door",
+    "core": "Control Core",
+    "keypad": "Keypad",
+    "paper": "Note"
+  },
+  "notes": {
+    "n_r1_table": {
+      "title": "Note on the Table",
+      "body": [
+        "You're awake.",
+        "I know it's frightening. It's all right—you're safe here. They can't come in where the lamp is on.",
+        "The flashlight is on the desk in my room upstairs. The stairs have collapsed, so use the crates in the yard. Think of it as practice. You'll have a lot of climbing ahead.",
+        "And save the light. Light shows you the way, but they come to the light too.",
+        "If you get lost, look for the clock tower. You can see it from anywhere in this city.",
+        "You must have so many questions. I left every answer at the tower. For now, just keep walking."
+      ],
+      "sign": "From the one who knows you best"
+    },
+    "n_r1_haram": {
+      "title": "Haram's Memo",
+      "body": [
+        "Don't forget we're going to the ceremony tonight!",
+        "7 o'clock, by the fountain in the plaza. If you're late, the cotton candy's on you.",
+        "I keep forgetting things lately, so this time you remember for me. Okay?"
+      ],
+      "sign": "Haram"
+    },
+    "n_r1_notice": {
+      "title": "Clearhaven Emergency Evacuation",
+      "body": [
+        "Following the mass memory-loss incident at approximately 21:47 on October 17, all of Clearhaven is now a restricted area.",
+        "The Depleted may not remember their own names or addresses. If you find one, do not question them—guide them to the nearest relief station.",
+        "Do not stare at the tower light. Approaching the tower is prohibited."
+      ],
+      "sign": "Clearhaven Disaster Response HQ"
+    },
+    "n_r1_neighbor": {
+      "title": "A Neighbor's Diary",
+      "body": [
+        "October 17. Clear skies.",
+        "The Archive Launch Ceremony is tonight. We're a Registered Household, so we got an invitation. Jiwoo has been singing about cotton candy since morning.",
+        "I'm glad we left our wedding day with the Archive. Now even when we're old, we won't forget that day.",
+        "At the plaza the tower was sparkling. Jiwoo said, \"Mom, the tower is smiling.\" It really looked like it.",
+        "After nine the tower got brighter and brighter. So bright that",
+        "(The writing stops here.)"
+      ]
+    },
+    "n_r1_garage": {
+      "title": "Note at the Parking Entrance",
+      "body": [
+        "There's one in there. We call them Remnants.",
+        "Shine a light on it and it notices you. It hears footsteps and comes closer. Only use the flashlight when you really need it.",
+        "If it comes near, crouch behind a car (C). Stay quiet and it will pass. If it chases you, run (Shift). They're slower than you.",
+        "The fuse is in the cabinet on the far east wall. Put it in the gate's power box and the way will open."
+      ]
+    },
+    "n_r2_photo": {
+      "title": "Back of the Photo",
+      "body": [
+        "For Haram's birthday.",
+        "March 14, at Springlight Photo Studio.",
+        "Let's take one here again next year. Even if you can't remember me by then, I'll remember you."
+      ]
+    },
+    "n_r2_vendor": {
+      "title": "A Vendor's Memo",
+      "body": [
+        "Cotton candy machine broken. Take it for repair tomorrow. Settle accounts after the ceremony.",
+        "Around 9:40 the tower got far too bright. Everyone looked up at the sky. The music stopped.",
+        "…Why am I standing here?",
+        "Who wrote this note? It's my handwriting."
+      ]
+    },
+    "n_r2_colleague": {
+      "title": "A Colleague's Note",
+      "body": [
+        "Yujin,",
+        "Tell me you were joking this afternoon when you asked for the safety override. It's the first day of operation. Forty thousand citizens are connected.",
+        "I said no. But at 9:30 the control room permissions switched to your account. I'm heading to the Institute now.",
+        "Please don't do anything."
+      ],
+      "sign": "Dokyung, Team 3"
+    },
+    "n_r2_station_log": {
+      "title": "Clearhaven Station Log · October 17",
+      "body": [
+        "19:10  More ceremony visitors. Exit 3 crowded.",
+        "21:30  Many reports of strange light from the tower.",
+        "21:47  Station-wide blackout. All passengers stopped where they stood. No response.",
+        "21:52  Asked the passengers their names. Nobody could answer. I can't remember mine either",
+        "22:30  (no entry)"
+      ]
+    },
+    "n_r2_code": {
+      "title": "Note on the Office Door",
+      "body": [
+        "The station office is safe. I left the lamp on.",
+        "The code is Haram's birthday.",
+        "You won't remember it. That's all right. I left a photo at the photo studio."
+      ]
+    },
+    "n_r2_rescuer": {
+      "title": "A Rescuer's Notebook",
+      "body": [
+        "Rescue Unit 2 · Search, day 3.",
+        "There are things underground. Person-shaped shadows with something glittering inside. The captain decided to call them Remnants.",
+        "Remnants follow light. Sound too. Kim walked up to one with his flashlight on and it touched him. He hasn't known his own name since.",
+        "There are more of them closer to the tower. Nobody who reached the foot of the tower came back."
+      ]
+    },
+    "n_r2_fuses": {
+      "title": "Note by the Power Panel",
+      "body": [
+        "You need two fuses to open the shutter.",
+        "One is on the counter of the electronics shop in the arcade. The other I put on the high shelf in the storeroom at the far end, out of their reach.",
+        "…Sorry. Out of yours too. Use a crate."
+      ]
+    },
+    "n_r3_record": {
+      "title": "Clearhaven University Hospital · Neurology Record",
+      "body": [
+        "Patient: Han Haram (24)",
+        "Diagnosis: Progressive memory loss (cause unknown)",
+        "Course: Rapid loss of episodic memory over the past six months. Declining recognition of family faces.",
+        "Prognosis: Most long-term memory expected to be lost within one year.",
+        "Guardian: Han Yujin (Memory Preservation Institute)",
+        "Note: Guardian asked about 'storing her in the Archive.' Explained there is no medical basis for this."
+      ]
+    },
+    "n_r3_research": {
+      "title": "Research Log · October 15",
+      "body": [
+        "The Archive stores memories. They can be retrieved. I can move all of Haram's memories before they disappear.",
+        "At normal output it would take a year. Haram doesn't have a year.",
+        "With the safety limits off, it would take one night. The night of the ceremony, just once. I can cut the citizens' connections before the output climbs.",
+        "The math works. It has to."
+      ]
+    },
+    "n_r3_closure": {
+      "title": "Permanent Closure of Clearhaven (Summary)",
+      "body": [
+        "1. At 21:47 on October 17, an Archive overload left all 42,108 Registered citizens classified as Depleted.",
+        "2. No recoveries. The Depleted cannot remember names, family or addresses, but are otherwise healthy.",
+        "3. Approaching the tower reproduces the memory loss. Rescue operations suspended.",
+        "4. All of Clearhaven is designated a permanent restricted area.",
+        "5. The person responsible, Lead Researcher Han Yujin, has been missing since the incident."
+      ]
+    },
+    "n_r3_years": {
+      "title": "Journal, Year Three",
+      "body": [
+        "Year three. Alone.",
+        "Every morning I try to climb the tower. Every time, it pulls at my memories. Haram's face fades first. So I turn back.",
+        "Nobody can reach the top while holding on to their memories. Only someone empty can climb.",
+        "Then there is only one answer."
+      ]
+    },
+    "n_r3_tower": {
+      "title": "Note Halfway Up the Tower",
+      "body": [
+        "You're almost there.",
+        "One of them guards the next floor. Light off. Slowly. Stay low.",
+        "Where the stairs have collapsed, use the crates.",
+        "I'll be waiting at the top."
+      ]
+    },
+    "n_r3_final": {
+      "title": "The Last Letter",
+      "body": [
+        "If you're reading this, you are me.",
+        "Our name is Han Yujin. We built the Archive, and ten years ago, on the night of the Launch Ceremony, we turned off the safety limits. I wanted to keep Haram's memories. The price was every memory in this city.",
+        "The Archive swallows the memories of anyone who comes near. That's why no one could reach it. So I decided to leave my own memories with it first—and left notes, lamps and batteries so that the empty me could walk all the way here.",
+        "That's why the handwriting on the notes was the same as yours.",
+        "Now enter the moment it all stopped into the Control Core. Every clock in the city has been telling you. When the clocks move again, the memories go home to their owners. Ours too.",
+        "I'm sorry. And thank you."
+      ],
+      "sign": "Han Yujin"
+    }
+  },
+  "obs": {
+    "o_clock_house": {
+      "title": "Stopped Wall Clock",
+      "text": "The wall clock stopped at 9:47. It looks like it stopped a very long time ago."
+    },
+    "o_device": {
+      "title": "Chair in the Storeroom",
+      "text": "A chair with electrodes at the headrest. The small machine beside it reads 'Archive Personal Terminal · Prototype.' One light is still blinking."
+    },
+    "o_photo_home": {
+      "title": "Photo on the Desk",
+      "text": "Someone in a yellow cardigan and someone with long hair, both smiling. On the back: 'With Haram, spring.'"
+    },
+    "o_laundry": {
+      "title": "Clothesline",
+      "text": "Faded laundry still hangs on the line, a yellow cardigan among it. Nobody ever took it in."
+    },
+    "o_sticker": {
+      "title": "Door Sticker",
+      "text": "'Registered Household.' This house, too, left its memories with the Archive."
+    },
+    "o_graffiti": {
+      "title": "Graffiti",
+      "text": "Hastily scrawled: 'DON'T LOOK AT THE TOWER LIGHT.'"
+    },
+    "o_busstop_clock": {
+      "title": "Bus Stop Clock",
+      "text": "The bus stop clock says 9:47 too. Did every clock in this city stop at the same moment?"
+    },
+    "o_gate_sign": {
+      "title": "Gate Notice",
+      "text": "Emergency power notice. Gate power is cut. A spare fuse is kept in the fuse cabinet (east wall) of the Block 3 underground parking."
+    },
+    "o_billboard": {
+      "title": "Fallen Billboard",
+      "text": "'The Archive — every moment of Clearhaven, forever.' The lead researcher on the billboard wears a yellow cardigan. The name: Han Yujin."
+    },
+    "o_stage": {
+      "title": "Ceremony Stage",
+      "text": "The instruments are still on the stage. The performance must have been about to begin."
+    },
+    "o_reservation": {
+      "title": "Studio Booking Ledger",
+      "text": "March 14, 2 PM: Han Yujin + 1 (sibling). Birthday portrait. Beside it, in pencil: 'every year.'"
+    },
+    "o_bags": {
+      "title": "Abandoned Bags",
+      "text": "Bags lie in front of the ticket gates, as if everyone let go of them at the same moment."
+    },
+    "o_bridge": {
+      "title": "Collapsed Bridge",
+      "text": "The bridge breaks off over the middle of the canal. You'll need another way across. The subway might run under the canal."
+    },
+    "o_train": {
+      "title": "Stopped Train",
+      "text": "Passengers' belongings are still inside the train. The doors stopped open."
+    },
+    "o_chairs": {
+      "title": "Empty Chairs",
+      "text": "Hundreds of chairs facing the tower. Where did everyone who sat here that night go?"
+    },
+    "o_fountain": {
+      "title": "Dry Fountain",
+      "text": "The statue in the fountain holds a small lantern. '7 o'clock, by the fountain.' This is where you were meant to meet Haram."
+    },
+    "o_tower_clock": {
+      "title": "Clock Tower",
+      "text": "The tower's hands are stopped at 9:47 too. A faint golden light leaks from the top."
+    },
+    "o_archive_model": {
+      "title": "Archive Model",
+      "text": "A model of the Archive in the lobby: 'Every memory of Clearhaven, kept safe.' Someone has crossed out 'safe.'"
+    },
+    "o_my_desk": {
+      "title": "Lab Desk",
+      "text": "A yellow mug and a photo of Haram. The nameplate reads 'Lead Researcher Han Yujin.' …Familiar. Far too familiar."
+    }
+  },
+  "thoughts": {
+    "t_wake": "I opened my eyes. I don't know where I am, or who I am.",
+    "t_note1": "The handwriting on the note is strangely familiar.",
+    "t_photo": "The person in the photo wears a yellow cardigan. My sleeves are yellow too.",
+    "t_hand": "The handwriting in this journal and on the notes is exactly the same. The one who wrote the notes… is me?",
+    "t_gate": "The gate is open. The sun is going down.",
+    "t_billboard": "The researcher on the billboard wears a yellow cardigan too. Han Yujin. Is that my name?",
+    "t_colleague": "'Yujin, please don't do anything.' What did I do that night?",
+    "t_code": "Haram's birthday. The number I forgot, the photo remembered.",
+    "t_center": "I'm out of the underground. It's deep night. The tower is right in front of me.",
+    "t_record": "Haram was forgetting everything. I wanted to keep those memories safe.",
+    "t_years": "Only someone empty can climb the tower. Is that why I'm empty?",
+    "t_final": "My name is Han Yujin. Now I'm going to find Haram."
+  },
+  "obj": {
+    "read_note": "Read the note on the table",
+    "flashlight": "Find the flashlight upstairs",
+    "flashlight_h": "Build steps from the three crates in the yard and climb onto the balcony",
+    "gate": "Head north, toward the clock tower",
+    "gate_h": "There's a quarantine gate at the end of the avenue",
+    "fuse_r1": "Find a fuse in the Block 3 underground parking",
+    "fuse_r1_h": "Fuse cabinet on the parking's east wall. Put it in the gate's power box",
+    "cross": "Find a way to the clock tower",
+    "cross_h": "The bridge has collapsed. Maybe you can cross under it through Clearhaven Station",
+    "office": "Get into the station office",
+    "office_h": "The code is Haram's birthday",
+    "office_h2": "Check the back of the photo left at Springlight Photo Studio (near the gate)",
+    "fuses_u": "Find two fuses in the arcade and put them in the office power panel",
+    "fuses_u_h": "The electronics shop counter, and the high shelf in the storeroom at the far end (use a crate)",
+    "tunnel": "The shutter is open. Take the tunnel to the city center",
+    "tower": "Go to the clock tower",
+    "tower_h": "The door to the tower is at the back of the Institute lobby",
+    "generator": "Restore power to the tower door",
+    "generator_h": "The generator room is at the end of the east corridor. The fuse might be in the lab",
+    "climb": "Climb to the top of the tower",
+    "climb_h": "Stack crates to get past the collapsed stairs",
+    "core": "Enter the moment everything stopped into the Control Core",
+    "core_h": "Every clock in the city showed the same time"
+  },
+  "puz": {
+    "gateNoFuse": "The power box is empty. There's a slot for a fuse.",
+    "gateOpen": "The gate is opening",
+    "keypadOffice": "Station office door code (4 digits)",
+    "keypadCore": "Control Core · enter stop time (4 digits)",
+    "wrong": "Wrong code.",
+    "doorOpen": "The door opened",
+    "panelHalf": "One light on the panel comes on. One more needed.",
+    "panelFull": "Power restored · the shutter is rising",
+    "towerLocked": "The tower door is locked. No power.",
+    "generatorOn": "The generator is running. The tower door is open.",
+    "coreLocked": "Read the letter on the device first."
+  },
+  "verbx": {
+    "read": "Read",
+    "examine": "Examine"
+  },
+  "journal": {
+    "title": "Journal",
+    "tabObj": "Goal",
+    "tabNotes": "Notes",
+    "tabObs": "Observations",
+    "now": "Right now",
+    "hint": "Clue",
+    "mine": "My entries",
+    "unknown": "???",
+    "count": "{n} / {total}",
+    "close": "Close with J or E",
+    "empty": "Nothing yet.",
+    "newEntry": "New journal entry"
+  },
+  "noteui": {
+    "close": "Close with E",
+    "found": "Added to journal: {name}"
+  },
+  "keypadui": {
+    "close": "Close with E",
+    "enter": "OK"
+  },
+  "save": {
+    "saved": "Saved",
+    "confirmNew": "Your saved progress will be erased. Start a new game?"
+  },
+  "ending": {
+    "lines": [
+      "The music of the ceremony.",
+      "Haram's laugh.",
+      "My hand on the lever.",
+      "And my name."
+    ],
+    "credits": [
+      "9:47",
+      "The Memory I Forgot",
+      "Made with Three.js and Vite",
+      "No 3D models, textures or audio files: everything is made in code",
+      "Every sound is synthesized with Web Audio",
+      "Thank you for walking all the way here"
+    ],
+    "back": "Back to Title"
   }
 }

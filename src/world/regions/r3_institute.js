@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { room, shade } from '../buildings.js';
 import { towerBeacon } from './r3.js';
 import { dotTexture } from '../textures.js';
+import { buildInstituteInside, buildTowerInside } from './r3_inside.js';
 
 const STONE = '#cfc6d9', STONE2 = '#bfb6cf', TRIM = '#ece6f2';
 export const TOWER = { x: 0, z: -166, half: 6.5, levels: [0, 8, 16, 24], top: 58 };
@@ -34,10 +35,10 @@ export function buildInstitute(k) {
   for (let i = 0; i < 3; i++) k.solid(0, 0.12 + i * 0.25, -136.2 + i * -0.8 - 0.4, 46 - i * 1.2, 0.25 + i * 0.25 * 0, 1.6 + (2 - i) * 0.0, i % 2 ? '#d8d0e0' : '#cec6d9', { top: '#e2dbea' });
   k.sign({ kind: 'sign', key: 'signs.institute', x: 0, y: 5.6, z: -139.75, w: 9, h: 1.0, bg: '#ece6f2', fg: '#5b5677' });
   k.sign({ kind: 'clock', x: 0, y: 7.8, z: -139.75, w: 1.4, h: 1.4, pw: 128 });
-  k.anchor('institute_door', 0, 0, -140, { size: [6, 4.6] });
-  k.col.setDyn('institute_door', { x: 0, y: 2.3, z: -140, sx: 6, sy: 4.6, sz: 0.4 });
-  g.box(0, 2.3, -140.05, 5.9, 4.5, 0.12, '#6d6a86');
+  g.box(-2.2, 1.9, -139.4, 2.9, 4.1, 0.12, '#6d6a86', { ry: 0.9, rz: 0.05 }); g.box(2.6, 0.3, -138.9, 2.9, 0.12, 4.1, '#6d6a86', { ry: 0.2 });
   buildTower(k);
+  buildInstituteInside(k);
+  buildTowerInside(k);
 }
 
 function buildTower(k) {
@@ -48,7 +49,8 @@ function buildTower(k) {
     else { const xx = side === 'w' ? x - half + t / 2 : x + half - t / 2; s.box(xx, cy, z + c, t, hy, L, STONE, { jit: 0.03 }); k.col.addBox(xx, cy, z + c, t, hy, L); }
   };
   for (const side of ['n', 's', 'e', 'w']) {
-    wallSeg(0, 24, side, -half, half);
+    if (side === 's') { wallSeg(0, 24, side, -half, -1.4); wallSeg(0, 24, side, 1.4, half); wallSeg(3, 24, side, -1.4, 1.4); }
+    else wallSeg(0, 24, side, -half, half);
     wallSeg(24, 31, side, -half, -2.2); wallSeg(24, 31, side, 2.2, half); wallSeg(29.4, 31, side, -2.2, 2.2);
     wallSeg(31, 50, side, -half, half);
     wallSeg(50, top, side, -half, -2.6); wallSeg(50, top, side, 2.6, half); wallSeg(56.4, top, side, -2.6, 2.6);

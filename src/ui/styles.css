@@ -141,3 +141,6 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #1b1f2e; fon
 #credits h1 { font-weight: 200; font-size: 64px; margin: 0 0 6px; letter-spacing: 0.06em; }
 #credits p { margin: 0; opacity: 0.75; font-size: 16px; }
 .fatal { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #ffb3a8; font-size: 16px; padding: 40px; text-align: center; }
+#fade { z-index: 20; }
+#ending { z-index: 30; }
+#loading { z-index: 40; }

@@ -72,7 +72,7 @@ export class Player {
     this.syncCam(dt);
   }
   step(dt, tx, tz) {
-    const a = this.onFloor ? 13 : 2.4, k = 1 - Math.exp(-a * dt);
+    const a = this.onFloor ? 13 : 4.5, k = 1 - Math.exp(-a * dt);
     this.vel.x += (tx - this.vel.x) * k; this.vel.z += (tz - this.vel.z) * k;
     this.vel.y = Math.max(this.vel.y - CFG.gravity * dt, -30);
     this.airTime = this.onFloor ? 0 : this.airTime + dt;
@@ -89,7 +89,7 @@ export class Player {
     for (const tree of this.G.world.col.trees()) {
       for (let it = 0; it < 3; it++) {
         const r = tree.capsuleIntersect(this.cap);
-        if (!r) break;
+        if (!r || r.depth < 1e-4) break;
         if (r.normal.y > 0.55) { this.onFloor = true; this.cap.translate(_v.set(0, r.depth / r.normal.y, 0)); if (this.vel.y < 0) this.vel.y = 0; }
         else { this.cap.translate(_v.copy(r.normal).multiplyScalar(r.depth)); const d = this.vel.dot(r.normal); if (d < 0) this.vel.addScaledVector(r.normal, -d); }
       }

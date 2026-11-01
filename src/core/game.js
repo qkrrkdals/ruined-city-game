@@ -9,23 +9,29 @@ import { initI18n, t } from '../i18n/i18n.js';
 import { buildWorld } from '../world/world.js';
 import { TITLE_PATH } from '../world/layout.js';
 import { Player } from '../player/player.js';
-import { TimeOfDay } from '../systems/timeofday.js';
-import { LightPool } from '../systems/lights.js';
 import { Interact } from '../player/interact.js';
 import { Props } from '../player/props.js';
 import { Hands } from '../player/hands.js';
-import { placeProps } from '../story/placement.js';
+import { TimeOfDay } from '../systems/timeofday.js';
+import { LightPool } from '../systems/lights.js';
 import { Flashlight } from '../systems/flashlight.js';
 import { Shelters } from '../systems/shelters.js';
 import { Remnants } from '../systems/remnants.js';
+import { Save } from '../systems/save.js';
+import { placeProps } from '../story/placement.js';
+import { Story } from '../story/story.js';
+import { Puzzles } from '../story/puzzles.js';
+import { Ending } from '../story/ending.js';
 import { UI, clockText } from '../ui/ui.js';
+import { Panels } from '../ui/panels.js';
 
 const raf = () => new Promise((r) => requestAnimationFrame(r));
 const TOWER_LOOK = new THREE.Vector3(0, 30, -166);
-
+const AUTO = 'clearhaven947.autostart';
 export { tick };
+
 export async function startGame() {
-  const G = { events: new Events(), state: 'loading', elapsed: 0, systems: [], region: null };
+  const G = { events: new Events(), state: 'loading', elapsed: 0, systems: [], region: null, dirty: false };
   G.settings = loadSettings();
   G.saveSettings = () => saveSettings(G.settings);
   initI18n(G.settings.lang);
@@ -45,20 +51,26 @@ export async function startGame() {
   G.hands = new Hands(G);
   G.flashlight = new Flashlight(G);
   G.shelters = new Shelters(G);
+  G.panels = new Panels(G);
   placeProps(G);
   G.remnants = new Remnants(G);
-  G.systems.push(G.lights, G.props, G.interact, G.hands, G.flashlight, G.shelters, G.remnants);
+  G.story = new Story(G);
+  G.puzzles = new Puzzles(G);
+  G.ending = new Ending(G);
+  G.systems.push(G.lights, G.props, G.interact, G.hands, G.flashlight, G.shelters, G.remnants, G.story, G.puzzles);
   G.events.on('quality', (q) => G.world.setDensity(q.density));
   G.gfx.setQuality(G.settings.quality);
   G.time.set(14.2, true);
   titleCam(G, 0);
   G.renderer.compile(G.scene, G.camera);
-  G.newGame = (o) => newGame(G, o);
+  G.newGame = (o) => begin(G, 'new', o);
   flow(G);
   if (DEBUG) installDebug(G);
   G.ui.show('loading', false);
-  G.ui.show('title', true);
-  G.state = 'title';
+  const auto = sessionStorage.getItem(AUTO);
+  sessionStorage.removeItem(AUTO);
+  if (auto === 'new' || (auto === 'continue' && Save.has())) { begin(G, auto, { skipLock: true }); G.state = 'paused'; G.ui.show('pause', true); }
+  else showTitle(G);
   let last = performance.now();
   const loop = (now) => {
     requestAnimationFrame(loop);
@@ -68,14 +80,32 @@ export async function startGame() {
   requestAnimationFrame(loop);
 }
 
-function newGame(G, o = {}) {
+function showTitle(G) {
+  G.state = 'title'; G.input.game = false;
+  for (const id of ['pause', 'hud', 'note', 'journal', 'keypad', 'ending', 'settings']) G.ui.show(id, false);
+  G.ui.show('title', true); G.ui.fade(false, false, 300); G.ui.threat(0);
+  document.querySelector('[data-act="continue"]').disabled = !Save.has();
+  G.time.set(14.2, true); G.time.range(14.2, 14.2);
+}
+
+function begin(G, mode, o = {}) {
+  if (G.dirty) { sessionStorage.setItem(AUTO, mode); location.reload(); return; }
+  G.dirty = true;
   G.ui.show('title', false); G.ui.show('hud', true);
-  const s = G.world.anchors.get('spawn');
-  G.player.spawn(s.pos.x, s.pos.y, s.pos.z, s.yaw);
-  G.time.set(14.0, true); G.time.range(14, 16.4);
   G.region = null;
+  if (mode === 'continue') {
+    const d = Save.read();
+    if (d) Save.apply(G, d);
+  } else {
+    Save.clear();
+    const s = G.world.anchors.get('spawn');
+    G.player.spawn(s.pos.x, s.pos.y, s.pos.z, s.yaw);
+    G.time.set(14.0, true);
+    G.story.enterStep(false);
+    setTimeout(() => { G.story.addThought('t_wake'); G.ui.objective(G.story.objectiveText()); }, 4600);
+  }
   setPlaying(G, !o.skipLock);
-  G.events.emit('newGame');
+  G.events.emit('newGame', mode);
 }
 
 function setPlaying(G, lock = true) {
@@ -98,9 +128,11 @@ function resume(G) {
 function flow(G) {
   G.pause = () => pause(G); G.resume = () => resume(G);
   G.events.on('ui', (act) => {
-    if (act === 'new') newGame(G);
+    if (act === 'new') { if (Save.has() && !window.confirm(t('save.confirmNew'))) return; begin(G, 'new'); }
+    else if (act === 'continue') begin(G, 'continue');
     else if (act === 'resume') resume(G);
-    else if (act === 'title') { G.state = 'title'; G.input.game = false; G.ui.show('pause', false); G.ui.show('hud', false); G.ui.show('title', true); G.time.set(14.2, true); G.events.emit('toTitle'); }
+    else if (act === 'journal' && G.state === 'paused') { setPlaying(G, false); G.panels.openJournal(); }
+    else if (act === 'title') showTitle(G);
   });
   G.events.on('unlock', (expected) => { if (!expected && G.state === 'playing') pause(G); });
   G.events.on('key', (code) => {
@@ -108,6 +140,7 @@ function flow(G) {
   });
   G.renderer.domElement.addEventListener('click', () => { if (G.state === 'paused') resume(G); else if (G.state === 'playing' && !G.input.locked) G.input.lock(); });
   G.events.on('fellOut', () => { G.props.returnCarried(); G.shelters.respawnPlayer(); });
+  G.events.on('shelterEnter', () => { if (G.state === 'playing' && Save.write(G)) G.ui.toast(t('save.saved')); });
 }
 
 function titleCam(G, time) {
@@ -125,17 +158,17 @@ function tick(G, dt) {
     G.world.update(dt, G.camera);
     if (!G.freeze) G.gfx.render();
   } else if (G.state === 'playing' || G.state === 'cutscene') {
-    if (G.state === 'playing') G.player.update(dt);
-    for (const s of G.systems) s.update(dt);
+    if (G.state === 'playing') { G.player.update(dt); for (const s of G.systems) s.update(dt); }
+    else { G.ending.update(dt); G.lights.update(dt); }
     const zone = G.world.zoneAt(G.camera.position);
-    G.time.update(dt, zone); G.time.followShadow(G.player.feet);
+    G.time.update(dt, zone); G.time.followShadow(G.state === 'playing' ? G.player.feet : G.camera.position);
     G.world.update(dt, G.camera);
-    const reg = G.world.regionAt(G.player.feet);
-    if (reg !== G.region) { G.region = reg; G.ui.regionCard(t('regions.' + reg), clockText(G.time.hour)); G.events.emit('region', reg); }
-    G.ui.crouch(G.player.crouch);
+    if (G.state === 'playing') {
+      const reg = G.world.regionAt(G.player.feet);
+      if (reg !== G.region) { G.region = reg; G.ui.regionCard(t('regions.' + reg), clockText(G.time.hour)); G.events.emit('region', reg); }
+      G.ui.crouch(G.player.crouch);
+    }
     if (!G.freeze) G.gfx.render();
-  } else if (G.state === 'panel') {
-    for (const s of G.systems) if (s.panelUpdate) s.panelUpdate(dt);
   }
   G.input.endFrame();
 }
