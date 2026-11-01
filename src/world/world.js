@@ -71,6 +71,7 @@ export function buildWorld(G) {
   kits.forEach((k) => k.noVegRects.forEach((r) => occ.block(r)));
   for (const k of kits) { scatter(k, occ); finishKit(k); W.lightSpecs.push(...k.extraLights); }
   farCity(W, G.scene);
+  for (const [x, z, sx, sz] of [[0, 267.5, 170, 1], [0, -191.5, 170, 1], [81.5, 38, 1, 460], [-81.5, 38, 1, 460]]) W.col.addBox(x, 5, z, sx, 20, sz, 0, 0, 0, 'bound');
   W.col.build();
   const redraw = () => W.textDraws.forEach((f) => f());
   onLang(redraw);

@@ -26,6 +26,7 @@ import { Puzzles } from '../story/puzzles.js';
 import { Ending } from '../story/ending.js';
 import { UI, clockText } from '../ui/ui.js';
 import { Panels } from '../ui/panels.js';
+import { SettingsUI } from '../ui/settings.js';
 
 const raf = () => new Promise((r) => requestAnimationFrame(r));
 const TOWER_LOOK = new THREE.Vector3(0, 30, -166);
@@ -61,12 +62,16 @@ export async function startGame() {
   G.ending = new Ending(G);
   G.weather = new Weather(G);
   G.audio = new AudioEngine(G);
+  G.settingsUI = new SettingsUI(G);
   G.systems.push(G.lights, G.props, G.interact, G.hands, G.flashlight, G.shelters, G.remnants, G.story, G.puzzles);
   G.events.on('quality', (q) => G.world.setDensity(q.density));
   G.gfx.setQuality(G.settings.quality);
   G.time.set(14.2, true);
   titleCam(G, 0);
+  const warm = [...G.remnants.list.map((r) => r.group), G.weather.rainLines, G.weather.dustPts, G.weather.pollenPts];
+  warm.forEach((o) => { o.visible = true; });
   G.renderer.compile(G.scene, G.camera);
+  warm.forEach((o) => { o.visible = false; });
   G.newGame = (o) => begin(G, 'new', o);
   flow(G);
   if (DEBUG) installDebug(G);

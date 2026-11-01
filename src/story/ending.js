@@ -32,7 +32,7 @@ export class Ending {
     this.one = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTexture(), color: new THREE.Color('#fff2b0').multiplyScalar(2.2), transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
     this.one.scale.setScalar(1.6); G.scene.add(this.one);
     this.camFrom = G.camera.position.clone(); this.qFrom = G.camera.quaternion.clone();
-    const look = new THREE.Object3D(); look.position.set(0, 25.7, -161.6); look.lookAt(0, 16, -90); this.qTo = look.quaternion.clone(); this.camTo = look.position.clone();
+    const look = new THREE.PerspectiveCamera(); look.position.set(0, 26.7, -161.3); look.lookAt(0, 10, -96); this.qTo = look.quaternion.clone(); this.camTo = look.position.clone();
     for (const r of G.remnants.list) r.dissolve = r.enabled;
   }
   update(dt) {
@@ -45,6 +45,9 @@ export class Ending {
     if (this.step === 0 && T > 2) { this.step = 1; G.events.emit('bell'); }
     if (this.step === 1 && T > 4.5) { this.step = 2; G.events.emit('bell'); }
     if (this.step === 2 && T > 7) { this.step = 3; G.events.emit('bell'); }
+    // the Archive core empties as the memories leave
+    const bc = G.world.beacon;
+    if (bc && T > 3) { const f = Math.max(0, 1 - (T - 3) / 6); bc.core.scale.setScalar(Math.max(0.01, f)); bc.halo.material.opacity = 0.6 * f; }
     // remnants dissolve
     for (const r of G.remnants.list) if (r.dissolve) { r.group.visible = true; r.u.uOpacity.value = Math.max(0, 0.88 - (T - 3) * 0.3); r.group.position.y += dt * Math.max(0, T - 3) * 0.6; if (r.u.uOpacity.value <= 0) r.group.visible = false; }
     G.remnants.disabled = true;
@@ -64,7 +67,7 @@ export class Ending {
     if (T > 10) {
       const u = Math.min(1, (T - 10) / 4), ue = u * u;
       this.one.material.opacity = Math.min(1, (T - 10) * 0.8);
-      this.one.position.set(0, 25.7 + (1 - ue) * 10, -161.6 + (1 - ue) * 60).lerp(G.camera.position.clone().add(new THREE.Vector3(0, 0, 0.0).applyQuaternion(G.camera.quaternion)), ue * 0.92);
+      this.one.position.set(0, 26.7 + (1 - ue) * 10, -161.3 + (1 - ue) * 60).lerp(G.camera.position.clone().add(new THREE.Vector3(0, 0, 0.0).applyQuaternion(G.camera.quaternion)), ue * 0.92);
     }
     if (this.step === 3 && T > 13.5) { this.step = 4; G.ui.fade(true, true, 2200); }
     if (this.step === 4 && T > 16) { this.step = 5; this.showLines(); }

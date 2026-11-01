@@ -15,7 +15,7 @@
     "clickToResume": "Click to continue",
     "toTitle": "Back to Title",
     "journal": "Journal",
-    "controlsHint": "WASD move · Shift run · Space jump · C crouch · E interact · F flashlight · J journal · P pause"
+    "controlsHint": "WASD move · Shift run · Space jump/climb · C crouch · E interact · Click throw · F flashlight · J journal · P pause"
   },
   "regions": {
     "r1": "Residential District",
@@ -484,5 +484,19 @@
       "Thank you for walking all the way here"
     ],
     "back": "Back to Title"
+  },
+  "settings": {
+    "title": "Settings",
+    "lang": "Language",
+    "ko": "한국어",
+    "en": "English",
+    "sens": "Mouse sensitivity",
+    "quality": "Graphics quality",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "volume": "Volume",
+    "back": "Back",
+    "note": "Low: no shadows/bloom, less grass · High: sharper shadows"
   }
 }

@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { Capsule } from 'three/addons/math/Capsule.js';
 import { CFG } from '../core/config.js';
 
-const _v = new THREE.Vector3();
+const _v = new THREE.Vector3(), _o = new THREE.Vector3(), _dn = new THREE.Vector3(0, -1, 0), _fw = new THREE.Vector3();
 
 export class Player {
   constructor(G) {
@@ -13,7 +13,7 @@ export class Player {
     this.vel = new THREE.Vector3(); this.feet = new THREE.Vector3();
     this.yaw = 0; this.pitch = 0; this.crouch = false; this.eyeH = CFG.eyeStand;
     this.onFloor = false; this.airTime = 0; this.jumpBuf = 0; this.stride = 0; this.bob = 0; this.bobAmp = 0; this.landDip = 0;
-    this.speedMul = 1; this.enabled = true; this.running = false; this.moving = false; this.lookEnabled = true;
+    this.speedMul = 1; this.enabled = true; this.running = false; this.moving = false; this.lookEnabled = true; this.mantle = null;
   }
   spawn(x, y, z, yaw = 0) {
     this.crouch = false; this.eyeH = CFG.eyeStand;
@@ -57,8 +57,12 @@ export class Player {
     this.running = this.enabled && (inp.isDown('ShiftLeft') || inp.isDown('ShiftRight')) && f > 0 && !this.crouch;
     const speed = (this.crouch ? CFG.crouch : this.running ? CFG.run : CFG.walk) * this.speedMul;
     this.jumpBuf -= dt;
-    const steps = 4, h = Math.min(dt, 0.05) / steps;
-    for (let i = 0; i < steps; i++) this.step(h, wx * speed, wz * speed);
+    if (this.mantle) this.doMantle(dt);
+    else {
+      if (this.jumpBuf > 0 && this.enabled && f > 0 && this.tryMantle()) this.jumpBuf = 0;
+      const steps = 4, h = Math.min(dt, 0.05) / steps;
+      for (let i = 0; i < steps; i++) this.step(h, wx * speed, wz * speed);
+    }
     this.eyeH += ((this.crouch ? CFG.eyeCrouch : CFG.eyeStand) - this.eyeH) * Math.min(1, dt * 10);
     const hs = Math.hypot(this.vel.x, this.vel.z);
     this.moving = this.onFloor && hs > 0.6;
@@ -83,6 +87,34 @@ export class Player {
     this.cap.translate(_v.copy(this.vel).multiplyScalar(dt));
     this.collide();
     if (wasAir && this.onFloor && vy < -5.5) { this.landDip = Math.min(0.16, -vy * 0.011); this.G.events.emit('land', -vy, this.feet); }
+  }
+  // climb onto a ledge 0.55–1.5 m above the feet (Space while moving forward in front of it)
+  tryMantle() {
+    const carry = this.G.props.carrying;
+    if (this.crouch || (carry && carry.crate) || this.airTime > 0.12) return false;
+    const col = this.G.world.col, f = this.feet;
+    _fw.set(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
+    _o.copy(f).addScaledVector(_fw, 0.3).add(_v.set(0, 0.45, 0));
+    const wall = col.ray(_o, _fw, 0.75, true);
+    if (!wall) return false;
+    const reach = 0.3 + wall.distance + 0.42;
+    _o.copy(f).addScaledVector(_fw, reach).add(_v.set(0, 1.9, 0));
+    const hit = col.ray(_o, _dn, 1.9, true); if (!hit) return false;
+    const top = _o.y - hit.distance, h = top - f.y;
+    if (h < 0.55 || h > 1.5) return false;
+    this.test.start.set(_o.x, top + CFG.radius + 0.05, _o.z); this.test.end.set(_o.x, top + CFG.standTop + 0.05, _o.z);
+    for (const t of col.trees()) { const r = t.capsuleIntersect(this.test); if (r && r.depth > 0.02) return false; }
+    this.mantle = { t: 0, dur: 0.42 + h * 0.15, from: f.clone(), to: new THREE.Vector3(_o.x, top + 0.02, _o.z), h };
+    this.G.events.emit('mantle', h);
+    return true;
+  }
+  doMantle(dt) {
+    const m = this.mantle; m.t += dt;
+    const k = Math.min(1, m.t / m.dur), up = Math.min(1, k * 1.6), fw = Math.max(0, (k - 0.35) / 0.65);
+    const x = m.from.x + (m.to.x - m.from.x) * fw, z = m.from.z + (m.to.z - m.from.z) * fw, y = m.from.y + (m.to.y - m.from.y) * up;
+    this.cap.start.set(x, y + CFG.radius, z); this.cap.end.set(x, y + CFG.standTop, z);
+    this.vel.set(0, 0, 0); this.landDip = Math.sin(k * Math.PI) * 0.12;
+    if (k >= 1) { this.mantle = null; this.onFloor = true; }
   }
   collide() {
     this.onFloor = false;

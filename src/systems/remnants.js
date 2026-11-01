@@ -52,7 +52,7 @@ export class Remnants {
     if (s.night && G.time.hour < 19.1) return false;
     if (s.when && !s.when(G)) return false;
     const z = r.zone, cx = (z[0] + z[2]) / 2, cz = (z[1] + z[3]) / 2;
-    return Math.abs(P.y - r.floorY) < 9 && Math.hypot(P.x - cx, P.z - cz) < 75;
+    return Math.abs(P.y - r.floorY) < 4.2 && Math.hypot(P.x - cx, P.z - cz) < 75;
   }
   resetAll() { for (const r of this.list) r.reset(); this.noises.length = 0; }
   catchPlayer() {

@@ -15,7 +15,7 @@
     "clickToResume": "클릭하면 이어집니다",
     "toTitle": "타이틀로",
     "journal": "일지",
-    "controlsHint": "WASD 이동 · Shift 달리기 · Space 점프 · C 앉기 · E 상호작용 · F 손전등 · J 일지 · P 일시정지"
+    "controlsHint": "WASD 이동 · Shift 달리기 · Space 점프/기어오르기 · C 앉기 · E 상호작용 · 클릭 던지기 · F 손전등 · J 일지 · P 일시정지"
   },
   "regions": {
     "r1": "주거 지구",
@@ -484,5 +484,19 @@
       "끝까지 걸어와 줘서 고마워요"
     ],
     "back": "타이틀로"
+  },
+  "settings": {
+    "title": "설정",
+    "lang": "언어",
+    "ko": "한국어",
+    "en": "English",
+    "sens": "마우스 감도",
+    "quality": "그래픽 품질",
+    "low": "낮음",
+    "medium": "중간",
+    "high": "높음",
+    "volume": "음량",
+    "back": "돌아가기",
+    "note": "낮음: 그림자·블룸 끔, 풀 줄임 · 높음: 선명한 그림자"
   }
 }
