@@ -18,6 +18,8 @@ import { Flashlight } from '../systems/flashlight.js';
 import { Shelters } from '../systems/shelters.js';
 import { Remnants } from '../systems/remnants.js';
 import { Save } from '../systems/save.js';
+import { Weather } from '../systems/weather.js';
+import { AudioEngine } from '../systems/audio/engine.js';
 import { placeProps } from '../story/placement.js';
 import { Story } from '../story/story.js';
 import { Puzzles } from '../story/puzzles.js';
@@ -57,6 +59,8 @@ export async function startGame() {
   G.story = new Story(G);
   G.puzzles = new Puzzles(G);
   G.ending = new Ending(G);
+  G.weather = new Weather(G);
+  G.audio = new AudioEngine(G);
   G.systems.push(G.lights, G.props, G.interact, G.hands, G.flashlight, G.shelters, G.remnants, G.story, G.puzzles);
   G.events.on('quality', (q) => G.world.setDensity(q.density));
   G.gfx.setQuality(G.settings.quality);
@@ -154,14 +158,14 @@ function tick(G, dt) {
   if (G.state === 'title') {
     titleCam(G, G.elapsed);
     G.lights.update(dt);
-    G.time.update(0, null); G.time.followShadow(G.camera.position);
+    G.time.update(0, null); G.weather.update(dt); G.time.followShadow(G.camera.position);
     G.world.update(dt, G.camera);
     if (!G.freeze) G.gfx.render();
   } else if (G.state === 'playing' || G.state === 'cutscene') {
     if (G.state === 'playing') { G.player.update(dt); for (const s of G.systems) s.update(dt); }
     else { G.ending.update(dt); G.lights.update(dt); }
     const zone = G.world.zoneAt(G.camera.position);
-    G.time.update(dt, zone); G.time.followShadow(G.state === 'playing' ? G.player.feet : G.camera.position);
+    G.time.update(dt, zone); G.weather.update(dt); G.time.followShadow(G.state === 'playing' ? G.player.feet : G.camera.position);
     G.world.update(dt, G.camera);
     if (G.state === 'playing') {
       const reg = G.world.regionAt(G.player.feet);
@@ -170,5 +174,6 @@ function tick(G, dt) {
     }
     if (!G.freeze) G.gfx.render();
   }
+  G.audio.update(dt);
   G.input.endFrame();
 }
