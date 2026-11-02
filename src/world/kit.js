@@ -148,6 +148,7 @@ export const INST = {
   treeB: { mat: 'tree', cast: true, geo: () => treeGeo('tall') },
   treeC: { mat: 'tree', cast: true, geo: () => treeGeo('blossom') },
   bush: { mat: 'tree', cast: true, geo: bushGeo },
+  hedge: { mat: 'tree', geo: bushGeo },
   car: { mat: 'world', cast: true, geo: carGeo },
   lamp: { mat: 'world', cast: true, geo: lampGeo },
   pole: { mat: 'world', cast: true, geo: poleGeo },

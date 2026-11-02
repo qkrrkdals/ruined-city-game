@@ -106,7 +106,8 @@
     "batteryFull": "배터리가 가득 차 있다.",
     "batteryPlus": "배터리 +35%",
     "noFlashlight": "아직 쓸 손전등이 없다.",
-    "gotFlashlight": "손전등을 챙겼다 · F로 켜고 끈다"
+    "gotFlashlight": "손전등을 챙겼다 · F로 켜고 끈다",
+    "fps": "{fps} fps · 최대 {max}ms · 계산 {cpu}ms · 끊김 {long}"
   },
   "verb": {
     "read": "읽기",
@@ -497,6 +498,9 @@
     "high": "높음",
     "volume": "음량",
     "back": "돌아가기",
-    "note": "낮음: 그림자·블룸 끔, 풀 줄임 · 높음: 선명한 그림자"
+    "note": "낮음: 그림자·블룸 끔, 풀 줄임 · 높음: 선명한 그림자",
+    "fps": "FPS 표시",
+    "on": "켜기",
+    "off": "끄기"
   }
 }

@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { Capsule } from 'three/addons/math/Capsule.js';
 import { CFG } from '../core/config.js';
 
-const _v = new THREE.Vector3(), _o = new THREE.Vector3(), _dn = new THREE.Vector3(0, -1, 0), _fw = new THREE.Vector3();
+const _v = new THREE.Vector3(), _o = new THREE.Vector3(), _dn = new THREE.Vector3(0, -1, 0), _fw = new THREE.Vector3(), _n = new THREE.Vector3();
 
 export class Player {
   constructor(G) {
@@ -72,7 +72,7 @@ export class Player {
       if (this.stride >= sl) { this.stride = 0; G.events.emit('footstep', this.mode(), this.feet); }
     }
     this.landDip *= Math.exp(-dt * 7);
-    if (this.feetY < -40) G.events.emit('fellOut');
+    if (this.feetY < -40 || G.world.pit(this.feet)) G.events.emit('fellOut');
     this.syncCam(dt);
   }
   step(dt, tx, tz) {
@@ -86,7 +86,19 @@ export class Player {
     const vy = this.vel.y, wasAir = !this.onFloor;
     this.cap.translate(_v.copy(this.vel).multiplyScalar(dt));
     this.collide();
+    // stick to the ground when walking down slopes/stairs (otherwise the capsule hops: no footsteps, no E)
+    if (!wasAir && !this.onFloor && this.vel.y <= 0) this.snapDown();
     if (wasAir && this.onFloor && vy < -5.5) { this.landDip = Math.min(0.16, -vy * 0.011); this.G.events.emit('land', -vy, this.feet); }
+  }
+  snapDown() {
+    _o.set(this.cap.start.x, this.cap.start.y - CFG.radius + 0.05, this.cap.start.z);
+    const hit = this.G.world.col.ray(_o, _dn, 0.5, true);
+    if (!hit || (hit.triangle && hit.triangle.getNormal(_n).y < 0.55)) return;
+    const drop = hit.distance - 0.05;
+    if (drop < 0.001 || drop > 0.42) return;
+    this.cap.translate(_v.set(0, -(drop + 0.01), 0));
+    this.collide();
+    if (this.onFloor) this.vel.y = 0;
   }
   // climb onto a ledge 0.55–1.5 m above the feet (Space while moving forward in front of it)
   tryMantle() {

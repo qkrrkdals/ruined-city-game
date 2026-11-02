@@ -10,7 +10,7 @@ export function installDebug(G) {
     get ready() { return G.state !== 'loading'; },
     start() { G.newGame({ skipLock: true }); },
     tp(name, hour, yaw, pitch = 0) {
-      const p = typeof name === 'string' ? TP[name] : name;
+      const p = typeof name === 'string' ? (name.includes(',') ? name.split(',').map(Number) : TP[name]) : name;
       if (!p) return false;
       G.player.spawn(p[0], p[1], p[2], yaw ?? p[3] ?? 0); G.player.pitch = pitch;
       if (hour !== undefined && hour !== null) G.time.set(hour, true);

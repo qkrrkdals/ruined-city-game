@@ -67,8 +67,9 @@ export class AudioEngine {
   }
   out(node, send = 0.15) { node.connect(this.sfx); if (send > 0) this.sendTo(node, send); }
   sendTo(node, amount) { const g = this.ctx.createGain(); g.gain.value = amount; node.connect(g).connect(this.send); }
-  panner(pos, send = 0.2) {
-    const p = this.ctx.createPanner(); p.panningModel = 'HRTF'; p.distanceModel = 'inverse'; p.refDistance = 2; p.rolloffFactor = 1.4; p.maxDistance = 60;
+  // hq = HRTF (expensive, used for Remnants); ambient one-shots use cheap equal-power panning
+  panner(pos, send = 0.2, hq = true) {
+    const p = this.ctx.createPanner(); p.panningModel = hq ? 'HRTF' : 'equalpower'; p.distanceModel = 'inverse'; p.refDistance = 2; p.rolloffFactor = 1.4; p.maxDistance = 60;
     p.positionX.value = pos.x; p.positionY.value = pos.y; p.positionZ.value = pos.z;
     this.out(p, send); return p;
   }
@@ -93,12 +94,12 @@ export class AudioEngine {
     E.on('volume', (v) => this.setVolume(v));
   }
   voice(r) {
-    const ctx = this.ctx, v = { g: ctx.createGain(), lp: ctx.createBiquadFilter() };
+    const ctx = this.ctx, v = { g: ctx.createGain(), lp: ctx.createBiquadFilter(), src: [], off: 0 };
     v.g.gain.value = 0; v.lp.type = 'lowpass'; v.lp.frequency.value = 260;
-    for (const f of [51.9, 55.4]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(v.lp); o.start(); }
+    for (const f of [51.9, 55.4]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(v.lp); o.start(); v.src.push(o); }
     const n = ctx.createBufferSource(); n.buffer = this.noise.pink; n.loop = true; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1700; bp.Q.value = 4;
     const wg = ctx.createGain(); wg.gain.value = 0.35; const lfo = ctx.createOscillator(); lfo.frequency.value = 0.4 + Math.random() * 0.5; const lg = ctx.createGain(); lg.gain.value = 0.3; lfo.connect(lg).connect(wg.gain); lfo.start();
-    n.connect(bp).connect(wg).connect(v.g); n.start(); v.lp.connect(v.g);
+    n.connect(bp).connect(wg).connect(v.g); n.start(); v.lp.connect(v.g); v.src.push(n, lfo);
     v.p = this.panner(r.pos, 0.25); v.g.connect(v.p);
     return v;
   }
@@ -123,6 +124,8 @@ export class AudioEngine {
       let v = this.voices.get(r);
       if (on && !v) { v = this.voice(r); this.voices.set(r, v); }
       if (!v) continue;
+      // silent voices are torn down after a few seconds so idle oscillators/HRTF panners don't load the audio thread
+      if (!on) { v.off += dt; if (v.off > 3) { v.src.forEach((s) => { try { s.stop(); } catch { /* already stopped */ } }); v.g.disconnect(); v.p.disconnect(); this.voices.delete(r); continue; } } else v.off = 0;
       const lv = on ? (r.state === 'chase' ? 0.85 : r.state === 'notice' ? 0.6 : r.state === 'investigate' ? 0.4 : 0.22) : 0;
       v.g.gain.setTargetAtTime(lv * 0.55, t, 0.3); v.lp.frequency.setTargetAtTime(r.state === 'chase' ? 520 : 260, t, 0.3);
       v.p.positionX.value = r.pos.x; v.p.positionY.value = r.floorY + 1.5; v.p.positionZ.value = r.pos.z;

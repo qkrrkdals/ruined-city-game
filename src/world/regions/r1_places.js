@@ -104,7 +104,7 @@ export function buildStore(k) {
   g.box(17, 0.4, 210.5, 2.2, 0.8, 0.6, '#c9c2d4', { rz: 1.2 }); k.col.addBox(17, 0.4, 210.5, 2.2, 0.8, 0.8);
   for (let i = 0; i < 25; i++) g.box(13 + R() * 12, 0.06, 199 + R() * 12, 0.25, 0.08, 0.15, ['#f3c7c0', '#b9dcd5', '#e9d29a'][i % 3], { ry: R() * 3 });
   k.sign({ kind: 'clock', x: 25.83, y: 2.5, z: 205, ry: -Math.PI / 2, w: 0.45, h: 0.45, pw: 128 });
-  k.anchor('bat_r1_a', 21.5, 0.95, 208.5);
+  k.anchor('bat_r1_a', 24.3, 1.1, 200.7);
   k.zone({ id: 'store', kind: 'indoor', box: [12, -0.5, 198, 26, 3.3, 212], surf: 'tile', reverb: 'room' });
 }
 
@@ -191,7 +191,7 @@ export function buildPlayground(k) {
   // sandbox frame + seesaw + bench
   for (const [x, z, w, d] of [[-39, 202, 6, 0.3], [-39, 208, 6, 0.3], [-42, 205, 0.3, 6], [-36, 205, 0.3, 6]]) g.box(x, 0.12, z, w, 0.24, d, '#c9a98a');
   g.box(-30, 0.35, 209, 0.3, 0.1, 3.6, '#e9d29a', { rx: 0.15 }); g.box(-30, 0.18, 209, 0.3, 0.36, 0.3, '#8a8a90');
-  k.add('bench', { x: -33, y: 0, z: 213.2, ry: Math.PI }); k.col.addBox(-33, 0.45, 213.2, 1.9, 0.9, 0.6);
+  k.add('bench', { x: -33, y: 0, z: 213.2, ry: Math.PI }); k.col.addBox(-33, 0.24, 213.2, 1.9, 0.48, 0.6);
   k.anchor('note_r1_neighbor', -33.1, 0.52, 213.05);
   k.add('bag', { x: -32.2, y: 0.5, z: 213.2, ry: 0.3, c: '#f3c7c0' });
   // graffiti on the house wall facing the playground

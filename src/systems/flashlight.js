@@ -8,7 +8,7 @@ export class Flashlight {
     this.G = G; this.has = false; this.on = false; this.level = 1; this.dying = 0; this.flick = 1; this.lowT = 0;
     const s = (this.spot = new THREE.SpotLight('#fff0d4', 0, 34, 0.5, 0.55, 1.25));
     s.position.set(0.22, -0.18, 0.05); s.target.position.set(0.05, -0.1, -6);
-    s.shadow.camera.near = 0.3; s.shadow.camera.far = 30; s.shadow.bias = -0.0006; s.shadow.normalBias = 0.02;
+    s.shadow.camera.near = 0.3; s.shadow.camera.far = 30; s.shadow.bias = -0.0006; s.shadow.normalBias = 0.02; s.shadow.autoUpdate = false;
     this.fill = new THREE.PointLight('#ffe8c8', 0, 7, 1.5);
     G.camera.add(s, s.target, this.fill);
     this.base = 46;
@@ -45,6 +45,8 @@ export class Flashlight {
     const target = this.on ? this.base * f * (0.75 + 0.25 * Math.min(1, this.level * 4)) : 0;
     this.spot.intensity += (target - this.spot.intensity) * Math.min(1, dt * 30);
     this.fill.intensity = this.spot.intensity / this.base * 1.6;
+    // keep castShadow constant (toggling it recompiles every shader) but skip the shadow pass while dark
+    this.spot.shadow.autoUpdate = this.spot.intensity > 0.05;
     G.ui.battery(this.level, this.has, this.on);
   }
 }

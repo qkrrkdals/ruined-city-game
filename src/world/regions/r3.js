@@ -11,7 +11,7 @@ export function buildR3(k) {
   const walks = [[-80, -48, 80, -40], [-80, -60, 80, -56], [-56, -190, -52, -60], [52, -190, 56, -60], [-70, -190, -66, -60], [66, -190, 70, -60]];
   const plaza = [-52, -136, 52, -60], holes = [[-44, -74, -28, -70]];
   k.noVeg([-45, -75, -27, -69]);
-  groundTiles(k, -80, -190, 80, -40, P.ground, [...roads, ...walks, plaza, ...holes, [-52, -140, 52, -136]], { dry: P.dry });
+  groundTiles(k, -80, -190, 80, -40, P.ground, [...roads, ...walks, plaza, ...holes, [-23, -139, 23, -136]], { dry: P.dry });
   groundBoxes(k, -80, -190, 80, -40, holes);
   roads.forEach((r) => road(k, r, P));
   walks.forEach((w) => sidewalk(k, w, P));

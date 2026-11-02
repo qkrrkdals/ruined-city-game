@@ -81,9 +81,9 @@ export const SOUNDS = {
       .forEach(([r, a, d]) => ping(E, t, base * r, a, d, 'sine', 0.8));
     burst(E, t, 'bandpass', 2400, 2, 0.12, 0.001, 0.08, 0.6);
   },
-  drip(E, { pos }) { const t = E.ctx.currentTime, o = osc(E, 'sine', 1400 + R() * 1200, t, 0.2), g = gain(E, 0); o.frequency.exponentialRampToValueAtTime(700 + R() * 300, t + 0.08); env(g.gain, t, 0.002, 0.07, 0.12); o.connect(g); if (pos) g.connect(E.panner(pos, 0.8)); else E.out(g, 0.7); },
+  drip(E, { pos }) { const t = E.ctx.currentTime, o = osc(E, 'sine', 1400 + R() * 1200, t, 0.2), g = gain(E, 0); o.frequency.exponentialRampToValueAtTime(700 + R() * 300, t + 0.08); env(g.gain, t, 0.002, 0.07, 0.12); o.connect(g); if (pos) g.connect(E.panner(pos, 0.8, false)); else E.out(g, 0.7); },
   bird(E, { pos }) {
-    const t = E.ctx.currentTime, n = 2 + Math.floor(R() * 4), f0 = 2600 + R() * 1600, out = pos ? E.panner(pos, 0.25) : null;
+    const t = E.ctx.currentTime, n = 2 + Math.floor(R() * 4), f0 = 2600 + R() * 1600, out = pos ? E.panner(pos, 0.25, false) : null;
     for (let i = 0; i < n; i++) {
       const s = t + i * (0.09 + R() * 0.08), o = osc(E, 'sine', f0, s, 0.14), m = osc(E, 'sine', 40 + R() * 30, s, 0.14), mg = gain(E, 300 + R() * 400), g = gain(E, 0);
       m.connect(mg).connect(o.frequency); o.frequency.exponentialRampToValueAtTime(f0 * (0.7 + R() * 0.6), s + 0.1);

@@ -27,6 +27,7 @@ import { Ending } from '../story/ending.js';
 import { UI, clockText } from '../ui/ui.js';
 import { Panels } from '../ui/panels.js';
 import { SettingsUI } from '../ui/settings.js';
+import { Perf } from './perf.js';
 
 const raf = () => new Promise((r) => requestAnimationFrame(r));
 const TOWER_LOOK = new THREE.Vector3(0, 30, -166);
@@ -63,15 +64,14 @@ export async function startGame() {
   G.weather = new Weather(G);
   G.audio = new AudioEngine(G);
   G.settingsUI = new SettingsUI(G);
+  G.perf = new Perf(G);
   G.systems.push(G.lights, G.props, G.interact, G.hands, G.flashlight, G.shelters, G.remnants, G.story, G.puzzles);
   G.events.on('quality', (q) => G.world.setDensity(q.density));
   G.gfx.setQuality(G.settings.quality);
   G.time.set(14.2, true);
   titleCam(G, 0);
   const warm = [...G.remnants.list.map((r) => r.group), G.weather.rainLines, G.weather.dustPts, G.weather.pollenPts];
-  warm.forEach((o) => { o.visible = true; });
-  G.renderer.compile(G.scene, G.camera);
-  warm.forEach((o) => { o.visible = false; });
+  precompile(G, warm);
   G.newGame = (o) => begin(G, 'new', o);
   flow(G);
   if (DEBUG) installDebug(G);
@@ -83,10 +83,30 @@ export async function startGame() {
   let last = performance.now();
   const loop = (now) => {
     requestAnimationFrame(loop);
-    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    const raw = now - last, dt = Math.min(0.1, raw / 1000); last = now;
+    const t0 = performance.now();
     try { tick(G, dt); } catch (e) { console.error(e); }
+    G.perf.frame(raw, performance.now() - t0);
   };
   requestAnimationFrame(loop);
+}
+
+// Compile every shader variant the game can need while the loading screen is up, for BOTH output paths:
+// straight to the canvas (low quality) and into the bloom composer's render target (medium/high), whose
+// colour space / tone mapping differ. Textures are uploaded too, so nothing stalls the first time it is seen.
+function precompile(G, warm) {
+  const R = G.renderer, groups = [...Object.values(G.world.groups), ...Object.values(G.world.details)];
+  const vis = groups.map((g) => g.visible);
+  [...groups, ...warm].forEach((o) => { o.visible = true; });
+  R.compile(G.scene, G.camera);
+  R.setRenderTarget(G.gfx.composer.readBuffer); R.compile(G.scene, G.camera); R.setRenderTarget(null);
+  const seen = new Set();
+  G.scene.traverse((o) => {
+    const mats = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
+    for (const m of mats) for (const k of ['map', 'alphaMap']) { const tx = m[k] || (m.uniforms && m.uniforms.uMap && m.uniforms.uMap.value); if (tx && tx.isTexture && !seen.has(tx)) { seen.add(tx); R.initTexture(tx); } }
+  });
+  warm.forEach((o) => { o.visible = false; });
+  groups.forEach((g, i) => { g.visible = vis[i]; });
 }
 
 function showTitle(G) {
