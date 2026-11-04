@@ -18,10 +18,10 @@
     "controlsHint": "WASD move · Shift run · Space jump/climb · C crouch · E interact · Click throw · F flashlight · J journal · P pause"
   },
   "regions": {
-    "r1": "Residential District",
-    "r2": "Commercial District",
-    "under": "Underground",
-    "r3": "City Center"
+    "r1": "Ginkgo Village",
+    "r2": "Station Street",
+    "under": "Clearhaven Station",
+    "r3": "Clock Tower Square"
   },
   "signs": {
     "laundry": "LAUNDROMAT",
@@ -106,7 +106,11 @@
     "batteryFull": "The battery is already full.",
     "batteryPlus": "Battery +35%",
     "noFlashlight": "You have no flashlight to use this with.",
-    "gotFlashlight": "Got the flashlight · F to toggle"
+    "gotFlashlight": "Got the flashlight · F to toggle",
+    "fps": "{fps} fps · worst {max}ms · logic {cpu}ms · hitches {long}",
+    "closer": "Move closer",
+    "holdToDrop": "hold to drop",
+    "autoQuality": "The game kept running slowly, so graphics quality was lowered to '{q}'. You can change it in Settings."
   },
   "verb": {
     "read": "Read",
@@ -118,7 +122,11 @@
     "insert": "Insert",
     "use": "Use",
     "enter": "Enter code",
-    "take": "Take"
+    "take": "Take",
+    "climb": "Climb",
+    "turn": "Turn",
+    "pull": "Pull",
+    "pullOut": "Pull out"
   },
   "items": {
     "crate": "Wooden crate",
@@ -132,7 +140,16 @@
     "towerDoor": "Tower door",
     "core": "Control Core",
     "keypad": "Keypad",
-    "paper": "Note"
+    "paper": "Note",
+    "slot_a": "Panel slot A",
+    "slot_b": "Panel slot B",
+    "slot_c": "Panel slot C",
+    "slot_d": "Panel slot D",
+    "genValve": "Fuel valve",
+    "genChoke": "Choke",
+    "genStart": "Start lever",
+    "genSwitch": "Transfer switch",
+    "alarm": "Alarm clock"
   },
   "notes": {
     "n_r1_table": {
@@ -140,7 +157,8 @@
       "body": [
         "You're awake.",
         "I know it's frightening. It's all right—you're safe here. They can't come in where the lamp is on.",
-        "The flashlight is on the desk in my room upstairs. The stairs have collapsed, so use the crates in the yard. Think of it as practice. You'll have a lot of climbing ahead.",
+        "The flashlight is on the desk in my room upstairs. The stairs have collapsed. Remember the way only the two of us used when we were kids? It's still drawn on the yard wall.",
+        "When you see yellow tape, I left it for you. Look closely around it.",
         "And save the light. Light shows you the way, but they come to the light too.",
         "If you get lost, look for the clock tower. You can see it from anywhere in this city.",
         "You must have so many questions. I left every answer at the tower. For now, just keep walking."
@@ -181,17 +199,16 @@
       "body": [
         "There's one in there. We call them Remnants.",
         "Shine a light on it and it notices you. It hears footsteps and comes closer. Only use the flashlight when you really need it.",
-        "If it comes near, crouch behind a car (C). Stay quiet and it will pass. If it chases you, run (Shift). They're slower than you.",
-        "The fuse is in the cabinet on the far east wall. Put it in the gate's power box and the way will open."
+        "If it comes near, crouch behind a car (C). Stay quiet and it will pass. If it chases you, run (Shift). They're slower than you."
       ]
     },
     "n_r2_photo": {
-      "title": "Back of the Photo",
+      "title": "Note from the Studio Owner",
       "body": [
-        "For Haram's birthday.",
-        "March 14, at Springlight Photo Studio.",
-        "Let's take one here again next year. Even if you can't remember me by then, I'll remember you."
-      ]
+        "Closing early today for the ceremony.",
+        "Prints nobody collected hang on the display board. Only the date is on the back. I remember every customer's face."
+      ],
+      "sign": "Springlight Photo Studio"
     },
     "n_r2_vendor": {
       "title": "A Vendor's Memo",
@@ -227,7 +244,7 @@
       "body": [
         "The station office is safe. I left the lamp on.",
         "The code is Haram's birthday.",
-        "You won't remember it. That's all right. I left a photo at the photo studio."
+        "You won't remember it. That's all right. The photo I left at the studio remembers."
       ]
     },
     "n_r2_rescuer": {
@@ -242,9 +259,9 @@
     "n_r2_fuses": {
       "title": "Note by the Power Panel",
       "body": [
-        "You need two fuses to open the shutter.",
-        "One is on the counter of the electronics shop in the arcade. The other I put on the high shelf in the storeroom at the far end, out of their reach.",
-        "…Sorry. Out of yours too. Use a crate."
+        "The shutter needs power in two places. The motor, and the lock.",
+        "There's only one spare fuse. I put it on the high shelf in the storeroom, out of their reach. You'll need a crate too.",
+        "The other one… is among the things lighting the concourse right now. Don't be scared when it goes dark."
       ]
     },
     "n_r3_record": {
@@ -290,8 +307,8 @@
       "title": "Note Halfway Up the Tower",
       "body": [
         "You're almost there.",
-        "One of them guards the next floor. Light off. Slowly. Stay low.",
-        "Where the stairs have collapsed, use the crates.",
+        "On the 16th floor one of them guards the next flight. They follow sounds.",
+        "I left an alarm clock on the landing. Wind it and it rings a little later. Don't be holding it when it does.",
         "I'll be waiting at the top."
       ]
     },
@@ -306,6 +323,14 @@
         "I'm sorry. And thank you."
       ],
       "sign": "Han Yujin"
+    },
+    "n_r2_code2": {
+      "title": "Crumpled Memo",
+      "body": [
+        "The studio's display board.",
+        "Find the same two people as in the photo on my desk at home.",
+        "The one in yellow is me."
+      ]
     }
   },
   "obs": {
@@ -338,8 +363,8 @@
       "text": "The bus stop clock says 9:47 too. Did every clock in this city stop at the same moment?"
     },
     "o_gate_sign": {
-      "title": "Gate Notice",
-      "text": "Emergency power notice. Gate power is cut. A spare fuse is kept in the fuse cabinet (east wall) of the Block 3 underground parking."
+      "title": "Site Map in the Guard Booth",
+      "text": "The garage is under Block 3. Deep inside it, a lightning mark: 'Basement power room'. The garage entrance faces the road in front of the block."
     },
     "o_billboard": {
       "title": "Fallen Billboard",
@@ -351,7 +376,7 @@
     },
     "o_reservation": {
       "title": "Studio Booking Ledger",
-      "text": "March 14, 2 PM: Han Yujin + 1 (sibling). Birthday portrait. Beside it, in pencil: 'every year.'"
+      "text": "'Ms. Han Yujin — birthday portrait with her sister, every year.' The date is water-stained and blurred. In pencil: 'every year'."
     },
     "o_bags": {
       "title": "Abandoned Bags",
@@ -384,6 +409,38 @@
     "o_my_desk": {
       "title": "Lab Desk",
       "text": "A yellow mug and a photo of Haram. The nameplate reads 'Lead Researcher Han Yujin.' …Familiar. Far too familiar."
+    },
+    "o_chalk": {
+      "title": "Chalk Drawing on the Wall",
+      "text": "It looks like a child drew it. Three boxes stacked like steps up to a window, a star beside it. 'our secret stairs'."
+    },
+    "o_studio_a": {
+      "title": "Print on the Board 1",
+      "text": "A child in a yellow raincoat with two parents. On the back: 'May 21 · first birthday'."
+    },
+    "o_studio_b": {
+      "title": "Print on the Board 2",
+      "text": "Someone in a yellow cardigan and someone with long hair, smiling side by side. On the back: 'March 14 · birthday · again next year'."
+    },
+    "o_studio_c": {
+      "title": "Print on the Board 3",
+      "text": "Someone in green and someone with long hair. On the back: 'February 20 · graduation'."
+    },
+    "o_studio_d": {
+      "title": "Print on the Board 4",
+      "text": "Someone in a yellow cardigan, alone, stiff like an ID photo. On the back: 'September 1 · first day at work'."
+    },
+    "o_panel_diagram": {
+      "title": "Wiring Diagram",
+      "text": "A diagram made only of pictures. A is a bulb, B a gear, C a padlock, D a fan. Two lines run into the shutter: B and C."
+    },
+    "o_board": {
+      "title": "Lab Whiteboard",
+      "text": "My handwriting. 'Generator (for outages): fuel open → pull choke → start. No choke = BANG! (like last time). Then transfer.'"
+    },
+    "o_gen_card": {
+      "title": "Generator Start-up Card",
+      "text": "The laminated card is torn through the middle. '1. Open the fuel valve' … '4. Raise the transfer switch'. Steps 2 and 3 are gone."
     }
   },
   "thoughts": {
@@ -398,45 +455,38 @@
     "t_center": "I'm out of the underground. It's deep night. The tower is right in front of me.",
     "t_record": "Haram was forgetting everything. I wanted to keep those memories safe.",
     "t_years": "Only someone empty can climb the tower. Is that why I'm empty?",
-    "t_final": "My name is Han Yujin. Now I'm going to find Haram."
-  },
-  "obj": {
-    "read_note": "Read the note on the table",
-    "flashlight": "Find the flashlight upstairs",
-    "flashlight_h": "Build steps from the three crates in the yard and climb onto the balcony",
-    "gate": "Head north, toward the clock tower",
-    "gate_h": "There's a quarantine gate at the end of the avenue",
-    "fuse_r1": "Find a fuse in the Block 3 underground parking",
-    "fuse_r1_h": "Fuse cabinet on the parking's east wall. Put it in the gate's power box",
-    "cross": "Find a way to the clock tower",
-    "cross_h": "The bridge has collapsed. Maybe you can cross under it through Clearhaven Station",
-    "office": "Get into the station office",
-    "office_h": "The code is Haram's birthday",
-    "office_h2": "Check the back of the photo left at Springlight Photo Studio (near the gate)",
-    "fuses_u": "Find two fuses in the arcade and put them in the office power panel",
-    "fuses_u_h": "The electronics shop counter, and the high shelf in the storeroom at the far end (use a crate)",
-    "tunnel": "The shutter is open. Take the tunnel to the city center",
-    "tower": "Go to the clock tower",
-    "tower_h": "The door to the tower is at the back of the Institute lobby",
-    "generator": "Restore power to the tower door",
-    "generator_h": "The generator room is at the end of the east corridor. The fuse might be in the lab",
-    "climb": "Climb to the top of the tower",
-    "climb_h": "Stack crates to get past the collapsed stairs",
-    "core": "Enter the moment everything stopped into the Control Core",
-    "core_h": "Every clock in the city showed the same time"
+    "t_final": "My name is Han Yujin. Now I'm going to find Haram.",
+    "t_gatebox": "The gate's power box is empty. Label inside the lid: Feed circuit B-3 · Block 3 basement power room.",
+    "t_wrongfuse": "Sparks. That fuse was for another circuit. I should look at the letters on the cabinet again.",
+    "t_panel": "The panel has four slots (A–D). Only A has a fuse right now, and it keeps the concourse lights on.",
+    "t_lightsout": "I pulled the fuse from slot A. The concourse went dark.",
+    "t_fan": "Slot D was ventilation. It made a terrible noise. They will have heard it.",
+    "t_towerdoor": "The tower door is locked by power. There must be an emergency generator somewhere in the institute.",
+    "t_nopower": "The switch does nothing. The generator has to be running first.",
+    "t_backfire": "The generator went off like a bomb. Wrong order.",
+    "t_alarm": "I wound the alarm clock. It will ring soon. I shouldn't be holding it when it does."
   },
   "puz": {
-    "gateNoFuse": "The power box is empty. There's a slot for a fuse.",
+    "gateNoFuse": "The power box is empty. There's a label inside the lid.",
     "gateOpen": "The gate is opening",
     "keypadOffice": "Station office door code (4 digits)",
-    "keypadCore": "Control Core · enter stop time (4 digits)",
+    "keypadCore": "Control Core · Enter the stop time (24-hour)",
     "wrong": "Wrong code.",
     "doorOpen": "The door opened",
     "panelHalf": "One light on the panel comes on. One more needed.",
     "panelFull": "Power restored · the shutter is rising",
     "towerLocked": "The tower door is locked. No power.",
-    "generatorOn": "The generator is running. The tower door is open.",
-    "coreLocked": "Read the letter on the device first."
+    "generatorOn": "Power on. The tower door opens.",
+    "coreLocked": "Read the letter on the device first.",
+    "wrongFuse": "Sparks!",
+    "slotEmpty": "An empty slot.",
+    "fan": "The ventilation fan roars to life!",
+    "lightsOn": "The concourse lights are back on.",
+    "lightsOut": "The concourse lights went out.",
+    "noPower": "Nothing happens.",
+    "genNoFuel": "The engine turns over but won't catch. No fuel.",
+    "backfire": "BANG! The generator backfired.",
+    "genRunning": "The generator starts running."
   },
   "verbx": {
     "read": "Read",
@@ -444,12 +494,12 @@
   },
   "journal": {
     "title": "Journal",
-    "tabObj": "Goal",
+    "tabObj": "Record",
     "tabNotes": "Notes",
     "tabObs": "Observations",
-    "now": "Right now",
+    "now": "Now",
     "hint": "Clue",
-    "mine": "My entries",
+    "mine": "What I know",
     "unknown": "???",
     "count": "{n} / {total}",
     "close": "Close with J or E",
@@ -495,8 +545,63 @@
     "low": "Low",
     "medium": "Medium",
     "high": "High",
-    "volume": "Volume",
+    "volume": "Master volume",
     "back": "Back",
-    "note": "Low: no shadows/bloom, less grass · High: sharper shadows"
+    "note": "Low: no shadows/bloom, less grass · High: sharp shadows, smooth edges",
+    "fps": "Show FPS",
+    "on": "On",
+    "off": "Off",
+    "invertY": "Invert mouse Y",
+    "fov": "Field of view",
+    "bob": "Head bob",
+    "volMusic": "Music",
+    "volSfx": "Effects",
+    "volAmb": "Ambience",
+    "sparkle": "Highlight nearby items",
+    "autoQuality": "Lower quality automatically when slow"
+  },
+  "dir": {
+    "look": "Look around the house",
+    "upstairs": "Find a way up to my room",
+    "north": "North, toward the clock tower",
+    "gatePower": "Find a way to power the quarantine gate",
+    "cross": "Find a way across the canal to the tower",
+    "office": "Get into the station office",
+    "shutter": "Open the platform shutter",
+    "tunnel": "Through the tunnel to Clock Tower Square",
+    "tower": "Into the clock tower",
+    "towerPower": "Find power for the tower door",
+    "climb": "To the top of the tower",
+    "core": "The device at the top"
+  },
+  "clues": {
+    "chalk": "our secret stairs",
+    "gateLabel": [
+      "Gate feed",
+      "Circuit B-3",
+      "Block 3 basement power room"
+    ],
+    "map": {
+      "title": "Clearhaven Block 3 · Site map",
+      "block3": "Block 3",
+      "power": "Basement power room",
+      "ramp": "Garage entrance",
+      "here": "Guard booth"
+    },
+    "diagram": {
+      "title": "Platform power · wiring"
+    },
+    "card": {
+      "title": "Emergency generator · start-up",
+      "s1": "1. Open the fuel valve",
+      "s4": "4. Raise the transfer switch"
+    },
+    "board": [
+      "Generator (for outages)",
+      "fuel open → pull choke → start",
+      "no choke = BANG! (like last time)",
+      "then transfer"
+    ],
+    "uncollected": "Prints not collected"
   }
 }

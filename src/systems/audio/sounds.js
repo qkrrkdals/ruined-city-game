@@ -26,14 +26,15 @@ function ping(E, t, f, vol, d, type = 'sine', send = 0.3) { const o = osc(E, typ
 
 export const SOUNDS = {
   step(E, { surf = 'concrete', mode = 'walk', wet }) {
-    const t = E.ctx.currentTime, v = (mode === 'run' ? 0.5 : mode === 'crouch' ? 0.13 : 0.3) * (0.85 + R() * 0.3);
+    // ~+5 dB over the first release (footsteps were masked by wind and rain)
+    const t = E.ctx.currentTime, v = (mode === 'run' ? 0.5 : mode === 'crouch' ? 0.16 : 0.3) * 1.8 * (0.85 + R() * 0.3);
     if (wet && surf !== 'grass' && surf !== 'wood') surf = 'water';
     switch (surf) {
-      case 'grass': burst(E, t, 'bandpass', 2200 + R() * 900, 0.7, v * 0.55, 0.01, 0.14); burst(E, t + 0.02, 'highpass', 5000, 0.7, v * 0.25, 0.005, 0.06); break;
+      case 'grass': burst(E, t, 'bandpass', 1500 + R() * 700, 0.8, v * 0.6, 0.01, 0.14); burst(E, t + 0.02, 'highpass', 4200, 0.7, v * 0.25, 0.005, 0.06); thump(E, t, 85, 55, v * 0.3, 0.07); break;
       case 'wood': thump(E, t, 150, 90, v * 0.6, 0.12, 0.2); burst(E, t, 'bandpass', 900, 1.4, v * 0.35, 0.003, 0.08); break;
       case 'tile': burst(E, t, 'bandpass', 2600 + R() * 600, 1.4, v * 0.45, 0.002, 0.05, 0.5); thump(E, t, 110, 70, v * 0.35, 0.05, 0.4); break;
       case 'metal': burst(E, t, 'bandpass', 3200, 8, v * 0.5, 0.002, 0.1, 0.3); ping(E, t, 820 + R() * 200, v * 0.12, 0.25); break;
-      case 'water': { const b = burst(E, t, 'bandpass', 600, 1.2, v * 0.5, 0.01, 0.16, 0.2); b.frequency.exponentialRampToValueAtTime(2200, t + 0.12); burst(E, t + 0.02, 'highpass', 4500, 0.7, v * 0.25, 0.01, 0.08); break; }
+      case 'water': { const b = burst(E, t, 'bandpass', 600, 1.2, v * 0.7, 0.01, 0.16, 0.2); b.frequency.exponentialRampToValueAtTime(2200, t + 0.12); burst(E, t + 0.02, 'highpass', 4500, 0.7, v * 0.25, 0.01, 0.08); break; }
       default: burst(E, t, 'lowpass', 1500 + R() * 400, 0.7, v * 0.6, 0.002, 0.07); thump(E, t, 95, 60, v * 0.45, 0.06);
     }
   },
@@ -46,6 +47,7 @@ export const SOUNDS = {
   throw(E) { const t = E.ctx.currentTime; const b = burst(E, t, 'bandpass', 600, 1.5, 0.12, 0.05, 0.2, 0.05, 'pink'); b.frequency.exponentialRampToValueAtTime(2400, t + 0.2); },
   clink(E) { const t = E.ctx.currentTime; ping(E, t, 2100 + R() * 400, 0.12, 0.25, 'triangle'); ping(E, t + 0.07, 3100 + R() * 300, 0.06, 0.2); },
   glass(E) { const t = E.ctx.currentTime; burst(E, t, 'highpass', 3000, 0.7, 0.5, 0.002, 0.25, 0.3); for (let i = 0; i < 7; i++) ping(E, t + 0.02 + R() * 0.25, 2500 + R() * 4000, 0.06 + R() * 0.05, 0.12 + R() * 0.2); },
+  write(E) { const t = E.ctx.currentTime; for (let i = 0; i < 4; i++) burst(E, t + i * 0.06 + R() * 0.02, 'bandpass', 3800 + R() * 1200, 1.2, 0.035, 0.01, 0.05, 0.05, 'pink'); },
   paper(E) { const t = E.ctx.currentTime; for (let i = 0; i < 3; i++) burst(E, t + i * 0.05 + R() * 0.03, 'bandpass', 2600 + R() * 1500, 0.9, 0.09, 0.02, 0.08, 0.05); },
   flashOn(E) { const t = E.ctx.currentTime; burst(E, t, 'bandpass', 3500, 3, 0.25, 0.001, 0.025, 0.05); ping(E, t, 1900, 0.05, 0.04, 'square', 0); },
   flashOff(E) { const t = E.ctx.currentTime; burst(E, t, 'bandpass', 2800, 3, 0.22, 0.001, 0.03, 0.05); },
@@ -81,9 +83,18 @@ export const SOUNDS = {
       .forEach(([r, a, d]) => ping(E, t, base * r, a, d, 'sine', 0.8));
     burst(E, t, 'bandpass', 2400, 2, 0.12, 0.001, 0.08, 0.6);
   },
-  drip(E, { pos }) { const t = E.ctx.currentTime, o = osc(E, 'sine', 1400 + R() * 1200, t, 0.2), g = gain(E, 0); o.frequency.exponentialRampToValueAtTime(700 + R() * 300, t + 0.08); env(g.gain, t, 0.002, 0.07, 0.12); o.connect(g); if (pos) g.connect(E.panner(pos, 0.8)); else E.out(g, 0.7); },
+  spark(E) { const t = E.ctx.currentTime; for (let i = 0; i < 9; i++) burst(E, t + i * 0.03 + R() * 0.03, 'highpass', 3000 + R() * 3000, 0.7, 0.22 + R() * 0.18, 0.001, 0.03, 0.2); const o = osc(E, 'sawtooth', 110, t, 0.35), g = gain(E, 0), f = filt(E, 'bandpass', 900, 2); env(g.gain, t, 0.005, 0.22, 0.3); o.connect(f).connect(g); E.out(g, 0.2); },
+  hiss(E) { const t = E.ctx.currentTime; burst(E, t, 'highpass', 2500, 0.7, 0.12, 0.08, 0.7, 0.2); },
+  crank(E) { const t = E.ctx.currentTime; for (let i = 0; i < 4; i++) thump(E, t + i * 0.16, 70, 45, 0.25, 0.1, 0.2); },
+  backfire(E) { const t = E.ctx.currentTime; thump(E, t, 90, 30, 0.9, 0.35, 0.5); burst(E, t, 'lowpass', 2000, 0.7, 0.8, 0.002, 0.4, 0.6); burst(E, t + 0.05, 'bandpass', 600, 1, 0.35, 0.01, 0.6, 0.6, 'brown'); },
+  wind(E) { const t = E.ctx.currentTime; for (let i = 0; i < 8; i++) burst(E, t + i * 0.07, 'bandpass', 4200, 6, 0.12, 0.001, 0.02, 0.05); },
+  alarm(E, { pos }) {
+    const t = E.ctx.currentTime, out = pos ? E.panner(pos, 0.3) : null;
+    for (let i = 0; i < 6; i++) { const o = osc(E, 'square', 1760 + (i % 2) * 120, t + i * 0.09, 0.07), g = gain(E, 0); env(g.gain, t + i * 0.09, 0.002, 0.09, 0.06); o.connect(g); if (out) g.connect(out); else E.out(g, 0.3); }
+  },
+  drip(E, { pos }) { const t = E.ctx.currentTime, o = osc(E, 'sine', 1400 + R() * 1200, t, 0.2), g = gain(E, 0); o.frequency.exponentialRampToValueAtTime(700 + R() * 300, t + 0.08); env(g.gain, t, 0.002, 0.07, 0.12); o.connect(g); if (pos) g.connect(E.panner(pos, 0.8, false)); else E.out(g, 0.7); },
   bird(E, { pos }) {
-    const t = E.ctx.currentTime, n = 2 + Math.floor(R() * 4), f0 = 2600 + R() * 1600, out = pos ? E.panner(pos, 0.25) : null;
+    const t = E.ctx.currentTime, n = 2 + Math.floor(R() * 4), f0 = 2600 + R() * 1600, out = pos ? E.panner(pos, 0.25, false) : null;
     for (let i = 0; i < n; i++) {
       const s = t + i * (0.09 + R() * 0.08), o = osc(E, 'sine', f0, s, 0.14), m = osc(E, 'sine', 40 + R() * 30, s, 0.14), mg = gain(E, 300 + R() * 400), g = gain(E, 0);
       m.connect(mg).connect(o.frequency); o.frequency.exponentialRampToValueAtTime(f0 * (0.7 + R() * 0.6), s + 0.1);

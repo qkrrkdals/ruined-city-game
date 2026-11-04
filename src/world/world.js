@@ -7,6 +7,7 @@ import { Sky } from './sky.js';
 import { INST, instGeo, makeInst } from './kit.js';
 import { scatter, Occupancy } from './vegetation.js';
 import { makeSign } from './textures.js';
+import './clues.js';
 import { PAL } from './palette.js';
 import { buildR1 } from './regions/r1.js';
 import { buildR2 } from './regions/r2.js';
@@ -34,22 +35,31 @@ function makeKit(G, W, name, seed, pal) {
   return k;
 }
 
+const CHUNK = 80; // metres per culling cell (bigger = fewer draw calls)
+const SPLIT = new Set(['grass', 'tall', 'flower', 'leaf']); // dense ground cover: split per cell and dropped beyond DETAIL_FAR
+const DETAIL_FAR = 110;
 function finishKit(k) {
   const M = k.W.M, grp = new THREE.Group(), detail = new THREE.Group();
   grp.name = k.name; detail.name = k.name + '_detail';
   const add = (geo, mat, o = {}) => {
     if (geo.empty) return;
-    const m = new THREE.Mesh(geo.build(), mat); m.castShadow = !!o.cast; m.receiveShadow = true; (o.into || grp).add(m); return m;
+    let first = null;
+    for (const gg of o.whole ? [geo.build()] : geo.buildChunks(CHUNK)) { const m = new THREE.Mesh(gg, mat); m.castShadow = !!o.cast; m.receiveShadow = true; (o.into || grp).add(m); first ||= m; }
+    return first;
   };
   add(k.geo, M.world, { cast: true });
-  add(k.soft, M.cloth);
-  add(k.glow, M.glow);
-  const tower = add(k.stone, M.tower, { cast: true, into: k.W.landmark });
+  add(k.soft, M.cloth, { whole: true });
+  add(k.glow, M.glow, { whole: true });
+  const tower = add(k.stone, M.tower, { cast: true, into: k.W.landmark, whole: true });
   if (tower) tower.frustumCulled = false;
   for (const [type, items] of Object.entries(k.inst)) {
     if (!items.length) continue;
-    const def = INST[type], mesh = makeInst(instGeo(type), M[def.mat], items, def);
-    if (def.density) { k.W.density.push({ mesh, total: items.length }); detail.add(mesh); } else grp.add(mesh);
+    const def = INST[type], cells = new Map();
+    for (const it of items) { const key = SPLIT.has(type) ? Math.floor(it.x / CHUNK) + ',' + Math.floor(it.z / CHUNK) : 'all'; let l = cells.get(key); if (!l) cells.set(key, (l = [])); l.push(it); }
+    for (const list of cells.values()) {
+      const mesh = makeInst(instGeo(type), M[def.mat], list, def);
+      if (def.density) { k.W.density.push({ mesh, total: list.length }); detail.add(mesh); k.W.near.push(mesh); } else grp.add(mesh);
+    }
   }
   for (const s of k.signs) grp.add(makeSign(s, k.W));
   for (const m of k.extra) grp.add(m);
@@ -59,19 +69,34 @@ function finishKit(k) {
 
 const REGION_Z = { r1: [120, 266], r2: [-10, 120], under: [-100, 70], r3: [-190, -40] };
 
+// a hedge row along the map edge so the (invisible) boundary wall reads as a natural limit
+const EDGES = { r1: { z: [120, 266], cap: 265.2 }, r2: { z: [-10, 120] }, r3: { z: [-190, -40], cap: -189.2 } };
+function edgeHedges(k, W) {
+  const e = EDGES[k.name]; if (!e) return;
+  const R = k.rand;
+  const blocked = (x, z) => W.col.boxes.some((b) => b.tag !== 'ground' && b.tag !== 'ramp' && b.tag !== 'bound' && Math.abs(b.x - x) < b.sx / 2 + 0.5 && Math.abs(b.z - z) < b.sz / 2 + 0.5 && b.y - b.sy / 2 < 1.2 && b.y + b.sy / 2 > 0.4);
+  const put = (x, z) => { if (!blocked(x, z)) k.add('hedge', { x, y: 0, z, ry: R() * 6.28, s: [1.5 + R() * 0.6, 1.4 + R() * 0.8, 1.5 + R() * 0.6] }); };
+  for (let z = e.z[0] + 0.8; z < e.z[1]; z += 2.0) { put(-79.2, z); put(79.2, z); }
+  if (e.cap) for (let x = -78.2; x < 79; x += 2.0) put(x, e.cap);
+}
+
 export function buildWorld(G) {
-  const W = { G, groups: {}, details: {}, anchors: new Map(), zones: [], surfaces: [], textDraws: [], density: [], portals: [], lightSpecs: [], tallCells: new Map(), col: new CollisionWorld() };
+  const W = { G, groups: {}, details: {}, anchors: new Map(), zones: [], surfaces: [], textDraws: [], density: [], portals: [], lightSpecs: [], tallCells: new Map(), near: [], nearT: 0, col: new CollisionWorld() };
   W.M = createMaterials();
   W.sky = new Sky(G.scene);
   W.landmark = new THREE.Group(); G.scene.add(W.landmark);
   const defs = [['r1', buildR1, 1101, PAL.r1], ['r2', buildR2, 2202, PAL.r2], ['under', buildUnder, 3303, PAL.under], ['r3', buildR3, 4404, PAL.r3]];
   const kits = defs.map(([name, fn, seed, pal]) => { const k = makeKit(G, W, name, seed, pal); fn(k); return k; });
+  for (const k of kits) edgeHedges(k, W);
   const occ = new Occupancy(-95, -200, 95, 280, 1);
   occ.fromBoxes(W.col.boxes);
   kits.forEach((k) => k.noVegRects.forEach((r) => occ.block(r)));
   for (const k of kits) { scatter(k, occ); finishKit(k); W.lightSpecs.push(...k.extraLights); }
   farCity(W, G.scene);
-  for (const [x, z, sx, sz] of [[0, 267.5, 170, 1], [0, -191.5, 170, 1], [81.5, 38, 1, 460], [-81.5, 38, 1, 460]]) W.col.addBox(x, 5, z, sx, 20, sz, 0, 0, 0, 'bound');
+  // map boundary: inner faces sit exactly on the ground edges (no gap) and reach deep below ground
+  for (const [x, z, sx, sz] of [[0, 266.5, 162, 1], [0, -190.5, 162, 1], [80.5, 38, 1, 460], [-80.5, 38, 1, 460]]) W.col.addBox(x, -10, z, sx, 60, sz, 0, 0, 0, 'bound');
+  // canal bed (safety floor; walking into the canal counts as falling, see W.pit)
+  W.col.addBox(0, -2.9, -25, 160, 1, 30, 0, 0, 0, 'ground');
   W.col.build();
   const redraw = () => W.textDraws.forEach((f) => f());
   onLang(redraw);
@@ -89,17 +114,23 @@ export function buildWorld(G) {
   };
   W.tallAt = (p) => (W.tallCells.get(Math.floor(p.x / 2) + ',' + Math.floor(p.z / 2)) || 0) >= 2;
   W.setDensity = (d) => { for (const e of W.density) e.mesh.count = Math.floor(e.total * d); };
+  // underground = below ground inside the station footprint (NOT the residential garage, which is part of r1)
+  W.isUnder = (p) => p.y < -2.4 && p.z < 70 && p.z > -100 && p.x < 50;
   W.update = (dt, cam) => {
     U.uTime.value += dt;
     W.sky.update(cam, dt);
-    const p = cam.position, under = p.y < -2.4;
+    const p = cam.position, under = W.isUnder(p), near = W.nearPortal(p, under ? 12 : 0);
     for (const [name, grp] of Object.entries(W.groups)) {
       const [z0, z1] = REGION_Z[name], dz = Math.max(0, z0 - p.z, p.z - z1);
-      const near = W.nearPortal(p);
       grp.visible = name === 'under' ? under || near : !under || near;
       const det = W.details[name]; if (det) det.visible = grp.visible && dz < 140;
     }
+    // ground cover farther than DETAIL_FAR is sub-pixel: skip it (checked a few times a second)
+    W.nearT -= dt;
+    if (W.nearT <= 0) { W.nearT = 0.3; for (const m of W.near) { const s = m.boundingSphere; m.visible = !s || s.center.distanceTo(p) - s.radius < DETAIL_FAR; } }
   };
-  W.nearPortal = (p) => W.portals.some((q) => Math.hypot(p.x - q[0], p.z - q[1]) < q[2]);
+  W.nearPortal = (p, extra = 0) => W.portals.some((q) => Math.hypot(p.x - q[0], p.z - q[1]) < q[2] + extra);
+  // places where the player counts as fallen (canal bed)
+  W.pit = (p) => p.y < -1.7 && p.y > -3.5 && p.z < -10.3 && p.z > -39.7;
   return W;
 }

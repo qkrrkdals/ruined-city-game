@@ -29,10 +29,11 @@ export class AudioEngine {
     this.master = mk(this.G.settings.volume ?? 0.8);
     const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 3;
     this.master.connect(comp).connect(ctx.destination);
-    this.sfx = mk(1); this.sfx.connect(this.master);
+    const S = this.G.settings;
+    this.sfx = mk(S.volSfx ?? 1); this.sfx.connect(this.master);
     this.musicBus = mk(0.9); this.musicBus.connect(this.master);
     this.ambLP = ctx.createBiquadFilter(); this.ambLP.type = 'lowpass'; this.ambLP.frequency.value = 16000;
-    this.amb = mk(1); this.amb.connect(this.ambLP).connect(this.master);
+    this.amb = mk(S.volAmb ?? 1); this.amb.connect(this.ambLP).connect(this.master);
     // two convolution reverbs (room / hall) cross-faded by zone
     this.send = mk(1);
     for (const [k, dur, decay] of [['room', 1.1, 3], ['hall', 2.8, 2.2]]) {
@@ -67,8 +68,9 @@ export class AudioEngine {
   }
   out(node, send = 0.15) { node.connect(this.sfx); if (send > 0) this.sendTo(node, send); }
   sendTo(node, amount) { const g = this.ctx.createGain(); g.gain.value = amount; node.connect(g).connect(this.send); }
-  panner(pos, send = 0.2) {
-    const p = this.ctx.createPanner(); p.panningModel = 'HRTF'; p.distanceModel = 'inverse'; p.refDistance = 2; p.rolloffFactor = 1.4; p.maxDistance = 60;
+  // hq = HRTF (expensive, used for Remnants); ambient one-shots use cheap equal-power panning
+  panner(pos, send = 0.2, hq = true) {
+    const p = this.ctx.createPanner(); p.panningModel = hq ? 'HRTF' : 'equalpower'; p.distanceModel = 'inverse'; p.refDistance = 2; p.rolloffFactor = 1.4; p.maxDistance = 60;
     p.positionX.value = pos.x; p.positionY.value = pos.y; p.positionZ.value = pos.z;
     this.out(p, send); return p;
   }
@@ -93,12 +95,12 @@ export class AudioEngine {
     E.on('volume', (v) => this.setVolume(v));
   }
   voice(r) {
-    const ctx = this.ctx, v = { g: ctx.createGain(), lp: ctx.createBiquadFilter() };
+    const ctx = this.ctx, v = { g: ctx.createGain(), lp: ctx.createBiquadFilter(), src: [], off: 0 };
     v.g.gain.value = 0; v.lp.type = 'lowpass'; v.lp.frequency.value = 260;
-    for (const f of [51.9, 55.4]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(v.lp); o.start(); }
+    for (const f of [51.9, 55.4]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(v.lp); o.start(); v.src.push(o); }
     const n = ctx.createBufferSource(); n.buffer = this.noise.pink; n.loop = true; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1700; bp.Q.value = 4;
     const wg = ctx.createGain(); wg.gain.value = 0.35; const lfo = ctx.createOscillator(); lfo.frequency.value = 0.4 + Math.random() * 0.5; const lg = ctx.createGain(); lg.gain.value = 0.3; lfo.connect(lg).connect(wg.gain); lfo.start();
-    n.connect(bp).connect(wg).connect(v.g); n.start(); v.lp.connect(v.g);
+    n.connect(bp).connect(wg).connect(v.g); n.start(); v.lp.connect(v.g); v.src.push(n, lfo);
     v.p = this.panner(r.pos, 0.25); v.g.connect(v.p);
     return v;
   }
@@ -110,9 +112,12 @@ export class AudioEngine {
     else { L.setPosition(cam.position.x, cam.position.y, cam.position.z); L.setOrientation(_f.x, _f.y, _f.z, _u.x, _u.y, _u.z); }
     const zone = G.world.zoneAt(cam.position), kind = zone ? zone.kind : 'outdoor', inside = kind !== 'outdoor';
     const W = G.weather || { wind: 0.8, rain: 0 }, playing = G.state === 'playing' || G.state === 'cutscene';
-    this.wind.g.gain.setTargetAtTime((inside ? 0.05 : 0.11) * W.wind * (G.state === 'title' ? 0.7 : 1), t, 0.4);
+    this.wind.g.gain.setTargetAtTime((inside ? 0.028 : 0.06) * W.wind * (G.state === 'title' ? 0.7 : 1), t, 0.4);
     this.wind.a.frequency.setTargetAtTime(380 + Math.sin(G.elapsed * 0.31) * 140 + Math.sin(G.elapsed * 1.7) * 60 + W.wind * 120, t, 0.3);
-    this.rain.g.gain.setTargetAtTime(W.rain * (inside ? 0.04 : 0.16), t, 0.5);
+    this.rain.g.gain.setTargetAtTime(W.rain * (inside ? 0.022 : 0.08), t, 0.5);
+    // ambience dips a little while you walk so your own footsteps stay audible
+    const S = G.settings, duck = G.player && G.player.moving && playing ? 0.78 : 1;
+    this.amb.gain.setTargetAtTime((S.volAmb ?? 1) * duck, t, 0.25); this.sfx.gain.setTargetAtTime(S.volSfx ?? 1, t, 0.05);
     this.ambLP.frequency.setTargetAtTime(inside ? 900 : 16000, t, 0.3);
     const room = kind === 'indoor' ? 0.35 : 0, hall = kind === 'underground' || kind === 'garage' || kind === 'dim' ? 0.55 : kind === 'outdoor' ? 0.07 : 0.1;
     this.wet_room.gain.setTargetAtTime(room, t, 0.4); this.wet_hall.gain.setTargetAtTime(hall, t, 0.4);
@@ -123,6 +128,8 @@ export class AudioEngine {
       let v = this.voices.get(r);
       if (on && !v) { v = this.voice(r); this.voices.set(r, v); }
       if (!v) continue;
+      // silent voices are torn down after a few seconds so idle oscillators/HRTF panners don't load the audio thread
+      if (!on) { v.off += dt; if (v.off > 3) { v.src.forEach((s) => { try { s.stop(); } catch { /* already stopped */ } }); v.g.disconnect(); v.p.disconnect(); this.voices.delete(r); continue; } } else v.off = 0;
       const lv = on ? (r.state === 'chase' ? 0.85 : r.state === 'notice' ? 0.6 : r.state === 'investigate' ? 0.4 : 0.22) : 0;
       v.g.gain.setTargetAtTime(lv * 0.55, t, 0.3); v.lp.frequency.setTargetAtTime(r.state === 'chase' ? 520 : 260, t, 0.3);
       v.p.positionX.value = r.pos.x; v.p.positionY.value = r.floorY + 1.5; v.p.positionZ.value = r.pos.z;
@@ -141,6 +148,6 @@ export class AudioEngine {
     }
     const mood = G.state === 'cutscene' ? 'ending' : G.state === 'title' ? 'r1' : kind === 'underground' ? 'under' : G.world.regionAt(G.player.feet);
     this.music.update(dt, mood);
-    this.musicBus.gain.setTargetAtTime((G.state === 'cutscene' ? 1.4 : 0.9) * (1 - threat * 0.7), t, 0.6);
+    this.musicBus.gain.setTargetAtTime((G.state === 'cutscene' ? 1.4 : 0.9) * (1 - threat * 0.7) * (S.volMusic ?? 1), t, 0.6);
   }
 }

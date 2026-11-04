@@ -39,7 +39,7 @@ export class Remnant {
     this.floorY = spec.y; this.home = new THREE.Vector3(spec.x, spec.y, spec.z); this.pos = this.home.clone();
     this.speedMul = spec.speed ?? 1; this.percept = spec.percept ?? 1; this.chaseSpeed = spec.chase ?? C.chase;
     this.state = 'wander'; this.aw = 0; this.path = null; this.pi = 0; this.wait = 0; this.tick = Math.random() * 0.1;
-    this.last = new THREE.Vector3(); this.noLos = 0; this.noticeT = 0; this.repath = 0; this.yaw = 0; this.los = false; this.dist = 99; this.lit = 0; this.agit = 0;
+    this.last = new THREE.Vector3(); this.noiseAt = new THREE.Vector3(1e5, 0, 0); this.noiseCd = 0; this.pend = []; this.noLos = 0; this.noticeT = 0; this.repath = 0; this.yaw = 0; this.los = false; this.dist = 99; this.lit = 0; this.agit = 0;
     this.enabled = false;
     const G = this.G, fog = G.scene.fog;
     this.u = { uTime: U.uTime, uAgit: { value: 0 }, uCol: { value: new THREE.Color('#1c1530') }, uRim: { value: new THREE.Color('#b9a6e8') }, uOpacity: { value: 0.88 }, uFogColor: { value: fog.color }, uFogDensity: U.uFogDensity, uLit: { value: 0 } };
@@ -114,13 +114,22 @@ export class Remnant {
     this.lit += ((lit ? 1 : 0) - this.lit) * Math.min(1, dt * 8);
     if (rate > 0) { this.aw += rate * dt * this.percept; this.last.copy(P.feet); }
     else this.aw = Math.max(0, this.aw - 0.22 * dt);
+    // react to the loudest audible noise only, and re-plan at most every 0.5 s unless the spot moved a lot
+    let heard = null, hk = 0;
     for (const n of noises) {
       if (Math.abs(n.pos.y - this.floorY) > 4) continue;
       const dn = Math.hypot(n.pos.x - this.pos.x, n.pos.z - this.pos.z);
       if (dn > n.r) continue;
-      this.aw = Math.max(this.aw, Math.min(0.95, 0.4 + ((n.r - dn) / n.r) * 0.5));
+      const k = (n.r - dn) / n.r;
+      this.aw = Math.max(this.aw, Math.min(0.95, 0.4 + k * 0.5));
       if (dn < 3) this.aw += 0.6;
-      if (this.state === 'wander' || this.state === 'investigate' || this.state === 'search') { this.state = 'investigate'; this.goTo(n.pos.x, n.pos.z); this.wait = 0; }
+      if (k > hk) { hk = k; heard = n; }
+    }
+    this.noiseCd -= dt;
+    if (heard && (this.state === 'wander' || this.state === 'investigate' || this.state === 'search')) {
+      const moved = Math.hypot(heard.pos.x - this.noiseAt.x, heard.pos.z - this.noiseAt.z);
+      this.state = 'investigate'; this.wait = 0;
+      if (this.noiseCd <= 0 || moved > 3 || !this.path) { this.noiseCd = 0.5; this.noiseAt.copy(heard.pos); this.goTo(heard.pos.x, heard.pos.z); }
     }
     this.aw = Math.min(this.aw, 1.3);
     return rate > 0;
@@ -128,8 +137,10 @@ export class Remnant {
   update(dt, noises) {
     const G = this.G, P = G.player.feet;
     this.tick -= dt;
+    // noises arrive every frame but perception runs every 0.1 s: keep them until then (they used to be dropped)
+    for (const n of noises) if (this.pend.length < 24) this.pend.push(n);
     let seen = this.state === 'chase' ? this.los : false;
-    if (this.tick <= 0) { this.tick = 0.1; seen = this.perceive(0.1, noises); }
+    if (this.tick <= 0) { this.tick = 0.1; seen = this.perceive(0.1, this.pend); this.pend.length = 0; }
     const sheltered = this.M.playerSheltered();
     switch (this.state) {
       case 'wander':

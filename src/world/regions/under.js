@@ -1,5 +1,6 @@
 // Underground (floor y = -7): station concourse, office (shelter 3), arcade, storeroom, platform, tunnel, center station.
 import { room, shade } from '../buildings.js';
+import { tape } from '../streets.js';
 
 const Y = -7, TOP = -3, TILE = '#6db5ae', TILE2 = '#5aa39c', WHITE = '#cde7e0', FLOOR = '#8fb1aa', RUST = '#af6f4c';
 const SHOPS = ['#f3c7c0', '#b9dcd5', '#e9d29a', '#c9bde6', '#e6a99c', '#a9cfd8'];
@@ -24,13 +25,13 @@ function canopy(k, x, z, key) {
 
 export function stationEntranceR2(k) {
   stairs(k, -12, -28, 40);
-  canopy(k, -13.6, 40, 'signs.station');
+  canopy(k, -13.6, 40, 'signs.station'); tape(k, -12.1, 1.5, 42.1, 0, { w: 0.2, d: 0.2 });
   k.anchor('under_entrance', -11, 0, 40);
   k.W.portals.push([-20, 40, 24]);
 }
 export function stationExitR3(k) {
   stairs(k, -28, -44, -72);
-  canopy(k, -29.6, -72, 'signs.station3');
+  canopy(k, -29.6, -72, 'signs.station3'); tape(k, -28.1, 1.5, -69.9, 0, { w: 0.2, d: 0.2 });
   k.W.portals.push([-36, -72, 24]);
 }
 
@@ -38,7 +39,7 @@ export function buildUnder(k) {
   const g = k.geo, R = k.rand;
   const floor = (x0, z0, x1, z1, c = FLOOR) => { k.solid((x0 + x1) / 2, Y - 0.25, (z0 + z1) / 2, x1 - x0, 0.5, z1 - z0, c, { top: c }); for (let x = x0; x < x1; x += 2) for (let z = z0; z < z1; z += 2) if (R() < 0.18) g.flat(x, z, Math.min(x + 2, x1), Math.min(z + 2, z1), Y + 0.01, shade(c, 0.9 + R() * 0.15), 0.04); };
   const moss = (x, z, r = 0.8) => { k.glow.ico(x, Y, z, r, '#5fcfae', { sy: 0.08, j: 0.3, jit: 0.15 }); };
-  const elight = (x, y, z, ry = 0) => { k.glow.box(x, y, z, ry ? 0.08 : 0.5, 0.12, ry ? 0.5 : 0.08, '#ffb36b'); k.extraLights.push({ pos: [x, y - 0.3, z], intensity: 3.2, distance: 8, color: '#ffb36b', flicker: R() < 0.4 }); };
+  const elight = (x, y, z, ry = 0, group) => { k.glow.box(x, y, z, ry ? 0.08 : 0.5, 0.12, ry ? 0.5 : 0.08, '#ffb36b'); k.extraLights.push({ pos: [x, y - 0.3, z], intensity: 3.2, distance: 8, color: '#ffb36b', flicker: R() < 0.4, group }); };
   // ---- concourse (x -48..-28, z 26..56)
   floor(-48, 26, -28, 56);
   room(k, { x0: -48, z0: 26, x1: -28, z1: 56, y: Y, h: 4, t: 0.4, wall: TILE, inner: WHITE, ceil: '#9fc3bd', doors: [{ side: 'e', a: 38, b: 42, h: 3.4 }, { side: 'n', a: -40, b: -34, h: 3.2 }, { side: 'w', a: 28, b: 32, h: 3.2 }, { side: 'w', a: 38, b: 42, h: 3.2 }] });
@@ -51,21 +52,26 @@ export function buildUnder(k) {
   k.sign({ kind: 'sign', key: 'signs.station', x: -38, y: Y + 3.3, z: 55.75, ry: Math.PI, w: 6, h: 0.8, bg: '#4f8f8a', fg: '#f4fbf8' });
   k.sign({ kind: 'poster', key: 'signs.notice', x: -28.22, y: Y + 1.6, z: 30, ry: -Math.PI / 2, w: 1, h: 1.4, pw: 256 });
   for (const [x, z] of [[-46, 29], [-31, 30], [-44, 44], [-30, 46]]) moss(x, z, 0.9);
-  elight(-28.3, Y + 3.2, 34, 1); elight(-47.7, Y + 3.2, 50, 1); elight(-38, Y + 3.7, 26.3);
+  elight(-28.3, Y + 3.2, 34, 1, 'concourse'); elight(-47.7, Y + 3.2, 50, 1, 'concourse'); elight(-38, Y + 3.7, 26.3, 0, 'concourse');
   // office (shelter 3): x -48..-40, z 48..56 with a keypad door on its north wall
   k.solid(-46.5, Y + 2, 48, 3, 4, 0.3, WHITE); k.solid(-41.5, Y + 2, 48, 3, 4, 0.3, WHITE); k.solid(-44, Y + 3.1, 48, 2, 1.8, 0.3, WHITE);
   k.solid(-40, Y + 2, 52, 0.3, 4, 8, WHITE);
   g.panel(-41.2, Y + 1.6, 47.83, 1.3, 1.0, Math.PI, '#2f4a52');
   k.col.setDyn('door_office', { x: -44, y: Y + 1.1, z: 48, sx: 2, sy: 2.2, sz: 0.2 });
   k.anchor('door_office', -44, Y, 48);
-  k.anchor('keypad_office', -42.55, Y + 1.45, 47.8);
+  k.anchor('keypad_office', -42.55, Y + 1.45, 47.8); tape(k, -42.55, Y + 1.85, 47.82, 0, { w: 0.24, tail: false });
   k.anchor('note_r2_code', -45.4, Y + 1.5, 47.82);
   k.solid(-42, Y + 0.38, 54.6, 2.4, 0.76, 1.0, '#c9b8a8', { top: '#e3d6c8' });
   g.box(-42.5, Y + 0.95, 54.8, 0.6, 0.4, 0.06, '#2a3236'); g.box(-41.6, Y + 0.95, 54.8, 0.6, 0.4, 0.06, '#2a3236');
   for (let i = 0; i < 4; i++) k.solid(-47.6, Y + 0.9, 49 + i * 0.6, 0.6, 1.8, 0.55, '#9aa7b4');
   k.solid(-47.85, Y + 1.5, 52, 0.25, 1.6, 1.6, '#7c8794');
   g.box(-47.7, Y + 1.5, 52, 0.06, 1.4, 1.4, '#a9b3be');
-  k.anchor('socket_u_1', -47.6, Y + 1.5, 51.6); k.anchor('socket_u_2', -47.6, Y + 1.5, 52.4);
+  // P4: four slots A-D (lights / shutter motor / shutter lock / ventilation) + wiring diagram above the lockers
+  ['bulb', 'motor', 'lock', 'fan'].forEach((icon, i) => { const z = 52.6 - i * 0.4; k.anchor('slot_' + 'abcd'[i], -47.6, Y + 1.4, z); k.sign({ kind: 'slot', icon, letter: 'ABCD'[i], x: -47.64, y: Y + 1.9, z, ry: Math.PI / 2, w: 0.34, h: 0.17, pw: 128 }); });
+  k.sign({ kind: 'diagram', x: -47.82, y: Y + 2.6, z: 49.9, ry: Math.PI / 2, w: 1.3, h: 0.92, pw: 384 });
+  k.anchor('obs_panel_diagram', -47.7, Y + 2.6, 49.9);
+  tape(k, -47.62, Y + 2.38, 52, Math.PI / 2, { w: 0.5, tail: false });
+  k.anchor('note_r2_code2', -42.9, Y + 0.02, 47.35);
   k.anchor('panel_lights', -47.6, Y + 2.1, 52);
   k.anchor('note_r2_fuses', -43, Y + 0.78, 54.4);
   g.prism(-46.6, Y, 54.9, 0.18, 0.18, 0.05, 8, '#6a5a5a'); g.prism(-46.6, Y + 0.05, 54.9, 0.025, 0.025, 1.45, 5, '#6a5a5a');
@@ -95,7 +101,6 @@ export function buildUnder(k) {
   k.anchor('bat_u_b', -21, Y + 0.05, 16.2);
   k.solid(1, Y + 0.5, 12.6, 4, 1.0, 0.9, '#c9c2d4', { top: '#e3dfe8' });
   for (let i = 0; i < 9; i++) g.box(-0.6 + R() * 3.2, Y + 1.1, 12.5 + (R() - 0.5) * 0.5, 0.35, 0.22, 0.25, '#3d4452', { ry: R() });
-  k.anchor('fuse_u_a', 0.2, Y + 1.06, 12.9);
   for (let i = 0; i < 3; i++) { k.solid(15.5 + i * 1.8, Y + 0.38, 13.5, 0.8, 0.76, 0.8, '#d9c4ad', { tag: 'low' }); }
   k.anchor('note_r2_rescuer', 17.3, Y + 0.8, 13.5);
   for (let i = 0; i < 10; i++) g.box(-38 + R() * 68, Y + 0.02, 19 + R() * 6, 1.2 + R() * 2, 0.02, 0.6 + R(), '#7fb3c4', { ry: R() * 3, skip: [0, 1, 2, 3] });
@@ -109,7 +114,7 @@ export function buildUnder(k) {
   for (let y = 0.6; y < 4.3; y += 1.0) g.box(40.65, Y + y, 21, 0.06, 0.06, 16, '#6f6a5f');
   for (let i = 0; i < 16; i++) g.box(41.2, Y + 0.25 + Math.floor(R() * 4) * 1.0, 13.5 + R() * 15, 0.7, 0.45, 0.6, ['#c9a98a', '#b8956f', '#d9c4ad'][i % 3]);
   for (const z of [16, 22]) k.solid(35.5, Y + 1.0, z, 3, 2.0, 0.9, '#8f8a7c');
-  k.anchor('fuse_u_b', 41.1, Y + 4.36, 26.4);
+  k.anchor('fuse_u_b', 41.1, Y + 4.36, 26.4); tape(k, 40.62, Y + 4.4, 26.4, Math.PI / 2, { w: 0.3 });
   k.anchor('crate_u_a', 34.2, Y + 0.45, 13.5); k.anchor('crate_u_b', 38.5, Y + 0.45, 28.6);
   k.anchor('bat_u_c', 33.2, Y + 0.05, 28.9);
   elight(32.3, Y + 4.5, 14, 1); moss(39, 14, 1.0);

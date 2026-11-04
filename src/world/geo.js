@@ -124,12 +124,24 @@ export class Geo {
       c[i] += (k.r - c[i]) * f; c[i + 1] += (k.g - c[i + 1]) * f; c[i + 2] += (k.b - c[i + 2]) * f;
     }
   }
-  build() {
+  build() { return Geo.make(this.p, this.c); }
+  static make(p, c) {
     const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(this.p, 3));
-    g.setAttribute('color', new THREE.Float32BufferAttribute(this.c, 3));
+    g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3));
+    g.setAttribute('color', new THREE.Float32BufferAttribute(c, 3));
     g.computeVertexNormals();
     g.computeBoundingSphere();
     return g;
+  }
+  // split into square xz cells (by triangle centroid) so off-screen parts are frustum-culled,
+  // in the main pass and in the shadow passes
+  buildChunks(size) {
+    const cells = new Map(), p = this.p, c = this.c;
+    for (let i = 0; i < p.length; i += 9) {
+      const key = Math.floor((p[i] + p[i + 3] + p[i + 6]) / 3 / size) + ',' + Math.floor((p[i + 2] + p[i + 5] + p[i + 8]) / 3 / size);
+      let e = cells.get(key); if (!e) cells.set(key, (e = { p: [], c: [] }));
+      for (let j = 0; j < 9; j++) { e.p.push(p[i + j]); e.c.push(c[i + j]); }
+    }
+    return [...cells.values()].map((e) => Geo.make(e.p, e.c));
   }
 }

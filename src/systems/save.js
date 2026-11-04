@@ -1,5 +1,6 @@
 // Autosave at shelters (localStorage). Continue restores story, puzzles, props, batteries, flashlight and time.
-const KEY = 'clearhaven947.save.v1';
+// v2: puzzles were redesigned (stage 9); v1 saves would restore impossible states
+const KEY = 'clearhaven947.save.v2';
 export const Save = {
   has() { try { return !!localStorage.getItem(KEY); } catch { return false; } },
   read() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; } },

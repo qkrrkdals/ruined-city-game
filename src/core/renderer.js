@@ -7,9 +7,9 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { CFG } from './config.js';
 
 export const QUALITY = {
-  low: { pr: 0.75, shadows: false, sunMap: 512, flashShadow: false, flashMap: 256, bloom: false, density: 0.45, rain: 600 },
-  medium: { pr: 1, shadows: true, sunMap: 1024, flashShadow: true, flashMap: 512, bloom: true, density: 0.75, rain: 1200 },
-  high: { pr: 1.5, shadows: true, sunMap: 2048, flashShadow: true, flashMap: 1024, bloom: true, density: 1, rain: 2000 },
+  low: { pr: 0.75, shadows: false, sunMap: 512, flashShadow: false, flashMap: 256, bloom: false, density: 0.45, rain: 600, msaa: 0 },
+  medium: { pr: 1, shadows: true, sunMap: 1024, flashShadow: true, flashMap: 512, bloom: true, density: 0.75, rain: 1200, msaa: 2 },
+  high: { pr: 1.5, shadows: true, sunMap: 2048, flashShadow: true, flashMap: 1024, bloom: true, density: 1, rain: 2000, msaa: 4 },
 };
 
 export function createRenderer(canvas, G) {
@@ -43,6 +43,7 @@ export function createRenderer(canvas, G) {
     setQuality(name) {
       this.qName = QUALITY[name] ? name : 'medium'; this.q = QUALITY[this.qName];
       renderer.shadowMap.enabled = this.q.shadows;
+      for (const t of [composer.renderTarget1, composer.renderTarget2]) if (t.samples !== this.q.msaa) { t.samples = this.q.msaa; t.dispose(); }
       G.events.emit('quality', this.q, this.qName);
       scene.traverse((o) => { if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => { m.needsUpdate = true; }); });
       this.resize();

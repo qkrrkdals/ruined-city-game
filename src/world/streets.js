@@ -96,3 +96,10 @@ export function car(k, x, z, ry, color, o = {}) {
   k.green(x - 2, z - 2, x + 2, z + 2, { d: 0.8, tall: 0.15 });
 }
 export const CAR_COLORS = ['#e9c6c0', '#bfd8e0', '#f0e2c0', '#c9c2dc', '#d6e3c8', '#e6e2dc', '#a7b6c9', '#e0b6a2', '#9fb7ad'];
+
+// Yujin's yellow mark: a band of yellow tape (optionally with fluttering ribbon tails) — "I left this for you"
+export function tape(k, x, y, z, ry = 0, o = {}) {
+  const w = o.w ?? 0.26, c = '#e8b73f';
+  k.geo.box(x, y, z, w, 0.07, o.d ?? 0.03, c, { ry, jit: 0 });
+  if (o.tail !== false) for (const d of [-0.04, 0.04]) k.soft.box(x + Math.cos(ry) * d, y - 0.2, z - Math.sin(ry) * d, 0.035, 0.36, 0.01, c, { ry, rz: d * 3, jit: 0, bottom: true });
+}

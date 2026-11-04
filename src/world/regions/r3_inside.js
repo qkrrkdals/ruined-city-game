@@ -1,4 +1,5 @@
 // Interiors of the Memory Preservation Institute (ground floor) and the clock tower (levels 0/8/16/24).
+import { tape } from '../streets.js';
 import { room, shade } from '../buildings.js';
 
 const STONE = '#cfc6d9', INNER = '#ece6f2', FLOOR = '#b9b2c9', WOOD = '#b89a86';
@@ -55,13 +56,21 @@ export function buildInstituteInside(k) {
   k.sign({ kind: 'photo', key: 'signs.photoDate', variant: 'home', x: 28.6, y: 1.0, z: -159.62, w: 0.28, h: 0.34, pw: 128 });
   k.sign({ kind: 'sign', key: 'signs.nameplate', x: 27.9, y: 0.86, z: -158.3, rx: -0.4, w: 0.7, h: 0.12, bg: '#3f3a4e', fg: '#efe6f0', pw: 512 });
   k.anchor('obs_my_desk', 28.4, 1.0, -158.9);
-  k.anchor('note_r3_record', 20.2, 0.8, -165.8); k.anchor('note_r3_research', 27.6, 0.8, -158.8); k.anchor('fuse_r3', 25.6, 0.86, -165.9);
+  k.anchor('note_r3_record', 20.2, 0.8, -165.8); k.anchor('note_r3_research', 27.6, 0.8, -158.8);
+  // P5 clue: my whiteboard (the middle of the start-up procedure), north wall of the lab
+  g.panel(25, 2.0, -169.83, 3.2, 1.4, 0, '#f4f1ea');
+  k.sign({ kind: 'board', x: 25, y: 2.0, z: -169.8, w: 3.0, h: 1.3, pw: 512, transparent: true });
+  k.anchor('obs_board', 25, 2.0, -169.65); tape(k, 26.45, 2.62, -169.8, 0, { w: 0.22 });
   g.panel(32.83, 2.1, -162, 4, 1.6, -Math.PI / 2, '#f4f1ea');
   k.sign({ kind: 'decal', key: 'signs.formula', x: 32.8, y: 2.1, z: -162, ry: -Math.PI / 2, w: 3.6, h: 1.3, fg: '#3c4a7a', font: 'hand' });
   k.sign({ kind: 'sign', key: 'signs.lab', x: 24.5, y: 3.1, z: -153.78, w: 2.4, h: 0.5, bg: '#ece6f2', fg: '#5b5677' });
   k.sign({ kind: 'sign', key: 'signs.generator', x: 38, y: 3.1, z: -153.78, w: 2.6, h: 0.5, bg: '#e9d29a', fg: '#5b4a3a' });
   k.solid(39, 1.0, -162, 3.5, 2.0, 2.4, '#7c8794'); g.prism(37.5, 2.0, -162.5, 0.25, 0.25, 1.6, 8, '#9aa7b4'); g.box(39, 2.2, -160.6, 1.6, 0.4, 0.3, '#8b8f9c');
-  k.anchor('socket_gen', 37.8, 1.25, -160.7);
+  // P5: generator controls on its front face + the torn start-up card; transfer switch on the east wall
+  k.anchor('gen_valve', 37.7, 0.75, -160.62); k.anchor('gen_choke', 38.5, 1.4, -160.62); k.anchor('gen_start', 39.35, 1.1, -160.62);
+  k.solid(41.78, 1.4, -158.5, 0.14, 0.6, 0.45, '#8b8f9c'); k.anchor('gen_switch', 41.66, 1.4, -158.5);
+  k.sign({ kind: 'card', x: 40.25, y: 1.45, z: -160.79, w: 0.6, h: 0.75, pw: 256 });
+  k.anchor('obs_gen_card', 40.25, 1.45, -160.68); tape(k, 40.25, 1.86, -160.78, 0, { w: 0.24, tail: false });
   elight(k, 41.7, 3.8, -150, 1); elight(k, 25, 4.1, -169.7); elight(k, 38, 4.1, -165.7);
   k.anchor('rem_inst_lobby', 0, 0, -146, { zone: [-13, -157, 13, -142], nav: 'surface' });
   k.anchor('rem_inst_wing', 30, 0, -150, { zone: [16, -169, 41, -147], nav: 'surface' });
@@ -97,10 +106,13 @@ export function buildTowerInside(k) {
   k.glow.prism(-5.2, 9.45, -160.8, 0.3, 0.18, 0.35, 8, '#ffcf8a', { jit: 0 });
   k.anchor('s5', -2.4, 8, -162.6, { yaw: Math.PI / 2, lamp: [-5.2, 9.6, -160.8], r: 2.9 });
   k.solid(-1, 8.35, -161, 1.2, 0.7, 0.6, WOOD); k.anchor('note_r3_tower', -1.2, 8.71, -161); k.anchor('bat_s5', -0.6, 8.72, -161.1);
-  k.anchor('crate_t_a', 2.4, 8.45, -163.2); k.anchor('crate_t_b', 1.2, 8.45, -168.2); k.anchor('crate_t_c', 3.0, 8.45, -166.0);
+  k.anchor('crate_t_a', 2.4, 8.45, -163.2); k.anchor('crate_t_b', 1.2, 8.45, -168.2);
+  k.anchor('bottle_t_a', -3.6, 8.12, -161.6); k.anchor('bottle_t_b', -3.2, 8.12, -161.2);
   k.anchor('tower_bounds', -6.5, 7.2, -172.5, { max: [6.5, 31, -159.5] });
   // level 16: dark hall with one Remnant; battery in the far corner
-  k.anchor('rem_tower16', -1, 16, -165, { zone: [-5.4, -169.4, 3.4, -160.6], nav: 'tower16' });
+  // P5b: the Remnant hovers by the next flight up; a wind-up alarm clock waits on the landing you arrive at
+  k.anchor('rem_tower16', 2.6, 16, -166.5, { zone: [1.2, -169.4, 3.7, -163.2], nav: 'tower16' });
+  k.anchor('alarm_t', 4.5, 16.08, -171.35); tape(k, 5.75, 16.9, -171.0, Math.PI / 2, { w: 0.2 });
   k.anchor('bat_t_a', 5.0, 16.06, -170.9);
   // level 24: Control Core room
   k.solid(0, 24.55, -170.7, 2.6, 1.1, 0.9, '#8f88ab', { top: '#c9c0d4' });

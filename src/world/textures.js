@@ -25,6 +25,16 @@ export function dotTexture() {
   ctx.fillStyle = g; ctx.fillRect(0, 0, 64, 64);
   return (_dot = tex);
 }
+let _ring = null;
+// soft glowing ring: marks the object you are aiming at
+export function ringTexture() {
+  if (_ring) return _ring;
+  const { ctx, tex } = canvasTex(128, 128);
+  const g = ctx.createRadialGradient(64, 64, 30, 64, 64, 62);
+  g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.55, 'rgba(255,255,255,0.95)'); g.addColorStop(0.7, 'rgba(255,255,255,0.5)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 128, 128);
+  return (_ring = tex);
+}
 
 function fit(ctx, text, x, y, maxW, size, font, weight = '') {
   let s = size;
@@ -141,7 +151,7 @@ export const DRAW = {
 export function makeSign(s, W) {
   const pw = s.pw ?? 512, ph = s.ph ?? Math.max(64, Math.round(pw * (s.h / s.w)));
   const { c, ctx, tex } = canvasTex(pw, ph);
-  const transparent = s.kind === 'decal' || s.kind === 'sticker' || s.kind === 'chain';
+  const transparent = s.kind === 'decal' || s.kind === 'sticker' || s.kind === 'chain' || !!s.transparent;
   if (s.kind === 'chain') { tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(s.w / 2, s.h / 2); }
   const Mat = s.glow ? THREE.MeshBasicMaterial : THREE.MeshLambertMaterial;
   const mat = patch(new Mat({ map: tex, transparent, alphaTest: transparent ? 0.05 : 0, depthWrite: !transparent || s.kind === 'chain', side: s.double || s.kind === 'chain' ? THREE.DoubleSide : THREE.FrontSide, polygonOffset: true, polygonOffsetFactor: -2 }), { soft: s.soft });

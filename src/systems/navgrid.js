@@ -7,7 +7,23 @@ export class NavGrid {
     const n = this.nx * this.nz;
     this.blocked = new Uint8Array(n);
     this.g = new Float32Array(n); this.par = new Int32Array(n); this.stamp = new Uint32Array(n); this.closed = new Uint32Array(n); this.run = 0;
-    this.heap = [];
+    // binary heap in typed arrays (no per-node allocations -> no GC spikes)
+    this.hk = new Int32Array(1 << 15); this.hf = new Float32Array(1 << 15); this.hn = 0;
+  }
+  hpush(k, f) {
+    if (this.hn >= this.hk.length) { const k2 = new Int32Array(this.hk.length * 2), f2 = new Float32Array(this.hk.length * 2); k2.set(this.hk); f2.set(this.hf); this.hk = k2; this.hf = f2; }
+    const K = this.hk, F = this.hf; let i = this.hn++;
+    while (i > 0) { const p = (i - 1) >> 1; if (F[p] <= f) break; K[i] = K[p]; F[i] = F[p]; i = p; }
+    K[i] = k; F[i] = f;
+  }
+  hpop() {
+    const K = this.hk, F = this.hf, top = K[0], n = --this.hn;
+    if (n > 0) {
+      const k = K[n], f = F[n]; let i = 0;
+      for (;;) { const l = 2 * i + 1; if (l >= n) break; const r = l + 1, m = r < n && F[r] < F[l] ? r : l; if (F[m] >= f) break; K[i] = K[m]; F[i] = F[m]; i = m; }
+      K[i] = k; F[i] = f;
+    }
+    return top;
   }
   build(boxes, inflate = 0.4) {
     const lo = this.y + 1.0, hi = this.y + 1.8;
@@ -48,20 +64,18 @@ export class NavGrid {
     for (let i = 0; i < tries; i++) { const x = zone[0] + R() * (zone[2] - zone[0]), z = zone[1] + R() * (zone[3] - zone[1]); if (this.free(x, z)) return [x, z]; }
     return null;
   }
-  path(ax, az, bx, bz, budget = 5000) {
+  path(ax, az, bx, bz, budget = 2500) {
     const s = this.nearestFree(ax, az, 3), e = this.nearestFree(bx, bz, 4);
     if (!s || !e) return null;
     const S = this.idx(s[0], s[1]), E = this.idx(e[0], e[1]);
     if (S === E) return [[bx, bz]];
     const run = ++this.run, nx = this.nx, ex = E % nx, ez = Math.floor(E / nx);
     const h = (k) => { const dx = Math.abs((k % nx) - ex), dz = Math.abs(Math.floor(k / nx) - ez); return Math.max(dx, dz) + 0.414 * Math.min(dx, dz); };
-    const heap = this.heap; heap.length = 0;
-    const push = (k, f) => { heap.push([f, k]); let i = heap.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (heap[p][0] <= heap[i][0]) break; [heap[p], heap[i]] = [heap[i], heap[p]]; i = p; } };
-    const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === i) break; [heap[m], heap[i]] = [heap[i], heap[m]]; i = m; } } return top; };
-    this.stamp[S] = run; this.g[S] = 0; this.par[S] = -1; push(S, h(S));
+    this.hn = 0;
+    this.stamp[S] = run; this.g[S] = 0; this.par[S] = -1; this.hpush(S, h(S));
     let found = false, n = 0;
-    while (heap.length && n++ < budget) {
-      const [, k] = pop();
+    while (this.hn && n++ < budget) {
+      const k = this.hpop();
       if (this.closed[k] === run) continue;
       this.closed[k] = run;
       if (k === E) { found = true; break; }
@@ -72,14 +86,19 @@ export class NavGrid {
         const q = i + j * nx; if (this.blocked[q] || this.closed[q] === run) continue;
         if (di && dj && (this.blocked[ci + di + cj * nx] || this.blocked[ci + (cj + dj) * nx])) continue;
         const ng = this.g[k] + (di && dj ? 1.414 : 1);
-        if (this.stamp[q] !== run || ng < this.g[q]) { this.stamp[q] = run; this.g[q] = ng; this.par[q] = k; push(q, ng + h(q)); }
+        if (this.stamp[q] !== run || ng < this.g[q]) { this.stamp[q] = run; this.g[q] = ng; this.par[q] = k; this.hpush(q, ng + h(q)); }
       }
     }
     if (!found) return null;
     const pts = []; for (let k = E; k !== -1; k = this.par[k]) pts.push(this.center(k));
     pts.reverse(); pts[pts.length - 1] = [bx, bz];
+    // greedy smoothing with a bounded look-ahead (the old all-pairs version could cost millions of samples)
     const out = [pts[0]]; let a = 0;
-    while (a < pts.length - 1) { let b = pts.length - 1; while (b > a + 1 && !this.los(pts[a][0], pts[a][1], pts[b][0], pts[b][1])) b--; out.push(pts[b]); a = b; }
+    while (a < pts.length - 1) {
+      let b = a + 1;
+      for (let c = Math.min(pts.length - 1, a + 16); c > a + 1; c--) if (this.los(pts[a][0], pts[a][1], pts[c][0], pts[c][1])) { b = c; break; }
+      out.push(pts[b]); a = b;
+    }
     return out;
   }
 }

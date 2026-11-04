@@ -1,11 +1,12 @@
-// Story state: steps/objectives, found notes & observations, journal thoughts, hints, position triggers.
+// Story state: steps (a vague direction for the journal), found notes & observations, the journal's
+// "what I know" entries (thoughts), position triggers. No timed hints: clues live in the world.
 import * as THREE from 'three';
 import { t } from '../i18n/i18n.js';
 import { NOTES, OBS, STEPS, noteAnchor, obsAnchor } from './content.js';
 
 export class Story {
   constructor(G) {
-    this.G = G; this.step = 0; this.flags = {}; this.notes = new Set(); this.obs = new Set(); this.thoughts = []; this.hint = 0; this.stepTime = 0; this.fails = {};
+    this.G = G; this.step = 0; this.flags = {}; this.notes = new Set(); this.obs = new Set(); this.thoughts = []; this.fails = {};
     this.paperMat = new THREE.MeshBasicMaterial({ color: new THREE.Color('#fff2d6').multiplyScalar(1.12) });
     this.paperGeo = new THREE.BoxGeometry(0.21, 0.006, 0.29);
     this.meshes = {};
@@ -44,47 +45,35 @@ export class Story {
     if (item.thought) this.addThought(item.thought);
     if (item.id === 'n_r1_table') this.advanceTo('flashlight');
     if (item.id === 'o_gate_sign') this.advanceTo('fuse_r1');
-    if (item.id === 'o_bridge' && this.step >= 4) this.hint = Math.max(this.hint, 1);
   }
+  // new journal entry: no pop-up text, just a pen sound and the journal icon pulsing
   addThought(id) {
     if (this.thoughts.includes(id)) return;
-    this.thoughts.push(id); this.G.ui.toast(t('journal.newEntry'));
+    this.thoughts.push(id); this.G.ui.journalPulse();
     this.G.events.emit('thought', id);
   }
   stepIndex(id) { return STEPS.findIndex((s) => s.id === id); }
-  advanceTo(id) { const i = this.stepIndex(id); if (i > this.step) { this.step = i; this.enterStep(true); } }
-  enterStep(announce) {
-    const s = this.cur; this.stepTime = 0; this.hint = 0;
+  advanceTo(id) { const i = this.stepIndex(id); if (i > this.step) { this.step = i; this.enterStep(); } }
+  enterStep() {
+    const s = this.cur;
     this.G.time.range(s.time[0], s.time[1]);
-    if (announce && s.obj) this.G.ui.objective(this.objectiveText());
     this.G.events.emit('step', s.id);
   }
-  objectiveText() {
-    const s = this.cur; if (!s.obj) return '';
-    let txt = t('obj.' + s.obj);
-    if (s.id === 'office' && (this.fails.office || 0) >= 2) txt += ' — ' + t('obj.office_h2');
-    else if (this.hint > 0) { const h = t('obj.' + s.obj + '_h'); if (h !== 'obj.' + s.obj + '_h') txt += ' — ' + h; }
-    return txt;
-  }
-  hintText() { const h = t('obj.' + this.cur.obj + '_h'); return this.hint > 0 && h !== 'obj.' + this.cur.obj + '_h' ? h : ''; }
-  fail(key) { this.fails[key] = (this.fails[key] || 0) + 1; if (this.fails[key] >= 2) { this.hint = 2; this.G.ui.objective(this.objectiveText()); } }
-  update(dt) {
+  dirText() { const s = this.cur; return s.dir ? t('dir.' + s.dir) : ''; }
+  update() {
     const G = this.G, p = G.player.feet, s = this.cur.id;
-    this.stepTime += dt;
     if (s === 'gate' && p.z < 136 && Math.abs(p.x) < 18 && p.y > -1) this.advanceTo('fuse_r1');
     if (this.flags.gateOpen && this.step < this.stepIndex('office') && p.y < -2 && p.z < 70) this.advanceTo('office');
     if (this.flags.shutterOpen && this.step < this.stepIndex('tower') && p.y < -2 && p.z < -64) this.advanceTo('tower');
     if (s === 'tower' && p.y > -1 && p.z < -140 && p.z > -160 && Math.abs(p.x) < 15) this.advanceTo('generator');
     if (s === 'climb' && p.y > 23 && Math.abs(p.x) < 7 && p.z < -159 && p.z > -173) this.advanceTo('core');
     if (this.step >= this.stepIndex('tower') && p.z < -40 && p.y > -1) this.addThought('t_center');
-    const hk = 'obj.' + this.cur.obj + '_h';
-    if (this.hint === 0 && this.stepTime > 150 && this.cur.obj && t(hk) !== hk) { this.hint = 1; G.ui.objective(this.objectiveText()); }
   }
   serialize() { return { step: this.step, flags: this.flags, notes: [...this.notes], obs: [...this.obs], thoughts: this.thoughts, fails: this.fails }; }
   restore(d) {
     if (!d) return;
     this.step = d.step || 0; this.flags = d.flags || {}; this.notes = new Set(d.notes || []); this.obs = new Set(d.obs || []); this.thoughts = d.thoughts || []; this.fails = d.fails || {};
-    this.enterStep(false);
+    this.enterStep();
   }
   debugState() { return { step: this.cur.id, flags: { ...this.flags }, notes: this.notes.size, obs: this.obs.size }; }
 }

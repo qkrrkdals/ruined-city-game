@@ -19,7 +19,9 @@
 ```
 npm run build
 node scripts/check.cjs                      # 기본 샷 3장 + 콘솔 에러 JSON
-node scripts/check.cjs name:teleport:hour:yaw:pitch ...   # 예: plaza:plaza:25.2::0.18
+node scripts/check.cjs name:teleport:hour:yaw:pitch ...   # 예: plaza:plaza:25.2::0.18 (teleport 자리에 x,y,z,yaw 좌표도 됨)
+node scripts/audit.cjs                      # 지면 구멍·맵 밖 낙하·주차장 앉기·계단·상호작용 도달·로딩 뒤 셰이더 컴파일·CPU 시간 (실패 시 exit 1)
+node scripts/playthrough.cjs                # 새 게임 → 엔딩: 모든 퍼즐을 실제 상호작용으로 (상자 쌓기·기어오르기 포함, 실패 시 exit 1)
 ```
 - 헤드리스는 SwiftShader라 느림 → 렌더링을 멈추고(`__game.freeze`) 샷마다 한 번만 그림(`renderOnce`). FPS는 의미 없음.
 - 스크린샷은 `shots/`(gitignore). 구도·색감 확인용.
@@ -28,16 +30,16 @@ node scripts/check.cjs name:teleport:hour:yaw:pitch ...   # 예: plaza:plaza:25.
 ## 폴더 구조
 ```
 src/main.js                  진입점(폰트·CSS 로드)
-src/core/  game.js(상태머신·루프) renderer.js(렌더러·블룸·품질) input.js(포인터 잠금→자동 일시정지) config.js(밸런스 상수) settings.js debug.js events.js
+src/core/  game.js(상태머신·루프·미리 컴파일) renderer.js(렌더러·블룸·품질) input.js(포인터 잠금→자동 일시정지) config.js(밸런스 상수) settings.js debug.js events.js perf.js(FPS 표시)
 src/world/ world.js(지역 조립·존·표면·가시성) geo.js(로우폴리 지오메트리 빌더) materials.js(높이 안개·바람 셰이더 패치)
            buildings.js(절차적 폐허 건물·room 셸) streets.js(지면·도로·인도·소품) kit.js(인스턴싱 소품) vegetation.js(풀·덩굴·덤불)
-           textures.js(캔버스 텍스처: 간판·포스터·사진·광고판·시계) sky.js(하늘·구름·별) collision.js(박스→Octree, 동적 Octree) palette.js layout.js
+           textures.js(캔버스 텍스처: 간판·포스터·사진·광고판·시계) clues.js(퍼즐 단서 그림) sky.js(하늘·구름·별) collision.js(박스→Octree, 동적 Octree) palette.js layout.js
            regions/ r1.js r1_places.js(집·마당·편의점·주차장·게이트·놀이터·공원·정류장) r2.js(상업·기념식 거리·사진관·광고판·운하) under.js(지하, 3단계) r3.js r3_institute.js(연구소·시계탑) far.js(원경)
 src/player/ player.js(Capsule 이동·앉기·점프·기어오르기·발소리) interact.js(E 상호작용) props.js(상자·작은 물건 물리) hands.js(노란 소매 팔)
 src/systems/ timeofday.js(이야기 연동 시간대·존 조명) lights.js(포인트 라이트 풀) flashlight.js navgrid.js remnant.js remnants.js(잔류체) shelters.js save.js weather.js audio/(engine·sounds·music)
-src/story/ content.js(쪽지·관찰·단계 메타) story.js(단계·목표·실마리·트리거) puzzles.js(P2~P6) placement.js(상자·퓨즈·배터리·손전등) ending.js
+src/story/ content.js(쪽지·관찰·단계 메타) story.js(단계·방향·일지 기록·트리거) puzzles.js(P2 게이트·P3 역무실·P6 장치·불꽃) puzzles2.js(P4 배전반·P5 발전기·탑 문·P5b 자명종) placement.js(상자·퓨즈·배터리·손전등) ending.js
 src/ui/ ui.js(HUD·타이틀·일시정지) panels.js(쪽지·일지·키패드) settings.js styles.css   src/i18n/ ko.json en.json i18n.js
-scripts/check.cjs  docs/DESIGN.md
+scripts/check.cjs audit.cjs playthrough.cjs  docs/DESIGN.md
 ```
 - 앵커: 지역 빌더가 `k.anchor(id, x,y,z, data)`로 퍼즐·쪽지·쉼터 위치를 등록 → `G.world.anchors`. 쉼터 앵커는 `lamp`, `r`(반경) 포함.
 - 충돌: 보이는 메시와 별개의 박스(`k.col.addBox`, `k.solid`=보이는 박스+충돌). 문·게이트·상자는 `col.setDyn(id, box)`(동적 Octree).
@@ -51,11 +53,27 @@ scripts/check.cjs  docs/DESIGN.md
 - [x] 4단계 미스터리: 쪽지 18개·관찰 19개(한/영 본문), 일지(J: 목표·실마리·나의 기록 / 쪽지 / 관찰), 쪽지·사진 보기, 키패드, 퍼즐 P2 게이트·P3 역무실(0314)·P4 배전반 2칸→셔터·P5 발전기→탑 문·무너진 계단(상자 3개)·P6 중앙 제어 장치(2147/0947), 연구소 내부(로비·연구실·기록 보관실·발전기실)·탑 내부(0/8/16/24층, 6개 계단), 이야기 단계·목표·실마리(150초 후·오답 2회), 쉼터 자동 저장·이어하기(새로 고침 방식), 엔딩(시계 움직임·종·기억 조각·새벽·일지 문장·크레딧). 헤드리스로 전체 진행 자동 점검 통과
 - [x] 5단계 연출: 이야기 단계별 시간 범위(지역 전환 시 빠르게 흐름), 꽃가루·먼지 바람·비(GPU 입자, 실내에서는 숨김), 바람 세기·비 안개, Web Audio 사운드 전체(이름 레지스트리 32종, 바닥 재질별 발소리, 바람·비·새·물방울, 잔류체 3D 목소리, 긴장음·심장 박동, 지역별 패드 음악·피아노 같은 플럭, 방/홀 잔향 교차, 종소리), 블룸 세기 밤낮 조절
 - [x] 6단계 마무리: 설정 화면(언어 즉시 전환·감도·품질 3단계·음량, 타이틀/일시정지에서), 기어오르기(땅에 서 있을 때 0.55~1.5m, 퍼즐 우회 불가 확인), 맵 경계 보이지 않는 벽(맵 밖으로 떨어지던 버그), 잔류체는 같은 층 높이에서만 활성, 숨은 셰이더 미리 컴파일(첫 등장 끊김 방지), 엔딩 카메라 방향 수정·아카이브 핵이 비워지는 연출
+- [x] 7단계 안정화 (플레이 피드백 반영): 지상/지하 그리기 전환을 높이 대신 역 범위로 판단(`W.isUnder`, 주차장에서 앉으면 세상이 사라지던 버그), 맵 경계 벽을 바닥 끝에 맞추고 땅속 깊이 연장(1m 틈으로 떨어지던 버그) + 가장자리 산울타리(`hedge`), 운하 바닥 충돌 + 빠지면 쉼터로(`W.pit`), 연구소 정문 앞 바닥 구멍, 내리막 땅 붙이기(`snapDown`: 계단 내려갈 때 발소리·E 안 되던 버그), 편의점 배터리(진열대 충돌 안)·이웃 쪽지(벤치 충돌) 위치 수정, 셰이더 미리 컴파일을 블룸 렌더 타깃 경로까지 + 텍스처 미리 올리기, 손전등 꺼지면 그림자 갱신 중지, A* 타입 배열 힙·스무딩 제한, 잔류체 소리 처리(가장 큰 소리만, 0.5초 재계획 제한, **소리를 0.1초 사이에 버리던 버그 수정 → 잔류체가 설계대로 잘 들음, 난이도 확인 필요**), 쓰지 않는 잔류체 목소리 노드 해제, 새·물방울은 가벼운 패닝, 설정 'FPS 표시'(fps·최대 프레임·계산 시간·끊김 수), `scripts/audit.cjs` 추가
+- [x] 8단계 조작감·사운드: 겨눈 물건에 옅은 빛 고리(`Interact.ring`), 범위 2.6m(물건 표면 기준)·조준 여유 증가, 보이지만 먼 물건은 흐린 '조금 더 가까이' 표시(`far`, 아직 못 쓰는 물건은 `idle` 문구), 주변 6m 상호작용 물건 반짝임(설정 '주변 물건 반짝임'), 퓨즈 등을 들고 있으면 3m 안 배전함에 조준 없이 꽂힘 + **E 길게 = 내려놓기**, 턱 앞 'Space 오르기' 안내(`mantleCheck`), 설정: 마우스 상하 반전·시야각·화면 흔들림·음악/효과음/환경음 음량, 발소리 +5dB(풀 소리 낮춤·쿵 추가)·바람/비 -5~6dB·걸을 때 환경음 0.78로 낮춤
+- [x] 9단계 퍼즐·힌트 재설계 (사용자 결정 1-B·2-가·3-가·4-나·5-가): 시간 지나면 뜨던 힌트·목표 알림 삭제, 일지 '기록' 탭 = 지금 방향 한 줄(`dir.*`) + '내가 아는 것'(생각 목록), 새 기록은 펜 소리 + 오른쪽 아래 'J' 표시, 지역 이름(은행나무 마을·역전 상가·청안역·시계탑 광장), 유진의 노란 테이프 표식(`tape()`), 단서 그림(`src/world/clues.js`: 분필 그림·게이트 라벨·단지 배치도·퓨즈함 격자·결선도·칸 라벨·찢긴 카드·화이트보드·사진관 사진), 퍼즐 P1~P6 새로(아래 '퍼즐 정답'), 틀리면 불꽃·굉음·역화로 잔류체 유인, 저장 키 v2, 사진·그림 관찰은 일지에서 크게 보기. **버그 수정**: three Octree가 경계 최대면의 삼각형을 잃던 문제(`SafeOctree`, 쌓은 상자 위에서 떨어지던 원인) + 동적 충돌은 상자마다 작은 트리, 바닥에 서서 처마 아래로 걸어 들어가면 밑으로 밀리던 문제. `scripts/playthrough.cjs` 추가(새 게임→엔딩 전체)
+- [x] 10단계 성능: 지역 정적 메시를 80m 칸으로 나눠 화면·그림자 밖은 안 그림(`CHUNK`), 풀·꽃·잎 인스턴스도 칸으로 나누고 110m 밖은 숨김(`DETAIL_FAR`), 천·빛 메시는 통째로(그리기 호출 절약), 품질별 MSAA(낮음 0·중간 2·높음 4), '느리면 품질 자동으로 낮추기'(6초 넘게 34fps 미만이면 한 단계, 설정에서 끔). 헤드리스 기준 삼각형 -25~35%, 그리기 호출 +28%
 
-## 현재 상태 (1차 완성)
+## 현재 상태 (2차: 플레이 피드백 반영, 7~10단계)
+- 7~10단계는 PR #2(같은 브랜치)에 쌓여 있음. 사용자가 병합하면 배포됨. 9단계에서 저장 키가 v2로 바뀌어 예전 저장은 이어하기에 안 나옴(새로 시작).
+
+## 1차 완성 당시 상태
 - 사양 전체 구현: 3지역 + 지하 + 엔딩, 퍼즐 6개, 쪽지 18개, 잔류체, 손전등·배터리, 저장·이어하기, 한/영, 시간대·날씨, 합성 사운드, 후처리, 품질 3단계, 기어오르기, 던지기.
 - 헤드리스 자동 점검: 처음부터 엔딩까지 진행(퍼즐·문·셔터·계단), 모든 계단 걷기, 상자 퍼즐 물리 풀이, 잡힘→다시 시작, 저장 데이터 구조, 콘솔 에러 0.
 - 사람이 직접 확인해야 하는 것: 조작감, 난이도, 소리 크기 균형, 실제 PC 성능.
+
+## 퍼즐 정답 (9단계 이후)
+- P1 마당: 상자 2~3개를 발코니 아래 쌓고 오르기(기어오르기 1.5m). 단서: 집 서쪽 벽 분필 그림, 끌린 자국, 난간 노란 테이프, 식탁 쪽지("담벼락에 그려져 있을 거야").
+- P2 게이트: 배전함 라벨 '회로 B-3' + 경비실 배치도 → 3단지 지하 주차장 동쪽 벽 퓨즈함 격자(행 A/B, 열 1~3)에서 **B행 3열** 퓨즈(`fuse_g_b3`). 다른 퓨즈 → 불꽃·소음 22m.
+- P3 역무실: 0314. 집 책상 사진(노란 카디건 + 긴 머리 분홍)과 같은 두 사람이 사진관 '찾아가지 않은 사진' 판의 2번(뒷면 3월 14일 생일). 키패드 아래 바닥에 보조 메모(`n_r2_code2`). 틀리면 소음 18m.
+- P4 셔터: 배전반 A(비상등)·B(모터)·C(잠금)·D(환기). B+C. A칸 퓨즈를 빼서(대합실 불 꺼짐) 하나 + 창고 높은 선반 퓨즈(상자 1개 필요, `reachOver`). D에 꽂으면 환기 팬 굉음 30m. 칸 상태는 `flags.slots`.
+- P5 탑 문: 발전기 = 연료 밸브 열기 → 초크 당기기 → 시동 레버 → 송전 스위치(동쪽 벽). 초크 없이 시동하면 역화(소음 32m, 밸브 닫힘). 단서: 찢긴 카드(1·4단계) + 연구실 북쪽 벽 화이트보드(2·3단계).
+- P5b 탑 8→12층: 상자 2개 + 기어오르기. 16층: 잔류체가 다음 계단 앞을 지킴. 도착 계단참의 자명종을 집으면 태엽이 감기고 6초 뒤 7초간 울림(소음 28m) → 던져서 유인. 8층에 빈 병 2개.
+- P6 중앙 제어 장치: 2147 또는 0947 (사용자 결정으로 둘 다 정답).
 
 ## 알려진 문제 / 확인 필요 (우선순위 순)
 1. 실제 GPU 성능 미측정(헤드리스는 소프트웨어 렌더링). 내장 그래픽에서 느리면 기본 품질을 '낮음'으로, 또는 `QUALITY`(src/core/renderer.js)의 그림자 맵·풀 밀도 조정.
@@ -66,17 +84,21 @@ scripts/check.cjs  docs/DESIGN.md
 6. 잔류체 길찾기는 1m 격자 A*. 좁은 곳에서 모서리를 살짝 스칠 수 있음(벽은 통과하지 않음).
 
 ## 다음 세션에 추천하는 개선 (우선순위 순)
-1. 실제 플레이 테스트 기반 밸런스: 잔류체 감지·속도, 배터리 소모, 실마리 타이밍, 사운드 믹스.
-2. 성능: 먼 지역 정적 메시 청크 분할(절두체 컬링), FPS 기반 자동 품질, 그림자 대상 줄이기.
+1. 실제 플레이 테스트 기반 밸런스: 새 퍼즐 난이도(막히는 곳), 잔류체 감지·속도(7단계에서 소리를 제대로 듣게 되어 전보다 어려울 수 있음), 배터리 소모, 사운드 믹스.
+2. 끊김 확인: 사용자 PC에서 설정 'FPS 표시'로 계산 ms(로직)와 최대 ms(그래픽)를 받아서 원인별 대응.
 3. 연출 다듬기: 잔류체 움직임 애니메이션, 1인칭 손 상호작용 애니메이션, 엔딩 뒤 하람의 편지 같은 에필로그.
 - 사운드는 `src/systems/audio/sounds.js`의 SOUNDS(이름 → 합성 함수). 파일로 바꾸려면 `G.audio.register(name, G.audio.fromFile(url))`.
-- 저장 키: `clearhaven947.save.v1`. 새 게임/이어하기는 한 번 플레이한 뒤라면 sessionStorage 플래그 + 새로 고침으로 깨끗하게 시작.
+- 저장 키: `clearhaven947.save.v2` (9단계에서 퍼즐이 바뀌어 v1 저장은 무시). 새 게임/이어하기는 한 번 플레이한 뒤라면 sessionStorage 플래그 + 새로 고침으로 깨끗하게 시작.
 - 잔류체 스폰 정의: `src/systems/remnants.js`의 SPAWNS(앵커 이름 기준). 배터리 목록: `src/story/placement.js`의 BATTERIES.
-- 상호작용 API: `G.interact.add({ id, pos|getPos, r, verb, name, enabled, onUse, accepts, onInsert })`. 물건: `G.props.addCrate/addItem`, `placeAt`, `returnCarried`, `serialize/restore`.
+- 상호작용 API: `G.interact.add({ id, pos|getPos, r, range, verb, name, enabled, idle, onUse, accepts, onInsert })` (`idle`: 아직 못 쓸 때 흐리게 보여 줄 i18n 키). 물건: `G.props.addCrate/addItem`, `placeAt`, `returnCarried`, `serialize/restore`.
 
 ## 알려진 문제 / 메모
 - 헤드리스 스크린샷에서 FPS 판단 금지.
 - 실내 조명은 존 배수 + 램프 라이트 풀(3개)로 처리. 그림자 맵은 해(플레이어 주변 ±36m)와 손전등만.
+
+## 다음 작업 (사용자 결정: 1-B, 2-가, 3-가, 4-나, 5-가)
+- 결정: 범위 B(버그·조작·사운드·성능 + 퍼즐·힌트 재설계 전부) / 힌트는 지형에만(시간 지나면 뜨는 힌트·목표 알림 삭제, 일지는 '내가 아는 것'만) / 틀리면 불꽃·굉음으로 잔류체가 옴 / 마지막 정답은 2147·0947 둘 다 / 지역 이름: 은행나무 마을·역전 상가·시계탑 광장·청안역 (Ginkgo Village · Station Street · Clock Tower Square · Clearhaven Station)
+- 끊김 제보: "처음엔 괜찮다가 이어하기 뒤부터, 품질 낮음에서도" → 7단계에서 CPU 쪽(A*·GC·소리) 수정. 실제 PC에서 설정 'FPS 표시'로 확인 요청할 것.
 
 ## 나중에 할 것 (사양 외 아이디어)
 - (없음)

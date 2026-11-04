@@ -29,12 +29,18 @@ function torchGeo() {
 export function placeProps(G) {
   const W = G.world, A = (id) => W.anchors.get(id)?.pos;
   for (const id of ['crate_r1_a', 'crate_r1_b', 'crate_r1_c']) G.props.addCrate(id, A(id), BOUNDS.r1);
-  G.props.addItem('fuse_r1', 'fuse', A('fuse_r1'), { bounds: BOUNDS.r1, lying: true });
+  // P2: six fuses in the garage cabinet (row A/B, column 1-3); only B-3 feeds the gate
+  const BANDS = { a1: '#c9625a', a2: '#e9d29a', a3: '#8fc7a7', b1: '#f6f1e6', b2: '#c9bde6', b3: '#7a9fd6' };
+  for (const [code, band] of Object.entries(BANDS)) G.props.addItem('fuse_g_' + code, 'fuse', A('fuse_g_' + code), { bounds: BOUNDS.r1, lying: true, code, band });
   for (const id of ['crate_u_a', 'crate_u_b']) if (A(id)) G.props.addCrate(id, A(id), BOUNDS.under);
-  for (const id of ['fuse_u_a', 'fuse_u_b']) if (A(id)) G.props.addItem(id, 'fuse', A(id), { bounds: BOUNDS.under, lying: true });
-  if (A('fuse_r3')) G.props.addItem('fuse_r3', 'fuse', A('fuse_r3'), { bounds: [-45, -1, -185, 45, 5, -138], lying: true });
-  const tb = W.anchors.get('tower_bounds');
-  for (const id of ['crate_t_a', 'crate_t_b', 'crate_t_c']) if (A(id)) G.props.addCrate(id, A(id), [tb.pos.x, tb.pos.y, tb.pos.z, ...tb.max]);
+  // P4: one fuse on the storeroom shelf + the one that already powers the concourse lights (slot A)
+  G.props.addItem('fuse_u_b', 'fuse', A('fuse_u_b'), { bounds: BOUNDS.under, lying: true, reachOver: true });
+  G.props.addItem('fuse_u_lamp', 'fuse', A('slot_a'), { bounds: BOUNDS.under, lying: true });
+  const tb = W.anchors.get('tower_bounds'), tbx = [tb.pos.x, tb.pos.y, tb.pos.z, ...tb.max];
+  for (const id of ['crate_t_a', 'crate_t_b']) if (A(id)) G.props.addCrate(id, A(id), tbx);
+  // P5b: bottles and a wind-up alarm clock to make noise with
+  for (const id of ['bottle_t_a', 'bottle_t_b']) if (A(id)) G.props.addItem(id, 'bottle', A(id), { bounds: tbx });
+  if (A('alarm_t')) G.props.addItem('alarm_t', 'alarm', A('alarm_t'), { bounds: tbx });
   // batteries
   const bg = batteryGeo(), glow = new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffd585').multiplyScalar(1.5) });
   G.batteries = [];
