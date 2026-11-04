@@ -11,11 +11,19 @@ function photo(variant) {
   DRAW.photo(c.getContext('2d'), { variant, key: variant === 'home' ? 'signs.photoDate' : 'signs.photoNone' }, 480, 560);
   return (imgCache[variant] = c.toDataURL());
 }
+// clue drawings (chalk, map, diagram, card, whiteboard) shown large in the examine view
+function drawing(d, dark) {
+  const w = 560, h = Math.round(560 * (d.h / d.w)), c = document.createElement('canvas'); c.width = w; c.height = h;
+  const ctx = c.getContext('2d'); if (dark) { ctx.fillStyle = dark === true ? '#6b5f6a' : dark; ctx.fillRect(0, 0, w, h); }
+  const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h; DRAW[d.kind](tmp.getContext('2d'), { ...d, key: d.key }, w, h); ctx.drawImage(tmp, 0, 0);
+  return c.toDataURL();
+}
 export function docHTML(kind, id) {
   const meta = kind === 'note' ? NOTES.find((n) => n.id === id) : OBS.find((o) => o.id === id);
   if (kind === 'obs') {
     const o = t(`obs.${id}`);
-    return { cls: 'hand2 photo', html: `<h3>${esc(o.title)}</h3>${meta && meta.image ? `<img src="${photo(meta.image)}" alt="">` : ''}<div class="body"><p>${esc(o.text)}</p></div>` };
+    const img = meta && meta.image ? photo(meta.image) : meta && meta.draw ? drawing(meta.draw, meta.dark) : null;
+    return { cls: 'hand2 photo', html: `<h3>${esc(o.title)}</h3>${img ? `<img src="${img}" alt="">` : ''}<div class="body"><p>${esc(o.text)}</p></div>` };
   }
   const n = t(`notes.${id}`), body = (n.body || []).map((p) => `<p>${esc(p)}</p>`).join('');
   return { cls: meta.style, html: `<h3>${esc(n.title)}</h3>${meta.image ? `<img src="${photo(meta.image)}" alt="">` : ''}<div class="body">${body}${n.sign ? `<p class="sign">— ${esc(n.sign)}</p>` : ''}</div>` };
@@ -53,6 +61,7 @@ export class Panels {
   }
   openJournal() {
     if (this.cur || this.G.state !== 'playing') return;
+    this.G.ui.journalPulse(false);
     this.renderJournal(); this.G.ui.show('journal', true); this.open('journal', true);
   }
   renderJournal() {
@@ -60,11 +69,10 @@ export class Panels {
     const tabs = ['obj', 'notes', 'obs'].map((k) => `<button class="${k === tab ? 'on' : ''}" data-act="jtab" data-tab="${k}">${esc(t('journal.tab' + k[0].toUpperCase() + k.slice(1)))}</button>`).join('');
     let side = '', main = '';
     if (tab === 'obj') {
-      side = `<div class="count">${esc(t('journal.mine'))}</div>`;
-      const hint = S.hint > 0 ? S.hintText() : '';
-      main = `<div class="print" style="opacity:.6">${esc(t('journal.now'))}</div><div class="obj">${esc(S.cur.obj ? t('obj.' + S.cur.obj) : '')}</div>`
-        + (hint ? `<p class="hand2">${esc(t('journal.hint'))}: ${esc(hint)}</p>` : '')
-        + `<div class="thoughts">${S.thoughts.map((id) => `<p>${esc(t('thoughts.' + id))}</p>`).join('') || `<p>${esc(t('journal.empty'))}</p>`}</div>`;
+      side = '';
+      main = `<div class="print" style="opacity:.6">${esc(t('journal.now'))}</div><div class="obj">${esc(S.dirText())}</div>`
+        + `<div class="print" style="opacity:.6;margin-top:14px">${esc(t('journal.mine'))}</div>`
+        + `<div class="thoughts">${[...S.thoughts].reverse().map((id) => `<p>${esc(t('thoughts.' + id))}</p>`).join('') || `<p>${esc(t('journal.empty'))}</p>`}</div>`;
     } else {
       const list = tab === 'notes' ? NOTES : OBS, found = tab === 'notes' ? S.notes : S.obs, kind = tab === 'notes' ? 'note' : 'obs';
       side = `<div class="count">${esc(t('journal.count', { n: list.filter((x) => found.has(x.id)).length, total: list.length }))}</div><div class="list">`;

@@ -14,7 +14,7 @@ export class UI {
 <div id="vignette"></div><div id="threat"></div><div id="flicker"></div>
 <div id="hud" class="hidden">
   <div id="hud-region"><div class="name"></div><div class="time"></div></div>
-  <div id="hud-obj"></div>
+  <div id="jicon" class="hidden"><span class="k">J</span><span data-i18n="journal.newEntry"></span></div>
   <div id="crosshair"></div><div id="prompt"></div>
   <div id="battery" class="hidden"><div class="cells"><i></i><i></i><i></i><i></i><i></i></div><span class="pct"></span><span class="lightoff"></span></div>
   <div id="crouch" class="hidden" data-i18n="hud.crouch"></div>
@@ -64,15 +64,13 @@ export class UI {
   regionCard(name, time) {
     const r = this.$('hud-region');
     r.querySelector('.name').textContent = name; r.querySelector('.time').textContent = time;
-    r.classList.add('show'); this.$('hud-obj').classList.remove('show');
-    clearTimeout(this._rc); this._rc = setTimeout(() => { r.classList.remove('show'); if (this._objPending) this.objective(this._objPending); }, 4200);
+    r.classList.add('show');
+    clearTimeout(this._rc); this._rc = setTimeout(() => r.classList.remove('show'), 4200);
   }
-  objective(text) {
-    if (!text) return;
-    if (this.$('hud-region').classList.contains('show')) { this._objPending = text; return; }
-    this._objPending = null;
-    const o = this.$('hud-obj'); o.textContent = text; o.classList.add('show');
-    clearTimeout(this._ob); this._ob = setTimeout(() => o.classList.remove('show'), 6500);
+  // small "J new entry" mark (no pop-up text): shown until the journal is opened, fades after a while
+  journalPulse(on = true) {
+    const el = this.$('jicon'); el.classList.toggle('hidden', !on); clearTimeout(this._jp);
+    if (on) { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); this.G.audio && this.G.audio.play('write'); this._jp = setTimeout(() => el.classList.add('hidden'), 9000); }
   }
   prompt(html, active = !!html) { if (this._p !== html) { this.$('prompt').innerHTML = html || ''; this._p = html; this.$('crosshair').classList.toggle('active', active); } }
   holding(html) { if (this._h !== html) { this.$('holding').innerHTML = html || ''; this._h = html; } }

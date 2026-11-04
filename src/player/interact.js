@@ -47,7 +47,8 @@ export class Interact {
       const score = ang + d * 0.04, reach = d - r * 0.6 <= (it.range ?? CFG.interactDist);
       const inReach = reach && usable;
       if (inReach ? score >= bestScore : score >= farScore) continue;
-      if (G.world.col.ray(eye, _d, Math.max(0.01, d - r - 0.06), !it.ignoreDyn)) continue;
+      const hit = G.world.col.ray(eye, _d, Math.max(0.01, d - r - 0.06), !it.ignoreDyn);
+      if (hit && !(it.reachOver && d - hit.distance < 0.75)) continue;
       if (inReach) { best = it; bestScore = score; } else { far = it; farScore = score; }
     }
     this.far = best ? null : far;

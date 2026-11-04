@@ -130,8 +130,8 @@ function begin(G, mode, o = {}) {
     const s = G.world.anchors.get('spawn');
     G.player.spawn(s.pos.x, s.pos.y, s.pos.z, s.yaw);
     G.time.set(14.0, true);
-    G.story.enterStep(false);
-    setTimeout(() => { G.story.addThought('t_wake'); G.ui.objective(G.story.objectiveText()); }, 4600);
+    G.story.enterStep();
+    setTimeout(() => G.story.addThought('t_wake'), 4600);
   }
   setPlaying(G, !o.skipLock);
   G.events.emit('newGame', mode);

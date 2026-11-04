@@ -135,13 +135,22 @@ export class Player {
     if (k >= 1) { this.mantle = null; this.onFloor = true; }
   }
   collide() {
+    // walking (not jumping up) into the underside of an overhang (e.g. the end of a broken flight at shin height)
+    // must stop you like a wall, not shove you down through what you stand on
+    const grounded = this.airTime < 0.05 && this.vel.y <= 0.5;
     this.onFloor = false;
     for (const tree of this.G.world.col.trees()) {
       for (let it = 0; it < 3; it++) {
         const r = tree.capsuleIntersect(this.cap);
         if (!r || r.depth < 1e-4) break;
-        if (r.normal.y > 0.55) { this.onFloor = true; this.cap.translate(_v.set(0, r.depth / r.normal.y, 0)); if (this.vel.y < 0) this.vel.y = 0; }
-        else { this.cap.translate(_v.copy(r.normal).multiplyScalar(r.depth)); const d = this.vel.dot(r.normal); if (d < 0) this.vel.addScaledVector(r.normal, -d); }
+        if (r.normal.y > 0.55) { this.onFloor = true; this.cap.translate(_v.set(0, r.depth / r.normal.y, 0)); if (this.vel.y < 0) this.vel.y = 0; continue; }
+        if (grounded && r.normal.y < -0.3) {
+          _n.set(r.normal.x, 0, r.normal.z);
+          if (_n.lengthSq() < 0.04) _n.set(-this.vel.x, 0, -this.vel.z);
+          if (_n.lengthSq() < 1e-6) break;
+          _n.normalize(); r.normal.copy(_n);
+        }
+        this.cap.translate(_v.copy(r.normal).multiplyScalar(r.depth)); const d = this.vel.dot(r.normal); if (d < 0) this.vel.addScaledVector(r.normal, -d);
       }
     }
   }

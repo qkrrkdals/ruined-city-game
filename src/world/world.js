@@ -7,6 +7,7 @@ import { Sky } from './sky.js';
 import { INST, instGeo, makeInst } from './kit.js';
 import { scatter, Occupancy } from './vegetation.js';
 import { makeSign } from './textures.js';
+import './clues.js';
 import { PAL } from './palette.js';
 import { buildR1 } from './regions/r1.js';
 import { buildR2 } from './regions/r2.js';

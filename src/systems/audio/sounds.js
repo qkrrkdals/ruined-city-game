@@ -47,6 +47,7 @@ export const SOUNDS = {
   throw(E) { const t = E.ctx.currentTime; const b = burst(E, t, 'bandpass', 600, 1.5, 0.12, 0.05, 0.2, 0.05, 'pink'); b.frequency.exponentialRampToValueAtTime(2400, t + 0.2); },
   clink(E) { const t = E.ctx.currentTime; ping(E, t, 2100 + R() * 400, 0.12, 0.25, 'triangle'); ping(E, t + 0.07, 3100 + R() * 300, 0.06, 0.2); },
   glass(E) { const t = E.ctx.currentTime; burst(E, t, 'highpass', 3000, 0.7, 0.5, 0.002, 0.25, 0.3); for (let i = 0; i < 7; i++) ping(E, t + 0.02 + R() * 0.25, 2500 + R() * 4000, 0.06 + R() * 0.05, 0.12 + R() * 0.2); },
+  write(E) { const t = E.ctx.currentTime; for (let i = 0; i < 4; i++) burst(E, t + i * 0.06 + R() * 0.02, 'bandpass', 3800 + R() * 1200, 1.2, 0.035, 0.01, 0.05, 0.05, 'pink'); },
   paper(E) { const t = E.ctx.currentTime; for (let i = 0; i < 3; i++) burst(E, t + i * 0.05 + R() * 0.03, 'bandpass', 2600 + R() * 1500, 0.9, 0.09, 0.02, 0.08, 0.05); },
   flashOn(E) { const t = E.ctx.currentTime; burst(E, t, 'bandpass', 3500, 3, 0.25, 0.001, 0.025, 0.05); ping(E, t, 1900, 0.05, 0.04, 'square', 0); },
   flashOff(E) { const t = E.ctx.currentTime; burst(E, t, 'bandpass', 2800, 3, 0.22, 0.001, 0.03, 0.05); },
@@ -81,6 +82,15 @@ export const SOUNDS = {
     [[0.5, 0.5, 6], [1, 0.4, 5], [1.183, 0.25, 3.5], [1.506, 0.22, 3], [2, 0.18, 2.6], [2.514, 0.12, 2], [2.662, 0.1, 1.8], [3.011, 0.08, 1.5], [4.166, 0.05, 1.1]]
       .forEach(([r, a, d]) => ping(E, t, base * r, a, d, 'sine', 0.8));
     burst(E, t, 'bandpass', 2400, 2, 0.12, 0.001, 0.08, 0.6);
+  },
+  spark(E) { const t = E.ctx.currentTime; for (let i = 0; i < 9; i++) burst(E, t + i * 0.03 + R() * 0.03, 'highpass', 3000 + R() * 3000, 0.7, 0.22 + R() * 0.18, 0.001, 0.03, 0.2); const o = osc(E, 'sawtooth', 110, t, 0.35), g = gain(E, 0), f = filt(E, 'bandpass', 900, 2); env(g.gain, t, 0.005, 0.22, 0.3); o.connect(f).connect(g); E.out(g, 0.2); },
+  hiss(E) { const t = E.ctx.currentTime; burst(E, t, 'highpass', 2500, 0.7, 0.12, 0.08, 0.7, 0.2); },
+  crank(E) { const t = E.ctx.currentTime; for (let i = 0; i < 4; i++) thump(E, t + i * 0.16, 70, 45, 0.25, 0.1, 0.2); },
+  backfire(E) { const t = E.ctx.currentTime; thump(E, t, 90, 30, 0.9, 0.35, 0.5); burst(E, t, 'lowpass', 2000, 0.7, 0.8, 0.002, 0.4, 0.6); burst(E, t + 0.05, 'bandpass', 600, 1, 0.35, 0.01, 0.6, 0.6, 'brown'); },
+  wind(E) { const t = E.ctx.currentTime; for (let i = 0; i < 8; i++) burst(E, t + i * 0.07, 'bandpass', 4200, 6, 0.12, 0.001, 0.02, 0.05); },
+  alarm(E, { pos }) {
+    const t = E.ctx.currentTime, out = pos ? E.panner(pos, 0.3) : null;
+    for (let i = 0; i < 6; i++) { const o = osc(E, 'square', 1760 + (i % 2) * 120, t + i * 0.09, 0.07), g = gain(E, 0); env(g.gain, t + i * 0.09, 0.002, 0.09, 0.06); o.connect(g); if (out) g.connect(out); else E.out(g, 0.3); }
   },
   drip(E, { pos }) { const t = E.ctx.currentTime, o = osc(E, 'sine', 1400 + R() * 1200, t, 0.2), g = gain(E, 0); o.frequency.exponentialRampToValueAtTime(700 + R() * 300, t + 0.08); env(g.gain, t, 0.002, 0.07, 0.12); o.connect(g); if (pos) g.connect(E.panner(pos, 0.8, false)); else E.out(g, 0.7); },
   bird(E, { pos }) {

@@ -151,7 +151,7 @@ export const DRAW = {
 export function makeSign(s, W) {
   const pw = s.pw ?? 512, ph = s.ph ?? Math.max(64, Math.round(pw * (s.h / s.w)));
   const { c, ctx, tex } = canvasTex(pw, ph);
-  const transparent = s.kind === 'decal' || s.kind === 'sticker' || s.kind === 'chain';
+  const transparent = s.kind === 'decal' || s.kind === 'sticker' || s.kind === 'chain' || !!s.transparent;
   if (s.kind === 'chain') { tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(s.w / 2, s.h / 2); }
   const Mat = s.glow ? THREE.MeshBasicMaterial : THREE.MeshLambertMaterial;
   const mat = patch(new Mat({ map: tex, transparent, alphaTest: transparent ? 0.05 : 0, depthWrite: !transparent || s.kind === 'chain', side: s.double || s.kind === 'chain' ? THREE.DoubleSide : THREE.FrontSide, polygonOffset: true, polygonOffsetFactor: -2 }), { soft: s.soft });

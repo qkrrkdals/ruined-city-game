@@ -10,11 +10,17 @@ const OFFS = [[0, 0], [0.38, 0.38], [-0.38, 0.38], [0.38, -0.38], [-0.38, -0.38]
 const PUSH = [[0, 0, 0.46], [0.3, 0.3, 0.16], [-0.3, 0.3, 0.16], [0.3, -0.3, 0.16], [-0.3, -0.3, 0.16]];
 const _v = new THREE.Vector3(), _o = new THREE.Vector3(), _down = new THREE.Vector3(0, -1, 0), _s = new THREE.Sphere(new THREE.Vector3(), 0.1), _t = new THREE.Vector3();
 
-function itemGeo(kind) {
+function itemGeo(kind, o = {}) {
   const g = new Geo(Math.random);
   if (kind === 'fuse') {
     g.prism(0, -0.09, 0, 0.045, 0.045, 0.18, 8, '#cfe8ef', { jit: 0.02, bottom: true });
     g.prism(0, -0.11, 0, 0.052, 0.052, 0.04, 8, '#b9b4c2', { bottom: true }); g.prism(0, 0.07, 0, 0.052, 0.052, 0.04, 8, '#b9b4c2');
+    if (o.band) g.prism(0, -0.02, 0, 0.048, 0.048, 0.035, 8, o.band, { jit: 0 });
+  } else if (kind === 'alarm') {
+    g.prism(0, -0.02, 0, 0.09, 0.09, 0.05, 12, '#e9a8a8', { rx: Math.PI / 2, jit: 0, bottom: true });
+    g.prism(0, -0.02, 0.026, 0.075, 0.075, 0.004, 12, '#fbf6e6', { rx: Math.PI / 2, jit: 0 });
+    for (const x of [-0.055, 0.055]) g.ico(x, 0.075, 0, 0.035, '#d9d4cc', { sy: 0.6, j: 0 });
+    g.box(-0.05, -0.1, 0, 0.02, 0.04, 0.02, '#6a5a5a'); g.box(0.05, -0.1, 0, 0.02, 0.04, 0.02, '#6a5a5a');
   } else if (kind === 'bottle') {
     g.prism(0, -0.12, 0, 0.05, 0.05, 0.17, 7, '#8fc7a7', { bottom: true, jit: 0.03 }); g.prism(0, 0.05, 0, 0.05, 0.018, 0.06, 7, '#8fc7a7'); g.prism(0, 0.11, 0, 0.018, 0.018, 0.06, 6, '#8fc7a7');
   }
@@ -39,12 +45,12 @@ export class Props {
     return p;
   }
   addItem(id, kind, pos, o = {}) {
-    const mesh = new THREE.Mesh(itemGeo(kind), this.G.world.M.world); mesh.castShadow = true;
+    const mesh = new THREE.Mesh(itemGeo(kind, o), this.G.world.M.world); mesh.castShadow = true;
     if (kind === 'fuse') { const gl = new THREE.Mesh(new THREE.IcosahedronGeometry(0.03, 0), this.glowMat); gl.position.y = 0.0; mesh.add(gl); }
     mesh.position.copy(pos); mesh.rotation.set(0, 0, o.lying ? Math.PI / 2 : 0);
-    const p = { id, kind, small: true, r: 0.1, mesh, pos: mesh.position, home: pos.clone(), rest: pos.clone(), vel: new THREE.Vector3(), spin: new THREE.Vector3(), state: 'rest', bounds: o.bounds, throwable: true, breakable: kind === 'bottle' };
+    const p = { id, kind, code: o.code, small: true, r: 0.1, mesh, pos: mesh.position, home: pos.clone(), rest: pos.clone(), vel: new THREE.Vector3(), spin: new THREE.Vector3(), state: 'rest', bounds: o.bounds, throwable: true, breakable: kind === 'bottle' };
     this.G.scene.add(mesh); this.list.push(p); this.byId.set(id, p);
-    p.it = this.G.interact.add({ id: 'prop_' + id, getPos: (v) => v.copy(p.pos), r: 0.28, verb: 'pickup', name: 'items.' + kind, ignoreDyn: true, enabled: () => p.state === 'rest' && !p.inserted && !p.gone && !this.carrying, onUse: () => this.pick(p) });
+    p.it = this.G.interact.add({ id: 'prop_' + id, getPos: (v) => v.copy(p.pos), r: 0.28, verb: 'pickup', name: 'items.' + kind, ignoreDyn: true, reachOver: !!o.reachOver, enabled: () => p.state === 'rest' && !p.inserted && !p.gone && !this.carrying, onUse: () => this.pick(p) });
     return p;
   }
 
@@ -97,6 +103,17 @@ export class Props {
       for (const q of this.list) if (q !== p && q.crate && q.state === 'rest' && Math.abs(q.pos.x - at.x) < 0.88 && Math.abs(q.pos.z - at.z) < 0.88 && Math.abs(q.pos.y - at.y) < 0.88) { p.pos.y = q.pos.y + 1.6; p.state = 'falling'; this.setCollider(p); return; }
     }
     p.state = 'rest'; p.rest.copy(p.pos); if (p.crate) this.setCollider(p); else p.mesh.rotation.set(0, 0, p.kind === 'fuse' ? Math.PI / 2 : 0);
+  }
+  // put a carried small item into a socket (kept, hidden, so it can be pulled out again)
+  insert(p) {
+    if (this.carrying === p) { this.carrying = null; this.releaseSmall(p); }
+    p.inserted = true; p.state = 'rest'; p.mesh.visible = false; p.vel.set(0, 0, 0);
+  }
+  // take an inserted item back out at `at` and hold it
+  extract(p, at) {
+    if (this.carrying) return false;
+    p.inserted = false; p.mesh.visible = true; p.pos.copy(at); p.rest.copy(at); p.state = 'rest';
+    this.pick(p); return true;
   }
   respawn(p) { this.placeAt(p, p.home); this.G.events.emit('itemReturned', p); }
   remove(p) { p.gone = true; p.state = 'gone'; p.mesh.parent?.remove(p.mesh); if (p.crate) this.setCollider(p); this.G.interact.remove(p.it); if (this.carrying === p) this.carrying = null; }
@@ -175,7 +192,7 @@ export class Props {
     for (const p of this.list) {
       const s = o[p.id]; if (!s) continue;
       if (s.s === 'gone') this.remove(p);
-      else if (s.s !== 'ins') { p.pos.fromArray(s.p); p.state = 'rest'; p.rest.copy(p.pos); if (p.crate) this.setCollider(p); }
+      else if (s.s !== 'ins') { p.inserted = false; p.mesh.visible = true; p.pos.fromArray(s.p); p.state = 'rest'; p.rest.copy(p.pos); if (p.crate) this.setCollider(p); }
     }
   }
 }

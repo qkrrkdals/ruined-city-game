@@ -1,6 +1,6 @@
 // Region 1 hand-authored places: my house (start/shelter 1), store, garage (fuse), gate, playground, park, bus stop.
 import { room, shade, rubblePile } from '../buildings.js';
-import { tree, wire } from '../streets.js';
+import { tree, wire, tape } from '../streets.js';
 
 const WALL = '#f2c29b', INNER = '#f6e6d2', WOOD = '#c9a27c', DARK = '#7a6658';
 
@@ -71,6 +71,11 @@ export function buildHouse(k) {
   for (const z of [246.5, 251]) { g.prism(-34.6, 0, z, 0.05, 0.04, 2.1, 5, '#8a8a90'); k.col.addBox(-34.6, 1, z, 0.15, 2, 0.15); }
   wire(k.geo, [-34.6, 2.0, 246.5], [-34.6, 2.0, 251], 0.15, '#d9d4cc', 4);
   [['#f3c7c0', 247.2], ['#fff6e8', 248.1], ['#b9dcd5', 249.0], ['#e8b73f', 249.9]].forEach(([c, z]) => k.soft.box(-34.6, 1.55, z, 0.02, 0.8, 0.7, c, { rz: 0.05 }));
+  // P1 clues: Haram's old chalk drawing under the balcony, drag marks, Yujin's yellow tape on the broken railing
+  k.sign({ kind: 'chalk', x: -26.17, y: 1.15, z: 244.7, ry: -Math.PI / 2, w: 1.5, h: 1.3, pw: 256, transparent: true });
+  k.anchor('obs_chalk', -26.3, 1.15, 244.7);
+  for (const dz of [-0.35, 0.35]) k.geo.box(-28.4, 0.015, 240.9 + dz, 2.6, 0.01, 0.08, '#8a7a62', { ry: 0.08, skip: [0, 1, 2, 3], jit: 0 });
+  tape(k, -27.55, 3.05, 239.3, Math.PI / 2, { w: 0.12, d: 0.12 });
   // anchors (used by story/puzzles)
   k.anchor('spawn', -19.9, 0, 243.6, { yaw: -0.6 });
   k.anchor('s1', -18.6, 0, 243.2, { yaw: -0.6, lamp: [-15.0, 1.6, 245.2], r: 5 });
@@ -135,8 +140,10 @@ export function buildGarage(k) {
   for (const [x, z] of [[20, 147.8], [47.8, 136], [16.2, 130]]) k.glow.box(x, Y + 2.5, z, 0.4, 0.12, 0.08, '#ffb36b');
   k.sign({ kind: 'sign', key: 'signs.garage', x: 18, y: 2.2, z: 160.3, ry: 0, w: 4, h: 0.6, bg: '#4f5f7a', fg: '#f4f0e6', double: true });
   g.box(18, 2.2, 160.25, 4.2, 0.7, 0.1, '#3d4a60'); for (const x of [15.9, 20.1]) g.prism(x, 0, 160.3, 0.06, 0.06, 2.5, 5, '#6e6a76');
-  k.anchor('note_r1_garage', 15.9, 1.35, 160.55);
-  k.anchor('fuse_r1', 47.18, Y + 1.12, 128.0);
+  k.anchor('note_r1_garage', 15.9, 1.35, 160.55); tape(k, 20.1, 1.5, 160.3, 0, { w: 0.1, d: 0.1 });
+  k.sign({ kind: 'fusegrid', x: 47.285, y: Y + 1.1, z: 128, ry: -Math.PI / 2, w: 1.1, h: 1.0, pw: 256 });
+  ['a1', 'a2', 'a3', 'b1', 'b2', 'b3'].forEach((id, i) => k.anchor('fuse_g_' + id, 47.2, Y + (i < 3 ? 1.3 : 0.92), 127.8 + (i % 3) * 0.265));
+  tape(k, 47.3, Y + 2.15, 128.9, Math.PI / 2, { w: 0.2, tail: false });
   k.anchor('bat_r1_b', 19.2, Y + 0.08, 146.2);
   k.anchor('garage_bounds', 15.8, -4.6, 123.8, { max: [48.2, 1.2, 162] });
   k.anchor('remnant_garage', 32, Y, 136, { zone: [17, 125, 47, 147], y: Y });
@@ -165,9 +172,11 @@ export function buildGate(k) {
   g.panel(8.6, 1.7, 125.24, 1.6, 0.8, 0, '#5a6880'); g.panel(6.97, 1.6, 123.2, 2.2, 0.9, -Math.PI / 2, '#5a6880');
   g.box(9.35, 1.25, 125.3, 0.5, 0.7, 0.18, '#8b8f9c');
   k.glow.box(9.5, 1.5, 125.4, 0.06, 0.06, 0.02, '#ff6b5a');
-  k.sign({ kind: 'poster', key: 'signs.gateSign', x: 10.45, y: 1.55, z: 125.25, w: 0.8, h: 1.1, pw: 256, bg: '#f2ecdf', fg: '#4f5f7a' });
+  k.sign({ kind: 'areamap', x: 10.35, y: 1.55, z: 125.25, w: 1.1, h: 1.25, pw: 320 });
+  k.sign({ kind: 'label', key: 'clues.gateLabel', x: 9.35, y: 1.36, z: 125.4, w: 0.4, h: 0.3, pw: 256 });
   k.anchor('gatebox_r1', 9.35, 1.25, 125.45);
-  k.anchor('obs_gate_sign', 10.45, 1.55, 125.32);
+  k.anchor('obs_gate_sign', 10.35, 1.55, 125.32);
+  tape(k, 9.35, 1.63, 125.4, 0, { w: 0.3, tail: false });
   // barriers, cones, rescue truck
   for (const x of [-5, -1.5, 2]) g.box(x, 0.45, 124.5 + R(), 1.8, 0.9, 0.5, '#e8e1d6', { ry: (R() - 0.5) * 0.3 });
   for (let i = 0; i < 6; i++) k.add('cone', { x: -14 + R() * 28, y: 0, z: 122 + R() * 6, ry: R() * 3, rz: R() < 0.3 ? 1.5 : 0 });

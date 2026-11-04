@@ -1,6 +1,6 @@
 // Region 2 — Commercial district (sunset -> night). z: -10..120. Underground lives in under.js.
 import { bld, room, shade, rubblePile } from '../buildings.js';
-import { groundTiles, groundBoxes, road, sidewalk, tree, lamp, car, wire, CAR_COLORS } from '../streets.js';
+import { groundTiles, groundBoxes, road, sidewalk, tree, lamp, car, wire, tape, CAR_COLORS } from '../streets.js';
 import { stationEntranceR2 } from './under.js';
 import { buildMall } from './r2_mall.js';
 
@@ -77,8 +77,14 @@ function studio(k) {
   g.prism(16.8, 0, 106, 0.04, 0.02, 1.4, 4, '#4b4650', { rz: 0.15 }); g.prism(16.8, 0, 106, 0.04, 0.02, 1.4, 4, '#4b4650', { rz: -0.15 }); g.box(16.8, 1.45, 106, 0.4, 0.28, 0.3, '#3a3640');
   g.box(19.4, 0.25, 105.6, 0.5, 0.5, 0.5, '#a3606a');
   k.solid(13.2, 0.5, 110.6, 2.6, 1.0, 0.8, '#b98f86', { top: '#e9d6cc' });
-  for (let i = 0; i < 6; i++) k.sign({ kind: 'photo', key: 'signs.photoNone', variant: i % 2 ? 'ceremony' : 'home', x: 10.5 + i * 1.6, y: 2.0 + (i % 2) * 0.25, z: 111.82, ry: Math.PI, w: 0.7, h: 0.85, pw: 160 });
-  for (let i = 0; i < 4; i++) k.sign({ kind: 'photo', key: 'signs.photoNone', variant: i % 2 ? 'home' : 'ceremony', x: 21.82, y: 2.1, z: 101.4 + i * 1.3 + (i > 1 ? 3.8 : 0), ry: -Math.PI / 2, w: 0.6, h: 0.75, pw: 160 });
+  const DECOR = ['ceremony', 'p_grad', 'ceremony', 'p_raincoat', 'ceremony', 'p_solo'];
+  for (let i = 0; i < 6; i++) k.sign({ kind: 'photo', key: 'signs.photoNone', variant: DECOR[i], x: 10.5 + i * 1.6, y: 2.25 + (i % 2) * 0.2, z: 111.82, ry: Math.PI, w: 0.6, h: 0.72, pw: 160 });
+  for (let i = 0; i < 4; i++) k.sign({ kind: 'photo', key: 'signs.photoNone', variant: i % 2 ? 'p_grad' : 'ceremony', x: 21.82, y: 2.1, z: 101.4 + i * 1.3 + (i > 1 ? 3.8 : 0), ry: -Math.PI / 2, w: 0.6, h: 0.75, pw: 160 });
+  // P3: board of prints nobody collected (only dates on the back) — one shows the same two people as the photo at home
+  k.solid(18.9, 1.2, 111.86, 2.7, 0.8, 0.08, '#b98f6a');
+  tape(k, 20.35, 1.62, 111.8, 0, { w: 0.2 });
+  k.sign({ kind: 'decal', key: 'clues.uncollected', x: 18.9, y: 1.72, z: 111.8, ry: Math.PI, w: 2.4, h: 0.26, fg: '#5b4a3a', font: 'print', pw: 512 });
+  ['p_raincoat', 'p_us', 'p_grad', 'p_solo'].forEach((v, i) => { const x = 20.0 - i * 0.72; k.sign({ kind: 'photo', key: 'signs.photoNone', variant: v, x, y: 1.2, z: 111.8, ry: Math.PI, w: 0.44, h: 0.52, pw: 160 }); k.anchor('obs_studio_' + 'abcd'[i], x, 1.2, 111.7); });
   g.prism(12.2, 0, 101.2, 0.18, 0.18, 0.05, 8, '#6a5a5a'); g.prism(12.2, 0.05, 101.2, 0.025, 0.025, 1.45, 5, '#6a5a5a');
   k.glow.prism(12.2, 1.45, 101.2, 0.3, 0.18, 0.35, 8, '#ffcf8a', { jit: 0 });
   k.anchor('s2', 15.4, 0, 105.8, { yaw: Math.PI / 2, lamp: [12.2, 1.6, 101.2], r: 5.5 });
