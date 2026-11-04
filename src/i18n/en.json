@@ -109,7 +109,8 @@
     "gotFlashlight": "Got the flashlight · F to toggle",
     "fps": "{fps} fps · worst {max}ms · logic {cpu}ms · hitches {long}",
     "closer": "Move closer",
-    "holdToDrop": "hold to drop"
+    "holdToDrop": "hold to drop",
+    "autoQuality": "The game kept running slowly, so graphics quality was lowered to '{q}'. You can change it in Settings."
   },
   "verb": {
     "read": "Read",
@@ -546,7 +547,7 @@
     "high": "High",
     "volume": "Master volume",
     "back": "Back",
-    "note": "Low: no shadows/bloom, less grass · High: sharper shadows",
+    "note": "Low: no shadows/bloom, less grass · High: sharp shadows, smooth edges",
     "fps": "Show FPS",
     "on": "On",
     "off": "Off",
@@ -556,7 +557,8 @@
     "volMusic": "Music",
     "volSfx": "Effects",
     "volAmb": "Ambience",
-    "sparkle": "Highlight nearby items"
+    "sparkle": "Highlight nearby items",
+    "autoQuality": "Lower quality automatically when slow"
   },
   "dir": {
     "look": "Look around the house",

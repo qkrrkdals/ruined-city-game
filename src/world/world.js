@@ -35,22 +35,31 @@ function makeKit(G, W, name, seed, pal) {
   return k;
 }
 
+const CHUNK = 80; // metres per culling cell (bigger = fewer draw calls)
+const SPLIT = new Set(['grass', 'tall', 'flower', 'leaf']); // dense ground cover: split per cell and dropped beyond DETAIL_FAR
+const DETAIL_FAR = 110;
 function finishKit(k) {
   const M = k.W.M, grp = new THREE.Group(), detail = new THREE.Group();
   grp.name = k.name; detail.name = k.name + '_detail';
   const add = (geo, mat, o = {}) => {
     if (geo.empty) return;
-    const m = new THREE.Mesh(geo.build(), mat); m.castShadow = !!o.cast; m.receiveShadow = true; (o.into || grp).add(m); return m;
+    let first = null;
+    for (const gg of o.whole ? [geo.build()] : geo.buildChunks(CHUNK)) { const m = new THREE.Mesh(gg, mat); m.castShadow = !!o.cast; m.receiveShadow = true; (o.into || grp).add(m); first ||= m; }
+    return first;
   };
   add(k.geo, M.world, { cast: true });
-  add(k.soft, M.cloth);
-  add(k.glow, M.glow);
-  const tower = add(k.stone, M.tower, { cast: true, into: k.W.landmark });
+  add(k.soft, M.cloth, { whole: true });
+  add(k.glow, M.glow, { whole: true });
+  const tower = add(k.stone, M.tower, { cast: true, into: k.W.landmark, whole: true });
   if (tower) tower.frustumCulled = false;
   for (const [type, items] of Object.entries(k.inst)) {
     if (!items.length) continue;
-    const def = INST[type], mesh = makeInst(instGeo(type), M[def.mat], items, def);
-    if (def.density) { k.W.density.push({ mesh, total: items.length }); detail.add(mesh); } else grp.add(mesh);
+    const def = INST[type], cells = new Map();
+    for (const it of items) { const key = SPLIT.has(type) ? Math.floor(it.x / CHUNK) + ',' + Math.floor(it.z / CHUNK) : 'all'; let l = cells.get(key); if (!l) cells.set(key, (l = [])); l.push(it); }
+    for (const list of cells.values()) {
+      const mesh = makeInst(instGeo(type), M[def.mat], list, def);
+      if (def.density) { k.W.density.push({ mesh, total: list.length }); detail.add(mesh); k.W.near.push(mesh); } else grp.add(mesh);
+    }
   }
   for (const s of k.signs) grp.add(makeSign(s, k.W));
   for (const m of k.extra) grp.add(m);
@@ -72,7 +81,7 @@ function edgeHedges(k, W) {
 }
 
 export function buildWorld(G) {
-  const W = { G, groups: {}, details: {}, anchors: new Map(), zones: [], surfaces: [], textDraws: [], density: [], portals: [], lightSpecs: [], tallCells: new Map(), col: new CollisionWorld() };
+  const W = { G, groups: {}, details: {}, anchors: new Map(), zones: [], surfaces: [], textDraws: [], density: [], portals: [], lightSpecs: [], tallCells: new Map(), near: [], nearT: 0, col: new CollisionWorld() };
   W.M = createMaterials();
   W.sky = new Sky(G.scene);
   W.landmark = new THREE.Group(); G.scene.add(W.landmark);
@@ -116,6 +125,9 @@ export function buildWorld(G) {
       grp.visible = name === 'under' ? under || near : !under || near;
       const det = W.details[name]; if (det) det.visible = grp.visible && dz < 140;
     }
+    // ground cover farther than DETAIL_FAR is sub-pixel: skip it (checked a few times a second)
+    W.nearT -= dt;
+    if (W.nearT <= 0) { W.nearT = 0.3; for (const m of W.near) { const s = m.boundingSphere; m.visible = !s || s.center.distanceTo(p) - s.radius < DETAIL_FAR; } }
   };
   W.nearPortal = (p, extra = 0) => W.portals.some((q) => Math.hypot(p.x - q[0], p.z - q[1]) < q[2] + extra);
   // places where the player counts as fallen (canal bed)

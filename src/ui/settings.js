@@ -2,7 +2,7 @@
 // volumes (master / music / effects / ambience), interaction sparkles, FPS display. Saved to localStorage.
 import { t, setLang, getLang } from '../i18n/i18n.js';
 
-const TOGGLES = { 'set-fps': 'fps', 'set-inv': 'invertY', 'set-bob': 'bob', 'set-spark': 'sparkle' };
+const TOGGLES = { 'set-fps': 'fps', 'set-inv': 'invertY', 'set-bob': 'bob', 'set-spark': 'sparkle', 'set-autoq': 'autoQuality' };
 
 export class SettingsUI {
   constructor(G) {
@@ -34,6 +34,7 @@ export class SettingsUI {
       ${row('fov', range('fov', 60, 95, 1))}
       ${row('bob', onoff('set-bob', s.bob !== false))}
       ${row('quality', seg('set-q', this.G.gfx.qName, [['low', t('settings.low')], ['medium', t('settings.medium')], ['high', t('settings.high')]]))}
+      ${row('autoQuality', onoff('set-autoq', s.autoQuality !== false))}
       ${row('volume', range('volume', 0, 1, 0.05))}
       ${row('volMusic', range('volMusic', 0, 1, 0.05))}
       ${row('volSfx', range('volSfx', 0, 1, 0.05))}
