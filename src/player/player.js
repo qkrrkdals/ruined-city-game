@@ -13,7 +13,7 @@ export class Player {
     this.vel = new THREE.Vector3(); this.feet = new THREE.Vector3();
     this.yaw = 0; this.pitch = 0; this.crouch = false; this.eyeH = CFG.eyeStand;
     this.onFloor = false; this.airTime = 0; this.jumpBuf = 0; this.stride = 0; this.bob = 0; this.bobAmp = 0; this.landDip = 0;
-    this.speedMul = 1; this.enabled = true; this.running = false; this.moving = false; this.lookEnabled = true; this.mantle = null;
+    this.speedMul = 1; this.enabled = true; this.running = false; this.moving = false; this.lookEnabled = true; this.mantle = null; this.mantleHint = false; this.hintT = 0;
   }
   spawn(x, y, z, yaw = 0) {
     this.crouch = false; this.eyeH = CFG.eyeStand;
@@ -40,7 +40,7 @@ export class Player {
     const G = this.G, inp = G.input;
     if (this.lookEnabled) {
       const [dx, dy] = inp.takeMouse(), sens = 0.0021 * (G.settings.sens ?? 1);
-      this.yaw -= dx * sens; this.pitch = THREE.MathUtils.clamp(this.pitch - dy * sens, -1.52, 1.52);
+      this.yaw -= dx * sens; this.pitch = THREE.MathUtils.clamp(this.pitch - dy * sens * (G.settings.invertY ? -1 : 1), -1.52, 1.52);
     } else inp.takeMouse();
     let f = 0, s = 0;
     if (this.enabled) {
@@ -72,6 +72,8 @@ export class Player {
       if (this.stride >= sl) { this.stride = 0; G.events.emit('footstep', this.mode(), this.feet); }
     }
     this.landDip *= Math.exp(-dt * 7);
+    this.hintT -= dt;
+    if (this.hintT <= 0) { this.hintT = 0.12; this.mantleHint = !this.mantle && this.onFloor && !!this.mantleCheck(); }
     if (this.feetY < -40 || G.world.pit(this.feet)) G.events.emit('fellOut');
     this.syncCam(dt);
   }
@@ -100,24 +102,28 @@ export class Player {
     this.collide();
     if (this.onFloor) this.vel.y = 0;
   }
-  // climb onto a ledge 0.55–1.5 m above the feet (Space while moving forward in front of it)
-  tryMantle() {
+  // ledge 0.55–1.5 m above the feet right in front of you (used for the "Space: climb" hint and the climb)
+  mantleCheck() {
     const carry = this.G.props.carrying;
-    if (this.crouch || (carry && carry.crate) || this.airTime > 0.12) return false;
+    if (this.crouch || (carry && carry.crate) || this.airTime > 0.12) return null;
     const col = this.G.world.col, f = this.feet;
     _fw.set(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
     _o.copy(f).addScaledVector(_fw, 0.3).add(_v.set(0, 0.45, 0));
     const wall = col.ray(_o, _fw, 0.75, true);
-    if (!wall) return false;
+    if (!wall) return null;
     const reach = 0.3 + wall.distance + 0.42;
     _o.copy(f).addScaledVector(_fw, reach).add(_v.set(0, 1.9, 0));
-    const hit = col.ray(_o, _dn, 1.9, true); if (!hit) return false;
+    const hit = col.ray(_o, _dn, 1.9, true); if (!hit) return null;
     const top = _o.y - hit.distance, h = top - f.y;
-    if (h < 0.55 || h > 1.5) return false;
+    if (h < 0.55 || h > 1.5) return null;
     this.test.start.set(_o.x, top + CFG.radius + 0.05, _o.z); this.test.end.set(_o.x, top + CFG.standTop + 0.05, _o.z);
-    for (const t of col.trees()) { const r = t.capsuleIntersect(this.test); if (r && r.depth > 0.02) return false; }
-    this.mantle = { t: 0, dur: 0.42 + h * 0.15, from: f.clone(), to: new THREE.Vector3(_o.x, top + 0.02, _o.z), h };
-    this.G.events.emit('mantle', h);
+    for (const t of col.trees()) { const r = t.capsuleIntersect(this.test); if (r && r.depth > 0.02) return null; }
+    return { to: new THREE.Vector3(_o.x, top + 0.02, _o.z), h };
+  }
+  tryMantle() {
+    const m = this.mantleCheck(); if (!m) return false;
+    this.mantle = { t: 0, dur: 0.42 + m.h * 0.15, from: this.feet.clone(), to: m.to, h: m.h };
+    this.G.events.emit('mantle', m.h);
     return true;
   }
   doMantle(dt) {
@@ -140,7 +146,7 @@ export class Player {
     }
   }
   syncCam(dt) {
-    const c = this.G.camera, target = this.moving ? (this.running ? 0.05 : this.crouch ? 0.018 : 0.032) : 0;
+    const c = this.G.camera, target = this.moving && this.G.settings.bob !== false ? (this.running ? 0.05 : this.crouch ? 0.018 : 0.032) : 0;
     this.bobAmp += (target - this.bobAmp) * Math.min(1, dt * 6);
     this.feet.set(this.cap.start.x, this.cap.start.y - CFG.radius, this.cap.start.z);
     c.position.set(this.feet.x, this.feet.y + this.eyeH + Math.sin(this.bob * 2) * this.bobAmp * 0.5 - this.landDip, this.feet.z);

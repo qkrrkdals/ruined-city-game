@@ -145,3 +145,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #1b1f2e; fon
 #ending { z-index: 30; }
 #loading { z-index: 40; }
 #fps { position: absolute; right: 12px; top: 10px; font: 12px/1.3 ui-monospace, monospace; color: #fff; background: rgba(0, 0, 0, 0.45); padding: 3px 7px; border-radius: 6px; pointer-events: none; z-index: 40; }
+#prompt .far { opacity: 0.55; font-size: 15px; }
+#settings .rows { max-height: 72vh; overflow-y: auto; padding-right: 6px; gap: 10px; }
+#settings .row { font-size: 15px; }
+#settings .seg button { padding: 4px 12px; font-size: 13px; }
+#settings h2 { font-size: 32px; margin-bottom: 14px; }

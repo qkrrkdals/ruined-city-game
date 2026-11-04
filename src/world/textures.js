@@ -25,6 +25,16 @@ export function dotTexture() {
   ctx.fillStyle = g; ctx.fillRect(0, 0, 64, 64);
   return (_dot = tex);
 }
+let _ring = null;
+// soft glowing ring: marks the object you are aiming at
+export function ringTexture() {
+  if (_ring) return _ring;
+  const { ctx, tex } = canvasTex(128, 128);
+  const g = ctx.createRadialGradient(64, 64, 30, 64, 64, 62);
+  g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.55, 'rgba(255,255,255,0.95)'); g.addColorStop(0.7, 'rgba(255,255,255,0.5)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 128, 128);
+  return (_ring = tex);
+}
 
 function fit(ctx, text, x, y, maxW, size, font, weight = '') {
   let s = size;

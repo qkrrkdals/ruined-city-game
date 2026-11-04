@@ -70,7 +70,7 @@ export async function startGame() {
   G.gfx.setQuality(G.settings.quality);
   G.time.set(14.2, true);
   titleCam(G, 0);
-  const warm = [...G.remnants.list.map((r) => r.group), G.weather.rainLines, G.weather.dustPts, G.weather.pollenPts];
+  const warm = [...G.remnants.list.map((r) => r.group), G.weather.rainLines, G.weather.dustPts, G.weather.pollenPts, ...G.interact.warm];
   precompile(G, warm);
   G.newGame = (o) => begin(G, 'new', o);
   flow(G);

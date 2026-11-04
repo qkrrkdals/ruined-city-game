@@ -107,7 +107,9 @@
     "batteryPlus": "배터리 +35%",
     "noFlashlight": "아직 쓸 손전등이 없다.",
     "gotFlashlight": "손전등을 챙겼다 · F로 켜고 끈다",
-    "fps": "{fps} fps · 최대 {max}ms · 계산 {cpu}ms · 끊김 {long}"
+    "fps": "{fps} fps · 최대 {max}ms · 계산 {cpu}ms · 끊김 {long}",
+    "closer": "조금 더 가까이",
+    "holdToDrop": "길게 누르면 내려놓기"
   },
   "verb": {
     "read": "읽기",
@@ -119,7 +121,8 @@
     "insert": "꽂기",
     "use": "작동하기",
     "enter": "입력하기",
-    "take": "챙기기"
+    "take": "챙기기",
+    "climb": "오르기"
   },
   "items": {
     "crate": "나무 상자",
@@ -496,11 +499,18 @@
     "low": "낮음",
     "medium": "중간",
     "high": "높음",
-    "volume": "음량",
+    "volume": "전체 음량",
     "back": "돌아가기",
     "note": "낮음: 그림자·블룸 끔, 풀 줄임 · 높음: 선명한 그림자",
     "fps": "FPS 표시",
     "on": "켜기",
-    "off": "끄기"
+    "off": "끄기",
+    "invertY": "마우스 상하 반전",
+    "fov": "시야각",
+    "bob": "걸을 때 화면 흔들림",
+    "volMusic": "음악",
+    "volSfx": "효과음",
+    "volAmb": "환경음",
+    "sparkle": "주변 물건 반짝임"
   }
 }

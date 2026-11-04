@@ -29,10 +29,11 @@ export class AudioEngine {
     this.master = mk(this.G.settings.volume ?? 0.8);
     const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 3;
     this.master.connect(comp).connect(ctx.destination);
-    this.sfx = mk(1); this.sfx.connect(this.master);
+    const S = this.G.settings;
+    this.sfx = mk(S.volSfx ?? 1); this.sfx.connect(this.master);
     this.musicBus = mk(0.9); this.musicBus.connect(this.master);
     this.ambLP = ctx.createBiquadFilter(); this.ambLP.type = 'lowpass'; this.ambLP.frequency.value = 16000;
-    this.amb = mk(1); this.amb.connect(this.ambLP).connect(this.master);
+    this.amb = mk(S.volAmb ?? 1); this.amb.connect(this.ambLP).connect(this.master);
     // two convolution reverbs (room / hall) cross-faded by zone
     this.send = mk(1);
     for (const [k, dur, decay] of [['room', 1.1, 3], ['hall', 2.8, 2.2]]) {
@@ -111,9 +112,12 @@ export class AudioEngine {
     else { L.setPosition(cam.position.x, cam.position.y, cam.position.z); L.setOrientation(_f.x, _f.y, _f.z, _u.x, _u.y, _u.z); }
     const zone = G.world.zoneAt(cam.position), kind = zone ? zone.kind : 'outdoor', inside = kind !== 'outdoor';
     const W = G.weather || { wind: 0.8, rain: 0 }, playing = G.state === 'playing' || G.state === 'cutscene';
-    this.wind.g.gain.setTargetAtTime((inside ? 0.05 : 0.11) * W.wind * (G.state === 'title' ? 0.7 : 1), t, 0.4);
+    this.wind.g.gain.setTargetAtTime((inside ? 0.028 : 0.06) * W.wind * (G.state === 'title' ? 0.7 : 1), t, 0.4);
     this.wind.a.frequency.setTargetAtTime(380 + Math.sin(G.elapsed * 0.31) * 140 + Math.sin(G.elapsed * 1.7) * 60 + W.wind * 120, t, 0.3);
-    this.rain.g.gain.setTargetAtTime(W.rain * (inside ? 0.04 : 0.16), t, 0.5);
+    this.rain.g.gain.setTargetAtTime(W.rain * (inside ? 0.022 : 0.08), t, 0.5);
+    // ambience dips a little while you walk so your own footsteps stay audible
+    const S = G.settings, duck = G.player && G.player.moving && playing ? 0.78 : 1;
+    this.amb.gain.setTargetAtTime((S.volAmb ?? 1) * duck, t, 0.25); this.sfx.gain.setTargetAtTime(S.volSfx ?? 1, t, 0.05);
     this.ambLP.frequency.setTargetAtTime(inside ? 900 : 16000, t, 0.3);
     const room = kind === 'indoor' ? 0.35 : 0, hall = kind === 'underground' || kind === 'garage' || kind === 'dim' ? 0.55 : kind === 'outdoor' ? 0.07 : 0.1;
     this.wet_room.gain.setTargetAtTime(room, t, 0.4); this.wet_hall.gain.setTargetAtTime(hall, t, 0.4);
@@ -144,6 +148,6 @@ export class AudioEngine {
     }
     const mood = G.state === 'cutscene' ? 'ending' : G.state === 'title' ? 'r1' : kind === 'underground' ? 'under' : G.world.regionAt(G.player.feet);
     this.music.update(dt, mood);
-    this.musicBus.gain.setTargetAtTime((G.state === 'cutscene' ? 1.4 : 0.9) * (1 - threat * 0.7), t, 0.6);
+    this.musicBus.gain.setTargetAtTime((G.state === 'cutscene' ? 1.4 : 0.9) * (1 - threat * 0.7) * (S.volMusic ?? 1), t, 0.6);
   }
 }

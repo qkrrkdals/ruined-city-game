@@ -74,7 +74,7 @@ export class UI {
     const o = this.$('hud-obj'); o.textContent = text; o.classList.add('show');
     clearTimeout(this._ob); this._ob = setTimeout(() => o.classList.remove('show'), 6500);
   }
-  prompt(html) { if (this._p !== html) { this.$('prompt').innerHTML = html || ''; this._p = html; this.$('crosshair').classList.toggle('active', !!html); } }
+  prompt(html, active = !!html) { if (this._p !== html) { this.$('prompt').innerHTML = html || ''; this._p = html; this.$('crosshair').classList.toggle('active', active); } }
   holding(html) { if (this._h !== html) { this.$('holding').innerHTML = html || ''; this._h = html; } }
   battery(level, visible, on) {
     const b = this.$('battery'); b.classList.toggle('hidden', !visible); if (!visible) return;

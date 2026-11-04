@@ -26,14 +26,15 @@ function ping(E, t, f, vol, d, type = 'sine', send = 0.3) { const o = osc(E, typ
 
 export const SOUNDS = {
   step(E, { surf = 'concrete', mode = 'walk', wet }) {
-    const t = E.ctx.currentTime, v = (mode === 'run' ? 0.5 : mode === 'crouch' ? 0.13 : 0.3) * (0.85 + R() * 0.3);
+    // ~+5 dB over the first release (footsteps were masked by wind and rain)
+    const t = E.ctx.currentTime, v = (mode === 'run' ? 0.5 : mode === 'crouch' ? 0.16 : 0.3) * 1.8 * (0.85 + R() * 0.3);
     if (wet && surf !== 'grass' && surf !== 'wood') surf = 'water';
     switch (surf) {
-      case 'grass': burst(E, t, 'bandpass', 2200 + R() * 900, 0.7, v * 0.55, 0.01, 0.14); burst(E, t + 0.02, 'highpass', 5000, 0.7, v * 0.25, 0.005, 0.06); break;
+      case 'grass': burst(E, t, 'bandpass', 1500 + R() * 700, 0.8, v * 0.6, 0.01, 0.14); burst(E, t + 0.02, 'highpass', 4200, 0.7, v * 0.25, 0.005, 0.06); thump(E, t, 85, 55, v * 0.3, 0.07); break;
       case 'wood': thump(E, t, 150, 90, v * 0.6, 0.12, 0.2); burst(E, t, 'bandpass', 900, 1.4, v * 0.35, 0.003, 0.08); break;
       case 'tile': burst(E, t, 'bandpass', 2600 + R() * 600, 1.4, v * 0.45, 0.002, 0.05, 0.5); thump(E, t, 110, 70, v * 0.35, 0.05, 0.4); break;
       case 'metal': burst(E, t, 'bandpass', 3200, 8, v * 0.5, 0.002, 0.1, 0.3); ping(E, t, 820 + R() * 200, v * 0.12, 0.25); break;
-      case 'water': { const b = burst(E, t, 'bandpass', 600, 1.2, v * 0.5, 0.01, 0.16, 0.2); b.frequency.exponentialRampToValueAtTime(2200, t + 0.12); burst(E, t + 0.02, 'highpass', 4500, 0.7, v * 0.25, 0.01, 0.08); break; }
+      case 'water': { const b = burst(E, t, 'bandpass', 600, 1.2, v * 0.7, 0.01, 0.16, 0.2); b.frequency.exponentialRampToValueAtTime(2200, t + 0.12); burst(E, t + 0.02, 'highpass', 4500, 0.7, v * 0.25, 0.01, 0.08); break; }
       default: burst(E, t, 'lowpass', 1500 + R() * 400, 0.7, v * 0.6, 0.002, 0.07); thump(E, t, 95, 60, v * 0.45, 0.06);
     }
   },
