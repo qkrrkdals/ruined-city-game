@@ -65,10 +65,18 @@ export function solveLimb(root, upper, lower, a, b, target, pole, outEnd, outQua
 export class Rig {
   constructor() { this.root = new THREE.Group(); this.j = {}; this.dim = {}; this.meshes = []; }
   joint(name, parent, x, y, z) {
-    const g = new THREE.Group(); g.position.set(x, y, z); g.userData.rest = new THREE.Vector3(x, y, z);
+    const g = new THREE.Group(); g.name = name; g.position.set(x, y, z); g.userData.rest = { x, y, z };
     (parent ? this.j[parent] : this.root).add(g); this.j[name] = g; return g;
   }
   add(name, geo, mat) { const m = new THREE.Mesh(geo, mat); this.j[name].add(m); this.meshes.push(m); return m; }
+}
+
+// 원형(proto) 뼈대를 복제한다. 지오메트리는 함께 쓰고 재질만 새로 만든다(개체마다 따로 번쩍이도록).
+export function cloneRig(proto, makeMats) {
+  const r = new Rig(); r.root = proto.root.clone(true); r.dim = { ...proto.dim };
+  const [body, keep] = makeMats(); r.mats = [body, keep]; r.body = body; r.keepMat = keep;
+  r.root.traverse((o) => { if (o.isMesh) { o.material = o.material === proto.body ? body : keep; r.meshes.push(o); } else if (o.name) r.j[o.name] = o; });
+  return r;
 }
 
 const POLE_ARM_R = new THREE.Vector3(-0.55, -0.75, -0.5), POLE_ARM_L = new THREE.Vector3(0.55, -0.75, -0.5);

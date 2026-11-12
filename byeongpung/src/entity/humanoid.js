@@ -1,6 +1,6 @@
 // 인간형 모델 만들기(주인공·군졸·묵장). 모두 같은 뼈대를 쓰고 겉모습만 다르다.
 import * as THREE from 'three';
-import { Rig } from './rig.js';
+import { Rig, cloneRig } from './rig.js';
 import { box, cyl, cone, ico, merge, seedGeo, xf, paint, tris } from '../gfx/geo.js';
 import { HEX } from '../gfx/palette.js';
 import { entityMat } from '../gfx/materials.js';
@@ -16,7 +16,7 @@ function skeleton() {
   r.joint('armL', 'torso', 0.2, 0.42, 0); r.joint('foreL', 'armL', 0, -0.27, 0); r.joint('handL', 'foreL', 0, -0.27, 0);
   r.joint('legR', 'hips', -0.09, -0.04, 0); r.joint('shinR', 'legR', 0, -0.42, 0); r.joint('footR', 'shinR', 0, -0.42, 0);
   r.joint('legL', 'hips', 0.09, -0.04, 0); r.joint('shinL', 'legL', 0, -0.42, 0); r.joint('footL', 'shinL', 0, -0.42, 0);
-  r.dim = { arm: [0.27, 0.27], leg: [0.42, 0.42], ankle: 0.06, grip: -0.36, tip: 1.35 };
+  r.dim = { arm: [0.27, 0.27], leg: [0.42, 0.42], ankle: 0.06, grip: 0.38, tip: 1.35 };
   return r;
 }
 
@@ -60,8 +60,14 @@ function glaiveGeo() {
   ]);
 }
 
-// kind: hero | soldier | shield | elite | general
+// kind: hero | soldier | shield | elite | general.  원형을 한 번만 만들고 복제해 쓴다.
+const PROTO = {};
 export function buildHumanoid(kind) {
+  const proto = PROTO[kind] || (PROTO[kind] = makeProto(kind));
+  const hero = kind === 'hero';
+  return cloneRig(proto, () => [entityMat(hero ? {} : { rim: 0.55 }), entityMat({ keep: true, double: true })]);
+}
+function makeProto(kind) {
   seedGeo(kind.length * 97 + 5);
   const rig = skeleton();
   const hero = kind === 'hero';
@@ -113,7 +119,7 @@ export function buildHumanoid(kind) {
       ]), body);
       rig.add('torso', box(0.46, 0.05, 0.31, HEX.red, { p: [0, 0.13, 0] }), keep);
       rig.add('weapon', glaiveGeo(), body);
-      rig.dim.tip = 2.5; rig.dim.grip = -0.55;
+      rig.dim.tip = 2.5; rig.dim.grip = 0.55;
     } else {
       // 벙거지(전립) + 붉은 상모
       rig.add('head', merge([cyl(0.1, 0.12, 0.13, 6, 0x15151a, { p: [0, 0.27, 0] }), cyl(0.27, 0.29, 0.025, 8, 0x1d1d23, { p: [0, 0.215, 0] })]), body);
@@ -130,7 +136,7 @@ export function buildHumanoid(kind) {
         sh.rotation.set(Math.PI / 2, 0, 0);
         rig.add('shield', merge([cyl(0.46, 0.46, 0.05, 9, 0x22222a, null, 0.12), cyl(0.34, 0.34, 0.07, 9, 0x2e2e37, null, 0.1)]), body);
         rig.add('shield', cyl(0.13, 0.13, 0.09, 7, HEX.red), keep);
-      } else if (kind === 'elite') { rig.add('weapon', swordGeo(), body); rig.dim.tip = 1.15; rig.j.weapon.scale.setScalar(1.25); rig.dim.tip = 1.4; } else { rig.add('weapon', spearGeo(), body); rig.dim.tip = 1.6; rig.dim.grip = -0.5; }
+      } else if (kind === 'elite') { rig.add('weapon', swordGeo(), body); rig.dim.tip = 1.15; rig.j.weapon.scale.setScalar(1.25); rig.dim.tip = 1.4; } else { rig.add('weapon', spearGeo(), body); rig.dim.tip = 1.6; rig.dim.grip = 0.5; }
     }
   }
   if (kind === 'general') rig.root.scale.setScalar(1.55);

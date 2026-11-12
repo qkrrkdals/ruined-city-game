@@ -6,6 +6,8 @@ import { F } from '../world/field.js';
 import * as HA from '../entity/hanim.js';
 import { buildHumanoid } from '../entity/humanoid.js';
 import { newPose, applyPose } from '../entity/rig.js';
+import { createAudio } from '../systems/audio/engine.js';
+import { SFX } from '../systems/audio/sfx.js';
 
 export function installDebug() {
   window.__game = {
@@ -34,9 +36,53 @@ export function installDebug() {
     },
     pose(fn, ...args) { HA[fn](this._pose, ...args); applyPose(this._rig, this._pose); return this._pose; },
     view(yawOff = 0, pitch = 0.2, dist = 4) { G.cam.yaw = G.player.yaw + Math.PI + yawOff; G.cam.pitch = pitch; G.cam.dist = dist; G.cam.snap(); },
+    spawn(kind, dx = 0, dz = 4, o = {}) { const p = G.player; return !!G.enemies.spawn(kind, p.pos.x + dx, p.pos.z + dz, o); },
+    // 자동 전투(점검용): 가까운 적에게 다가가 치고, 예고가 끝날 즈음 피하고, 흐트러지면 맺는다
+    bot(on = true, o = {}) {
+      if (!on) { G.bot = null; G.input.releaseAll(); return; }
+      const I = G.input; let tA = 0, hold = null, stat = { dodges: 0, attacks: 0, fins: 0 };
+      const tapKey = (c) => { I.press(c); hold = c; };
+      G.bot = { stat, update(rdt) {
+        if (hold) { I.release(hold); hold = null; }
+        const p = G.player; if (!p.alive || G.state !== 'play') { I.releaseAll(); return; }
+        let best = null, bd = 1e9, threat = null, fin = null;
+        for (const e of G.enemies.list) {
+          if (!e.alive || !e.targetable) continue;
+          const d = Math.hypot(e.pos.x - p.pos.x, e.pos.z - p.pos.z);
+          if (d < bd) { bd = d; best = e; }
+          if (e.st === 'windup' && e.windup - e.t < (o.react ?? 0.16) && d < 6.5) threat = e;
+          if (e.staggered && d < 5) fin = e;
+        }
+        for (const c of ['KeyW', 'KeyA', 'KeyD', 'KeyS']) I.release(c);
+        if (!best) return;
+        G.cam.yaw = Math.atan2(-(best.pos.x - p.pos.x), -(best.pos.z - p.pos.z));
+        if (o.heal !== false && p.hp < p.maxHp * 0.4 && p.heals > 0 && p.st === 'move') { tapKey('KeyR'); return; }
+        if (threat && o.dodge !== false && p.st !== 'dodge') { I.press(Math.random() < 0.5 ? 'KeyA' : 'KeyD'); tapKey('Space'); stat.dodges++; return; }
+        if (fin) { tapKey('KeyE'); stat.fins++; return; }
+        if (bd - best.radius > 2.3) I.press('KeyW');
+        tA -= rdt;
+        if (bd - best.radius < 3.2 && tA <= 0) { tA = 0.14; if (o.arts && p.ink >= 1 && Math.random() < 0.2) tapKey(['KeyQ', 'KeyF', 'KeyC'][(Math.random() * 3) | 0]); else if (o.heavy && Math.random() < 0.25) { tapKey('M2'); } else tapKey('M0'); stat.attacks++; }
+      } };
+    },
+    // 소리 점검: 효과음·음악을 오프라인으로 렌더링해 크기(최댓값·RMS)와 길이를 잰다
+    async audioTest(names, moods) {
+      const res = {}, measure = (buf) => { const d = buf.getChannelData(0); let peak = 0, sum = 0, last = 0; for (let i = 0; i < d.length; i++) { const a = Math.abs(d[i]); if (a > peak) peak = a; sum += a * a; if (a > 0.002) last = i; } return { peak: +peak.toFixed(3), rms: +Math.sqrt(sum / d.length).toFixed(4), dur: +(last / buf.sampleRate).toFixed(2), nan: Number.isNaN(sum) }; };
+      for (const n of names || Object.keys(SFX)) {
+        const oc = new OfflineAudioContext(2, 44100 * 5, 44100), A = createAudio(); A.init(oc);
+        A.play(n, { power: 2, note: 3, n: 2, kind: 'inkling', size: 3, lv: 1, id: 'dot' });
+        res[n] = measure(await oc.startRendering());
+      }
+      for (const m of moods || []) {
+        const oc = new OfflineAudioContext(2, 44100 * 24, 44100), A = createAudio(); A.init(oc);
+        A.music.setMood(m); for (let t = 0; t < 23; t += 0.25) A.music.update(0, t);
+        res['music:' + m] = measure(await oc.startRendering());
+      }
+      return res;
+    },
+    enemies() { return G.enemies.list.map((e) => ({ kind: e.kind, st: e.st, hp: Math.round(e.hp), posture: Math.round(e.posture), d: +e.distP.toFixed(1) })); },
     info() {
       const p = G.player;
-      return { state: G.state, pos: [+p.pos.x.toFixed(1), +p.pos.y.toFixed(1), +p.pos.z.toFixed(1)], sdf: +F.sdf(p.pos.x, p.pos.z).toFixed(2), zone: F.zone(p.pos.x, p.pos.z), calls: G.gfx.renderer.info.render.calls, tris: G.gfx.renderer.info.render.triangles };
+      return { state: G.state, st: p.st, hp: Math.round(p.hp), ink: +(p.ink || 0).toFixed(2), enemies: G.enemies ? G.enemies.list.filter((e) => e.alive).length : 0, pos: [+p.pos.x.toFixed(1), +p.pos.y.toFixed(1), +p.pos.z.toFixed(1)], sdf: +F.sdf(p.pos.x, p.pos.z).toFixed(2), zone: F.zone(p.pos.x, p.pos.z), calls: G.gfx.renderer.info.render.calls, tris: G.gfx.renderer.info.render.triangles };
     },
   };
 }

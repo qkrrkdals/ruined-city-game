@@ -87,6 +87,23 @@ export function collapse(P, u) {
   return P;
 }
 
+// 흐트러짐(무릎 꿇음): 무기를 짚고 버틴다
+export function kneel(P, t) {
+  reset(P);
+  const b = Math.sin(t * 3.1);
+  P.hy = -0.43 + b * 0.008; P.trx = 0.5 + b * 0.03; P.hdx = 0.45; P.hz = 0.05;
+  s3(P.hr, -0.3, 0.72, 0.3); s3(P.wd, 0.1, 0.95, 0.25); s3(P.hl, 0.3, 0.42, 0.22);
+  s3(P.fl, 0.15, 0, 0.27); s3(P.fr, -0.15, 0, -0.38);
+  return P;
+}
+// 무기를 세워 들고 서 있기(군졸 경계)
+export function sentry(P, t) {
+  reset(P);
+  const b = Math.sin(t * 1.5);
+  P.hy = b * 0.005; P.trx = 0.02 + b * 0.01; P.hdy = Math.sin(t * 0.4) * 0.4;
+  s3(P.hr, -0.3, 0.95, 0.12); s3(P.wd, 0.02, 1, 0.04); s3(P.hl, 0.28, 0.8, 0.04);
+  return P;
+}
 // 휘두르기. sp: { tilt, a0, a1, tw, ts, dur, back, over, lead:'L'|'R', cy, rh, grip, reach }
 // 평면: e1=앞(0,0,1), e2=(-cos tilt, sin tilt, 0). 각 a: 0=앞, +90°=e2 쪽(tilt 0 이면 오른쪽, 90° 면 위).
 export function swingAngle(sp, t) {

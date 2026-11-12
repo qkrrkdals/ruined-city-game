@@ -23,7 +23,7 @@ void main() {
   float u = vUv.x, v = vUv.y;
   float rev = 1.0 - smoothstep(uProg - 0.03, uProg + 0.01, u);
   float tail = smoothstep(uFade * 1.3 - 0.3, uFade * 1.3, u);
-  float prof = mix(smoothstep(0.0, 0.07, u) * (1.0 - 0.78 * smoothstep(0.4, 1.0, u)), 1.0, uFlat);
+  float prof = mix(smoothstep(0.0, 0.06, u) * (1.0 - 0.82 * smoothstep(0.3, 1.0, u)), 1.0, uFlat);
   float w = abs(v - 0.56) / (0.44 * prof + 0.001);
   float body = 1.0 - smoothstep(0.72, 1.0, w);
   float hair = texture2D(uTex, vec2(u * 0.92 + 0.04, clamp((v - 0.56) / (prof + 0.001) * 0.5 + 0.5, 0.0, 1.0))).a;
