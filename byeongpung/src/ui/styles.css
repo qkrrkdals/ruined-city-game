@@ -1,0 +1,8 @@
+:root {
+  --paper: #efe7d6; --paper-dark: #d9cdb4; --ink: #15151b; --ink-soft: #3a3a42; --ink-pale: #8a8a8c;
+  --red: #c5341f; --indigo: #2c4c7c; --gold: #c9a24a;
+  color-scheme: light;
+}
+html, body { height: 100%; margin: 0; overflow: hidden; background: var(--paper); color: var(--ink); }
+#bp-canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
+#bp-ui { position: fixed; inset: 0; pointer-events: none; user-select: none; -webkit-user-select: none; overflow: hidden; }
