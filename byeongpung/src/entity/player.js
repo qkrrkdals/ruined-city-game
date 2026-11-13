@@ -67,7 +67,7 @@ export function createPlayer() {
       return true;
     },
     perfect() {
-      this.perfectDone = true; this.boostT = pc.perfect.boostDur; this.gainInk(pc.perfect.ink);
+      this.perfectDone = true; this.boostT = pc.perfect.boostDur; this.gainInk(pc.perfect.ink + (this.perfectInk || 0));
       G.fx.slowmo(pc.perfect.slow, pc.perfect.dur); G.fx.playerFree = pc.perfect.dur; G.fx.blank(pc.perfect.dur * 0.9);
       G.audio.play('perfect'); this.dodges = pc.dodge.charges;
       if (G.ui && G.ui.flashWord) G.ui.flashWord('perfect');
