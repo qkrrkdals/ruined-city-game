@@ -53,6 +53,23 @@ export function paperTexture() {
   return tex(cv, { data: true });
 }
 
+// UI 바탕에 까는 한지 무늬(CSS 배경용 데이터 URL)
+export function uiPaperUrl() {
+  const S = 256, cv = canvas(S, S), g = cv.getContext('2d'), R = mulberry32(17);
+  const img = g.createImageData(S, S), d = img.data;
+  for (let y = 0, i = 0; y < S; y++) for (let x = 0; x < S; x++, i += 4) {
+    const v = (tfbm(x / 48, y / 48, 5, 3) - 0.5) * 14 + (hash2(x, y) - 0.5) * 6;
+    d[i] = 239 + v; d[i + 1] = 231 + v; d[i + 2] = 214 + v * 0.9; d[i + 3] = 255;
+  }
+  g.putImageData(img, 0, 0); g.lineCap = 'round';
+  for (let k = 0; k < 260; k++) {
+    const x = R() * S, y = R() * S, a = R() * Math.PI, len = 5 + R() * 26;
+    g.strokeStyle = R() < 0.6 ? `rgba(255,252,244,${0.12 + R() * 0.2})` : `rgba(120,105,80,${0.05 + R() * 0.08})`; g.lineWidth = 0.5 + R() * 0.8;
+    for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) { g.beginPath(); g.moveTo(x + ox, y + oy); g.lineTo(x + ox + Math.cos(a) * len, y + oy + Math.sin(a) * len); g.stroke(); }
+  }
+  return cv.toDataURL('image/png');
+}
+
 // 지형에 곱하는 붓자국. kind 'rock'=준법(산의 붓질), 'ground'=옅은 담묵 얼룩
 export function strokeDetailTexture(kind = 'rock') {
   const S = 512, cv = canvas(S, S), g = cv.getContext('2d'), R = mulberry32(kind === 'rock' ? 21 : 57);

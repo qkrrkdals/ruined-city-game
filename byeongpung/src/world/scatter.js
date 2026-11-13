@@ -11,7 +11,7 @@ import { mulberry32, fbm2, hash2 } from '../core/util.js';
 const TILE = 96;
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _p = new THREE.Vector3(), _s = new THREE.Vector3(), _c = new THREE.Color();
 
-function pineGeo(v, white) {
+export function pineGeo(v, white) {
   seedGeo(40 + v);
   const bark = white ? 0xf3eee2 : 0x7a5645, leaf = white ? 0xf6f2e8 : HEX.pine, leaf2 = white ? 0xece6d8 : HEX.pineDark;
   const g = [

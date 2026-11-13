@@ -12,7 +12,7 @@ export function createScreens(UI) {
   let overName = null, overBack = null, cardState = null, noticeT = 0;
 
   function buildTitle() {
-    title.innerHTML = `<div class="title-v">${T.ui.title}</div><div class="title-sub">${T.ui.chapter}</div><div class="title-seal seal">${T.ui.sealTitle}</div>`;
+    title.innerHTML = `<div class="title-col"><div class="title-main"><div class="title-v">${T.ui.title}</div><div class="title-seal seal">${T.ui.sealTitle}</div></div><div class="title-sub">${T.ui.chapter}</div></div>`;
     const menu = el('div', 'title-menu');
     if (Save.has()) menu.appendChild(btn('btn', T.ui.continue, () => { G.audio.init(); G.audio.play('uiOk'); G.flow.continueGame(); }));
     menu.appendChild(btn('btn', T.ui.new, () => { G.audio.init(); G.audio.play('uiOk'); if (Save.has()) S.confirm(T.ui.confirmNew, () => G.flow.newGame()); else G.flow.newGame(); }));

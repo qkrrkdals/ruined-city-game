@@ -2,10 +2,14 @@
 import { G } from '../core/g.js';
 import { HumanoidEnemy, HUMANOID } from './enemies/soldier.js';
 import { Inkling, INKLING } from './enemies/inkling.js';
+import { Boar, BOAR } from './enemies/boar.js';
+import { Crane, CRANE } from './enemies/crane.js';
+import { Toad, TOAD } from './enemies/toad.js';
+import { Tiger, TIGER } from './enemies/tiger.js';
 import { Combat } from './combat.js';
 
 export const KINDS = {
-  inkling: [Inkling, INKLING],
+  inkling: [Inkling, INKLING], boar: [Boar, BOAR], crane: [Crane, CRANE], toad: [Toad, TOAD], tiger: [Tiger, TIGER],
   soldier: [HumanoidEnemy, HUMANOID.soldier], shield: [HumanoidEnemy, HUMANOID.shield], elite: [HumanoidEnemy, HUMANOID.elite], general: [HumanoidEnemy, HUMANOID.general],
 };
 export function registerKind(name, cls, def) { KINDS[name] = [cls, def]; }
@@ -33,7 +37,7 @@ export function createEnemies() {
           if (d < min && d > 1e-4) { const k = (min - d) / d, wa = b.mass / (a.mass + b.mass), wb = 1 - wa; a.pos.x -= dx * k * wa; a.pos.z -= dz * k * wa; b.pos.x += dx * k * wb; b.pos.z += dz * k * wb; }
         }
       }
-      if (G.cam.target && !G.cam.target.alive) G.cam.target = null;
+      if (G.cam.target && (!G.cam.target.alive || !G.cam.target.targetable)) G.cam.target = null;
     },
   };
   return E;

@@ -157,13 +157,14 @@ export class Enemy {
     G.audio.play('tell', { kind: this.kind, big: a.power >= 3 });
     if (a.ground) this.tellFx = this.groundTell(a);
     if (a.onStart) a.onStart(this);
+    G.emit('tell', this);
   }
   // 바닥에 붉은 붓자국으로 공격 범위를 미리 보여 준다
   groundTell(a) {
-    const s = a.shape, o = { parent: this.group, color: HEX.red, reveal: this.windup * 0.5, hold: this.windup * 0.5 + (a.strike || 0.1), fade: 0.2, dry: 0.75, opacity: 0.6, flat: 1 };
+    const s = a.groundShape || a.shape, o = { parent: this.group, color: HEX.red, reveal: this.windup * 0.5, hold: this.windup * 0.5 + (a.strike || 0.1), fade: 0.2, dry: 0.75, opacity: 0.6, flat: 1 };
     if (s.kind === 'line') return Slash.line({ ...o, c: [0, 0.14, 0], dir: [0, 0, 1], side: [1, 0, 0], len: s.len, width: s.w * 2 });
     if (s.kind === 'sector') return Slash.arc({ ...o, c: [0, 0.14, 0], tilt: 0, a0: (s.off || 0) - s.half, a1: (s.off || 0) + s.half, r0: Math.max(0.5, s.r * 0.25), r1: s.r });
-    return Slash.arc({ ...o, c: [0, 0.14, s.fwd || 0], tilt: 0, a0: 0, a1: Math.PI * 2, r0: s.r * 0.15, r1: s.r });
+    return Slash.arc({ ...o, c: [0, 0.14, s.fwd || 0], tilt: 0, a0: 0, a1: Math.PI * 2, r0: s.r > 5 ? s.r * 0.62 : s.r * 0.15, r1: s.r, opacity: s.r > 5 ? 0.42 : 0.55 });
   }
   updateAttack(dt) {
     const a = this.atk, p = G.player;
@@ -192,7 +193,7 @@ export class Enemy {
   // 공격 도형 안에 주인공이 있으면 때린다. 판정이 끝났으면(맞았든 피했든) true
   tryHit(a, shape) {
     const p = G.player, s = shape || a.shape;
-    if (!inShape(s, this.pos.x, this.pos.z, this.yaw, p.pos.x, p.pos.z, p.radius)) return !a.lunge;
+    if (!inShape(s, this.pos.x, this.pos.z, this.yaw, p.pos.x, p.pos.z, p.radius)) return !(a.lunge || a.sweep);
     if (p.jumpY > 1.2 && !a.air) return true;
     _d.set(p.pos.x - this.pos.x, 0, p.pos.z - this.pos.z).normalize();
     p.takeHit({ dmg: a.dmg * (this.dmgMul || 1), power: a.power || 1, dir: _d, from: this });

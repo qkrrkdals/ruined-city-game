@@ -5,6 +5,10 @@ import { buildTerrain } from './terrain.js';
 import { buildSky } from './sky.js';
 import { NODES } from './layout.js';
 import { U, setRestore } from '../gfx/materials.js';
+import { buildScatter, pineGeo } from './scatter.js';
+import { Kit } from './kit.js';
+import { makeHelpers, buildSouthAndVillage } from './regions_a.js';
+import { buildWestEastNorth } from './regions_b.js';
 
 export function buildWorld() {
   const scene = G.gfx.scene;
@@ -22,8 +26,19 @@ export function buildWorld() {
       const s = { x, z, r, cur: instant ? r : 0 }; this.restores.push(s); setRestore(i, x, z, s.cur, 1);
       return s;
     },
+    clearRestores() { this.restores.length = 0; for (let i = 0; i < 8; i++) setRestore(i, 0, 0, 0, 0); },
+    // 그 자리에 색이 돌아왔는가
+    restoredAt(x, z) { if (U.uSat.value > 0.5) return true; for (const s of this.restores) if (Math.hypot(x - s.x, z - s.z) < s.cur * 0.85) return true; return false; },
+    // 식생·소품·적 무리·사람들을 놓는다(시스템들이 준비된 뒤에 부른다)
+    populate() {
+      this.scatter = buildScatter(scene);
+      const kit = new Kit(scene), H = makeHelpers(kit);
+      buildSouthAndVillage(H); buildWestEastNorth(H, pineGeo);
+      kit.build();
+      this.shrines = G.shrines.list;
+    },
     update(dt, rdt) {
-      terrain.update(G.real); sky.update(rdt);
+      terrain.update(G.real); sky.update(rdt); if (this.scatter) this.scatter.update(rdt);
       for (let i = 0; i < this.restores.length; i++) {
         const s = this.restores[i];
         if (s.cur < s.r) { s.cur = Math.min(s.r, s.cur + (18 + s.cur * 0.55) * rdt); setRestore(i, s.x, s.z, s.cur, 1); }

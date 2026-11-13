@@ -8,6 +8,7 @@ import { buildHumanoid } from '../entity/humanoid.js';
 import { newPose, applyPose } from '../entity/rig.js';
 import { createAudio } from '../systems/audio/engine.js';
 import { SFX } from '../systems/audio/sfx.js';
+import { createAutoplay, PLAN } from './autoplay.js';
 
 export function installDebug() {
   window.__game = {
@@ -36,6 +37,15 @@ export function installDebug() {
     },
     pose(fn, ...args) { HA[fn](this._pose, ...args); applyPose(this._rig, this._pose); return this._pose; },
     view(yawOff = 0, pitch = 0.2, dist = 4) { G.cam.yaw = G.player.yaw + Math.PI + yawOff; G.cam.pitch = pitch; G.cam.dist = dist; G.cam.snap(); },
+    // 제목과 여는 글을 건너뛰고 바로 놀이 상태로. o: { flags, arts, armed }
+    start(o = {}) {
+      G.ui.screens.hideAll(); G.story.reset(); G.story.started = true;
+      Object.assign(G.prog.flags, { brush: true, ...(o.flags || {}) });
+      if (o.arts) for (const a of o.arts) G.prog.arts[a] = true;
+      G.shrines.load(); G.pickups.load(); G.story.ch.load();
+      const p = G.player; p.armed = o.armed !== false; G.prog.apply(); p.fullRestore(); p.frozen = false; p.setState('move', 0);
+      G.cam.cine = null; G.fx.setBars(false); G.fx.fade = 0; G.fx.fadeTo = 0; G.state = 'play'; G.story.objective();
+    },
     spawn(kind, dx = 0, dz = 4, o = {}) { const p = G.player; return !!G.enemies.spawn(kind, p.pos.x + dx, p.pos.z + dz, o); },
     // 자동 전투(점검용): 가까운 적에게 다가가 치고, 예고가 끝날 즈음 피하고, 흐트러지면 맺는다
     bot(on = true, o = {}) {
@@ -78,6 +88,12 @@ export function installDebug() {
         res['music:' + m] = measure(await oc.startRendering());
       }
       return res;
+    },
+    // 처음부터 결말까지 자동 플레이. o: { god, react, skill, from(계획의 몇 번째부터) }
+    autoplay(o = {}) { G.god = !!o.god; G.bot = createAutoplay(o); if (o.from) G.bot.gi = o.from; return PLAN.length; },
+    autoStatus() {
+      const b = G.bot, p = G.player, pr = G.prog, g = PLAN[b.gi] || {};
+      return { t: Math.round(b.t), gi: b.gi, goal: g.node || g.use || (g.end ? 'end' : ''), state: G.state, pos: [Math.round(p.pos.x), Math.round(p.pos.z)], hp: Math.round(p.hp), maxHp: p.maxHp, ink: Math.round(pr.ink), lv: pr.level, weapon: pr.weapon, arts: pr.artCount, deaths: b.deaths, kills: pr.stats.kills, fins: pr.stats.finishers, done: b.done, boss: G.story.boss ? `${G.story.boss.key}:${Math.round(G.story.boss.e.hp)}` : '', stat: b.stat, log: b.log.splice(0) };
     },
     enemies() { return G.enemies.list.map((e) => ({ kind: e.kind, st: e.st, hp: Math.round(e.hp), posture: Math.round(e.posture), d: +e.distP.toFixed(1) })); },
     info() {

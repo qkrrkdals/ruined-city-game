@@ -2,4 +2,4 @@
 import './ui/styles.css';
 import { boot } from './core/game.js';
 
-boot();
+boot().catch((e) => { console.error(e); });

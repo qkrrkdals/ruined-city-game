@@ -44,7 +44,7 @@ export const HUMANOID = {
     ],
   },
   general: {
-    kind: 'general', model: 'general', boss: true, hp: 540, posture: 170, radius: 0.85, height: 2.75, speed: 3.1, aggro: 30, lose: 80, leash: 60, pref: 3.2, strafe: 0.3, poise: 3, staggerTime: 4.2, finFrac: 0.24, ink: 300, mass: 4, turn: 4.5,
+    kind: 'general', model: 'general', boss: true, hp: 1000, posture: 200, radius: 0.85, height: 2.75, speed: 3.1, aggro: 30, lose: 80, leash: 60, pref: 3.2, strafe: 0.3, poise: 3, staggerTime: 4.2, finFrac: 0.2, ink: 300, mass: 4, turn: 4.5,
     attacks: [
       { id: 'sweep', anim: 'swing', sp: { tilt: 6 * D, a0: 125 * D, a1: -100 * D, lead: 'L' }, range: [0, 4.2], w: 4, windup: 0.9, strike: 0.2, recover: 0.95, cd: [0.9, 1.8], lunge: 1.2, shape: { kind: 'sector', r: 4.8, half: 88 * D }, ground: true, dmg: 22, power: 2, track: 4, hitAt: 0.4, chain: 'slam', chainCond: (e) => e.hp < e.maxHp * 0.6 },
       { id: 'slam', anim: 'swing', sp: { tilt: 90 * D, a0: 132 * D, a1: -36 * D, lead: 'R', cy: 1.25 }, range: [1.5, 5], w: 3, windup: 1.1, strike: 0.18, recover: 1.25, cd: [1, 2], lunge: 1.0, shape: { kind: 'line', len: 5.6, w: 1.15 }, ground: true, dmg: 30, power: 3, track: 3.5, commit: 0.3, hitAt: 0.6, onStrikeEnd: (e) => slamRing(e, 4.2) },
@@ -71,7 +71,6 @@ export class HumanoidEnemy extends Enemy {
   onBlock() { this.pop = 0.6; this.blockT = 0.25; }
   startAttack(a) {
     super.startAttack(a);
-    if (a.groundShape && this.tellFx) { Slash.kill(this.tellFx); this.tellFx = this.groundTell({ ...a, shape: a.groundShape }); }
     const w = this.windup; this.sp = { ...(a.sp || {}), tw: w, ts: w + a.strike, dur: w + a.strike + a.recover };
     this.vfx = false;
   }

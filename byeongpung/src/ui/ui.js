@@ -4,7 +4,7 @@ import { G } from '../core/g.js';
 import { MOVES, ARTS } from '../entity/moves.js';
 import { finisherTarget } from '../entity/player_act.js';
 import { makeIcons } from './icons.js';
-import { paperTexture } from '../gfx/textures.js';
+import { uiPaperUrl, sealCanvas } from '../gfx/textures.js';
 import { createDialog } from './dialog.js';
 import { createMenus } from './menus.js';
 import { createScreens } from './screens.js';
@@ -16,7 +16,7 @@ export const el = (tag, cls, html) => { const e = document.createElement(tag); i
 export function createUI(root) {
   const T = G.text, icons = makeIcons();
   // 한지 무늬를 CSS 변수로
-  try { const pt = paperTexture().image; root.style.setProperty('--paper-img', `url(${pt.toDataURL()})`); } catch (e) { /* 무늬 없이 */ }
+  try { root.style.setProperty('--paper-img', `url(${uiPaperUrl()})`); } catch (e) { /* 무늬 없이 */ }
   const hud = el('div', 'hud off');
   hud.innerHTML = `
     <div class="hud-tl"><div class="hp"><b></b><i></i></div><div class="inkrow"></div><div class="heals"></div></div>
@@ -38,8 +38,10 @@ export function createUI(root) {
   const numPool = []; let numI = 0;
   for (let i = 0; i < 22; i++) { const n = el('div', 'num'); n.hidden = true; nums.appendChild(n); numPool.push(n); }
   const cache = { hpw: -1, hpf: -1, inkN: -1, ink: -1, healN: -1, heals: -1, money: -1, prompt: '', obj: '', bossHp: -1, bossPs: -1 };
-  let moneyShown = 0, hintT = 0, hintKey = '', objTarget = null, bossE = null;
+  let moneyShown = 0, hintT = 0, hintKey = '', objTarget = null, bossE = null, bannerT = 0, wordT = 0, bumpT = 0;
   const restart = (e, cls) => { e.classList.remove(cls); void e.offsetWidth; e.classList.add(cls); };
+  const timed = []; // 잠깐 떴다 사라지는 것들: { el, t }
+  const later = (e, t) => timed.push({ e, t });
 
   const UI = {
     root, hud, icons, el,
@@ -48,14 +50,16 @@ export function createUI(root) {
       const n = numPool[numI]; numI = (numI + 1) % numPool.length;
       n.hidden = false; n.textContent = text; n.className = 'num ' + (cls || '');
       n.style.left = _s.x + (Math.random() - 0.5) * 40 + 'px'; n.style.top = _s.y - 10 + (Math.random() - 0.5) * 24 + 'px';
-      n.style.animation = 'none'; void n.offsetWidth; n.style.animation = '';
+      n.style.animation = 'none'; void n.offsetWidth; n.style.animation = ''; n._t = 0.78;
     },
-    flashWord(key) { word.textContent = T.ui[key] || key; word.classList.toggle('red', key === 'boost'); restart(word, 'on'); },
+    flashWord(key) { word.textContent = T.ui[key] || key; word.classList.toggle('red', key === 'boost'); restart(word, 'on'); wordT = 0.95; },
     hint(key, dur = 6) { if (!key) { hintT = 0; return; } if (hintKey === key && hintT > 0) return; hintKey = key; hint.textContent = T.hints[key] || key; hintT = dur; hint.classList.add('on'); },
-    banner(text, sub) { banner.innerHTML = text + (sub ? `<small>${sub}</small>` : ''); restart(banner, 'on'); },
-    toast(title, sub) { const t = el('div', 'toast', `<b>${title}</b>${sub ? `<small>${sub}</small>` : ''}`); toasts.appendChild(t); setTimeout(() => t.remove(), 4300); while (toasts.children.length > 4) toasts.firstChild.remove(); },
+    banner(text, sub) { banner.innerHTML = text + (sub ? `<small>${sub}</small>` : ''); restart(banner, 'on'); bannerT = 3.7; },
+    toast(title, sub) { const t = el('div', 'toast', `<b>${title}</b>${sub ? `<small>${sub}</small>` : ''}`); toasts.appendChild(t); later(t, 4.3); while (toasts.children.length > 4) toasts.firstChild.remove(); },
     // 화면 가운데 크게(획을 익혔다 등)
-    big(title, sub) { const b = el('div', 'big', `<small>${sub || ''}</small><b>${title}</b>`); hud.appendChild(b); setTimeout(() => b.remove(), 4700); },
+    big(title, sub) { const b = el('div', 'big', `<small>${sub || ''}</small><b>${title}</b>`); hud.appendChild(b); later(b, 4.7); },
+    // 화면 한가운데 쾅 찍히는 큰 낙관(보스를 맺었을 때)
+    sealStamp() { const im = el('img', 'bigseal'); im.alt = ''; im.src = sealCanvas(T.ui.sealFinish, 512).toDataURL(); root.appendChild(im); later(im, 3.2); },
     setObjective(key, target) { objTarget = target || null; const txt = key ? T.obj[key] || key : ''; if (txt !== cache.obj) { cache.obj = txt; objT.textContent = txt; objBox.hidden = !txt; } },
     showBoss(e) { bossE = e; boss.hidden = !e; if (e) { bossN.innerHTML = `${T.names[e.def.nameKey || e.kind] || ''}<small>${T.bossSub[e.def.nameKey || e.kind] || ''}</small>`; cache.bossHp = cache.bossPs = -1; bossHpB.style.width = '100%'; } },
     denyArt(id, noInk) { const a = artEls[id]; if (a) restart(a.a, 'deny'); UI.hint(noInk ? G.text.toast.noInk : G.text.toast.cooldown, 1.6); },
@@ -67,6 +71,10 @@ export function createUI(root) {
       if (UI.dialog) UI.dialog.update(rdt);
       if (UI.screens) UI.screens.update(rdt);
       if (hintT > 0) { hintT -= rdt; if (hintT <= 0) hint.classList.remove('on'); }
+      for (const n of numPool) if (!n.hidden) { n._t -= rdt; if (n._t <= 0) n.hidden = true; }
+      for (let i = timed.length - 1; i >= 0; i--) { const x = timed[i]; x.t -= rdt; if (x.t <= 0) { x.e.remove(); timed.splice(i, 1); } }
+      if (bannerT > 0) { bannerT -= rdt; if (bannerT <= 0) banner.classList.remove('on'); }
+      if (wordT > 0) { wordT -= rdt; if (wordT <= 0) word.classList.remove('on'); }
       if (!playing) return;
       // 체력
       const w = Math.min(30, 7 + p.maxHp * 0.075); if (w !== cache.hpw) { cache.hpw = w; hp.style.width = w + 'em'; }
@@ -81,7 +89,8 @@ export function createUI(root) {
       if (p.healsMax !== cache.healN) { cache.healN = p.healsMax; heals.innerHTML = ''; for (let i = 0; i < p.healsMax; i++) { const im = el('img'); im.src = icons.gourd; im.alt = ''; heals.appendChild(im); } cache.heals = -1; }
       if (p.heals !== cache.heals) { cache.heals = p.heals; for (let i = 0; i < p.healsMax; i++) heals.children[i].classList.toggle('used', i >= p.heals); }
       // 먹물
-      if (pr) { const tgt = Math.round(pr.ink); if (moneyShown !== tgt) { const d = tgt - moneyShown; moneyShown += Math.abs(d) < 3 ? d : Math.round(d * Math.min(1, rdt * 10)) || Math.sign(d); moneyT.textContent = moneyShown; if (d > 0 && !money.classList.contains('bump')) { money.classList.add('bump'); setTimeout(() => money.classList.remove('bump'), 260); } } }
+      if (pr) { const tgt = Math.round(pr.ink); if (moneyShown !== tgt) { const d = tgt - moneyShown; moneyShown += Math.abs(d) < 3 ? d : Math.round(d * Math.min(1, rdt * 10)) || Math.sign(d); moneyT.textContent = moneyShown; if (d > 0) { if (bumpT <= 0) money.classList.add('bump'); bumpT = 0.26; } } }
+      if (bumpT > 0) { bumpT -= rdt; if (bumpT <= 0) money.classList.remove('bump'); }
       // 획
       for (const id in artEls) {
         const a = artEls[id], m = MOVES[ARTS[id].move], have = !!p.arts[id];

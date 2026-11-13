@@ -86,13 +86,17 @@ export function createPlayer() {
       if (this.dodges < pc.dodge.charges) { this.dodgeCd -= dt; if (this.dodgeCd <= 0) { this.dodges++; this.dodgeCd = pc.dodge.recharge; } }
       this.combatT += dt; this.t += dt;
       const I = G.input, active = G.state === 'play' && !this.frozen && this.alive;
-      const hasWish = active ? wish(_w) : 0;
+      let hasWish = active ? wish(_w) : 0;
+      if (this.auto) { // 연출: 정해진 곳까지 스스로 걷는다
+        const ax = this.auto.x - this.pos.x, az = this.auto.z - this.pos.z, ad = Math.hypot(ax, az);
+        if (ad < 0.35) { this.auto = null; hasWish = 0; } else { _w.x = ax / ad; _w.z = az / ad; hasWish = 1; }
+      }
       let speed = 0;
       switch (this.st) {
         case 'move': {
           if (active && tryActions(this, hasWish, _w)) break;
           const tgt = G.cam.target, sprint = active && hasWish && I.down('sprint');
-          speed = hasWish ? (sprint ? pc.sprint : tgt ? pc.lockSpeed : pc.run) : 0;
+          speed = hasWish ? (this.auto ? this.auto.speed : sprint ? pc.sprint : tgt ? pc.lockSpeed : pc.run) : 0;
           this.sprinting = sprint;
           steer(this, _w.x, _w.z, speed, dt);
           if (tgt && tgt.alive && !sprint) this.yaw = dampAngle(this.yaw, Math.atan2(tgt.pos.x - this.pos.x, tgt.pos.z - this.pos.z), 14, dt);
@@ -146,7 +150,7 @@ export function createPlayer() {
           if (this.t >= pc.heal.dur) this.setState('move', 0.15);
           break;
         }
-        case 'dead': this.vel.set(0, 0, 0); break;
+        case 'dead': case 'lie': this.vel.set(0, 0, 0); break;
         default: steer(this, 0, 0, 0, dt);
       }
       // 넉백
@@ -198,6 +202,7 @@ export function createPlayer() {
       case 'down': HA.down(C, p.t / pc.hurt.down); break;
       case 'heal': HA.drink(C, p.t / pc.heal.dur); if (sp > 0.5) { HA.run(p.poseA, p.runPh, 0.4, 0, 1, true); for (let i = 0; i < 3; i++) { C.fl[i] = p.poseA.fl[i]; C.fr[i] = p.poseA.fr[i]; } } break;
       case 'dead': HA.collapse(C, p.t / 1.1); break;
+      case 'lie': HA.down(C, 0.45); break;
       default: {
         HA.stand(p.poseA, t); if (!p.armed) { p.poseA.hr[0] = -0.28; p.poseA.hr[1] = 0.8; p.poseA.hr[2] = 0.04; }
         if (p.combatW > 0.01) lerpPose(p.poseA, HA.guard(p.poseB, t), p.combatW, p.poseA);
