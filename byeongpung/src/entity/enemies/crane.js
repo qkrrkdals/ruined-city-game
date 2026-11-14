@@ -26,7 +26,7 @@ function geos() {
 }
 
 export const CRANE = {
-  kind: 'crane', hp: 55, posture: 36, radius: 0.5, height: 2.0, speed: 2.9, aggro: 19, pref: 8.5, strafe: 0.5, poise: 1, flinchMax: 3, staggerTime: 2.8, ink: 24, mass: 0.8, turn: 7,
+  kind: 'crane', hp: 65, posture: 40, radius: 0.5, height: 2.0, speed: 2.9, aggro: 19, pref: 8.5, strafe: 0.5, poise: 1, flinchMax: 3, staggerTime: 2.8, ink: 24, mass: 0.8, turn: 7,
   attacks: [
     { id: 'spit', range: [4.5, 17], w: 4, windup: 0.75, strike: 0.2, recover: 0.7, cd: [2, 3.6], track: 7,
       onStrike: (e) => { const p = G.player; e.sk.j.head.getWorldPosition(_a); _b.set(p.pos.x + p.vel.x * 0.3, p.pos.y + 0.2, p.pos.z + p.vel.z * 0.3); G.shots.glob({ from: _a, to: _b, speed: 15, arc: 1.5, dmg: 10, r: 0.85, owner: e }); G.audio.play('squawk', { n: 1 }); } },

@@ -39,7 +39,7 @@ function land(e, r, dmg, power) {
 }
 
 export const TOAD = {
-  kind: 'toad', nameKey: 'toad', boss: true, hp: 1150, posture: 230, radius: 1.9, height: 2.6, speed: 1.7, aggro: 40, lose: 99, leash: 99, pref: 5.5, strafe: 0.2, poise: 3, staggerTime: 4.4, finFrac: 0.18, ink: 300, mass: 8, turn: 3.2, wake: 40,
+  kind: 'toad', nameKey: 'toad', boss: true, hp: 2600, posture: 360, radius: 1.9, height: 2.6, speed: 1.7, aggro: 40, lose: 99, leash: 99, pref: 5.5, strafe: 0.2, poise: 3, staggerTime: 4.4, finFrac: 0.13, ink: 300, mass: 8, turn: 3.2, wake: 40,
   attacks: [
     { id: 'leap', range: [5, 24], w: 5, windup: 0.9, strike: 0.85, recover: 1.35, cd: [0.8, 1.8], track: 4, power: 3,
       onStrike: (e) => {

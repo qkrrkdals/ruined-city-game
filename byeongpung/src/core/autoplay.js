@@ -41,9 +41,9 @@ export function createAutoplay(o = {}) {
       if (st === 'ending') { const b = document.querySelector('.endcard .btn'); if (b) { b.click(); this.done = true; this.note('ending → title'); } return; }
       if (st === 'menu') { // 연적에서는 덧칠, 가게에서는 살 수 있는 만큼
         const pr = G.prog; let guard = 0;
-        while (pr.ink >= pr.cost() && guard++ < 20) pr.upgrade(['atk', 'hp', 'atk', 'ink'][upI++ % 4]);
+        if (G.ui.menus.name === 'shrine') while (pr.ink >= pr.cost() && guard++ < 20) pr.upgrade(['atk', 'hp', 'atk', 'ink'][upI++ % 4]);
         const act = [...document.querySelectorAll('.panel .act:not([disabled])')].find((b) => !b.closest('.foot'));
-        if (act && guard === 0) { act.click(); return; }
+        if (act && G.ui.menus.name !== 'shrine') { act.click(); return; }
         G.ui.menus.close(); return;
       }
       if (st === 'dead') { if (!this.wasDead) { this.wasDead = true; this.deaths++; this.note(`죽음 hp0 zone=${F.zone(p.pos.x, p.pos.z)} boss=${G.story.boss ? G.story.boss.key : ''}`); } return; }

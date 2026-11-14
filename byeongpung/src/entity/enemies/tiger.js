@@ -26,7 +26,7 @@ function behind(e) { const p = G.player; rel(e.pos.x, e.pos.z, e.yaw, p.pos.x, p
 function surface(e) { e.sunk = false; e.hittable = true; e.targetable = true; e.solid = true; if (e.blot) e.blot.visible = false; }
 
 export const TIGER = {
-  kind: 'tiger', nameKey: 'tigerBoss', boss: true, hp: 2400, posture: 330, radius: 1.7, height: 2.5, speed: 4.6, aggro: 70, lose: 999, leash: 999, pref: 4.4, strafe: 0.28, poise: 3, staggerTime: 4.8, finFrac: 0.13, ink: 0, mass: 10, turn: 3.8, wake: 70, accel: 16,
+  kind: 'tiger', nameKey: 'tigerBoss', boss: true, hp: 5600, posture: 460, radius: 1.7, height: 2.5, speed: 4.6, aggro: 70, lose: 999, leash: 999, pref: 4.4, strafe: 0.28, poise: 3, staggerTime: 4.8, finFrac: 0.1, ink: 0, mass: 10, turn: 3.8, wake: 70, accel: 16,
   attacks: [
     { id: 'swipeR', range: [0, 4.7], w: 5, windup: 0.62, strike: 0.2, recover: 0.72, cd: [0.5, 1.3], lunge: 1.6, shape: FRONT, dmg: 22, power: 2, track: 5, hitAt: 0.35, chain: 'swipeL', chainCond: (e) => Math.random() < (e.phase2 ? 0.8 : 0.45) },
     { id: 'swipeL', range: [99, 99], windup: 0.52, strike: 0.2, recover: 0.82, cd: [0.6, 1.4], lunge: 1.8, shape: FRONT, dmg: 22, power: 2, track: 5, hitAt: 0.35, chain: 'pounce', chainCond: (e) => e.phase2 && Math.random() < 0.35 },
@@ -75,7 +75,7 @@ export const TIGER = {
 
 export class Tiger extends Enemy {
   build() {
-    const t = buildTiger('boss'); this.sk = t; this.mats = t.mats; this.model.add(t.root);
+    const t = buildTiger('boss'); this.sk = t; this.mats = t.mats; this.model.add(t.root); t.root.scale.setScalar(1.28);
     this.ph = 0; this.roarCd = 6; this.diveCd = 5; this.phase2 = false; this.sink = 0; this.sunk = false;
     this.home3 = new THREE.Vector3(this.home.x, 0, this.home.z + 13.5);
     const g = new THREE.PlaneGeometry(1, 1); g.rotateX(-Math.PI / 2);

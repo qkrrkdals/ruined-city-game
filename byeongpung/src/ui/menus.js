@@ -13,7 +13,7 @@ export function createMenus(UI) {
   const scr = el('div', 'screen veil'); scr.hidden = true; UI.root.appendChild(scr);
   let cur = null, tab = 'up', onClose = null;
   const M = {
-    get open() { return !!cur; },
+    get open() { return !!cur; }, get name() { return cur; },
     show(name, cb) { cur = name; onClose = cb || null; tab = 'up'; scr.hidden = false; G.flow.menuOpen(); render(); G.audio.play('page'); },
     close() { if (!cur) return; cur = null; scr.hidden = true; G.audio.play('uiBack'); const cb = onClose; onClose = null; G.flow.menuClose(); if (cb) cb(); },
     update() {},

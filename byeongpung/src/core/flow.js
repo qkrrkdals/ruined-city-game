@@ -34,7 +34,7 @@ export function createFlow() {
   // Esc: 놀이 중이면 멈춤, 멈춤이면 돌아가기. 포인터 잠금이 풀리면(브라우저의 Esc) 멈춤.
   G.on('key', (code) => {
     if (code === 'Escape') {
-      if (G.state === 'play' && (G.input.free || !G.input.locked)) F.pause();
+      if (G.state === 'play') F.pause();
       else if (G.state === 'pause') { if (G.ui.screens.panelName === 'pause' || G.ui.screens.panelName === 'map') F.resume(); else G.ui.screens.back(); }
       else if (G.state === 'title' && G.ui.screens.panelName) G.ui.screens.closePanel();
     } else if (code === 'KeyM') {

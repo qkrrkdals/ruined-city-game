@@ -6,7 +6,7 @@ import { entityMat } from '../../gfx/materials.js';
 import { HEX } from '../../gfx/palette.js';
 
 const PAL = {
-  boss: { fur: 0x1c1c22, belly: 0x2a2a31, stripe: 0x5a140f, nose: 0x3a0c08, claw: 0xd8d2c4 },
+  boss: { fur: 0x18181d, belly: 0x2c2c34, stripe: 0x9a2418, nose: 0x3a0c08, claw: 0xe8e2d4 },
   folk: { fur: HEX.tiger, belly: HEX.tigerPale, stripe: 0x1a1a1e, nose: 0xc8606a, claw: 0xf8f3e6 },
 };
 const CACHE = {};
@@ -45,7 +45,7 @@ function geos(kind) {
 export function buildTiger(kind = 'boss') {
   const g = geos(kind);
   const sk = quadSkeleton({ H: 1.62, L: 2.2, w: 0.5, u: 0.84, l: 0.74, neckY: 0.25, neckZ: 0.5, neckLen: 0.62, headY: 0.12, jawY: -0.2, jawZ: 0.36, tail: 4, tailSeg: 0.58, tailY: 0.25, legY: -0.05 });
-  const body = entityMat(kind === 'boss' ? { rim: 0.5 } : {}), keep = entityMat({ keep: true });
+  const body = entityMat(kind === 'boss' ? { rim: 0.95, keep: true } : {}), keep = entityMat({ keep: true });
   const add = (j, geo, m = body) => { const me = new THREE.Mesh(geo, m); sk.j[j].add(me); return me; };
   add('body', g.body); add('chest', g.chest); add('hips', g.hips); add('neck', g.neck); add('head', g.head); add('head', g.eyes, keep); add('jaw', g.jaw); add('jaw', g.teeth, keep);
   for (const n of ['FL', 'FR', 'BL', 'BR']) { add('leg' + n, g.leg); add('shin' + n, g.shin); add('shin' + n, g.claws, keep); }

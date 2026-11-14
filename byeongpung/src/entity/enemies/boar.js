@@ -25,7 +25,7 @@ function geos() {
 }
 
 export const BOAR = {
-  kind: 'boar', hp: 140, posture: 85, radius: 0.95, height: 1.4, speed: 3.3, aggro: 17, pref: 6.5, strafe: 0.5, poise: 2, flinchPower: 2, flinchMax: 3, staggerTime: 3.6, ink: 36, mass: 3, turn: 4,
+  kind: 'boar', hp: 170, posture: 95, radius: 0.95, height: 1.4, speed: 3.3, aggro: 17, pref: 6.5, strafe: 0.5, poise: 2, flinchPower: 2, flinchMax: 3, staggerTime: 3.6, ink: 36, mass: 3, turn: 4,
   attacks: [
     { id: 'charge', range: [4.2, 17], w: 4, windup: 1.0, strike: 1.45, recover: 1.1, cd: [1.6, 3], shape: { kind: 'circle', r: 1.3, fwd: 0.8 }, groundShape: { kind: 'line', len: 17, w: 1.2 }, ground: true, sweep: true, dmg: 24, power: 3, track: 3.6, commit: 0.25, armor: true,
       onStrike: (e) => { e.chargeV = 4; G.audio.play('snort'); },

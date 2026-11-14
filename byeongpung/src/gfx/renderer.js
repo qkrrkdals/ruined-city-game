@@ -62,6 +62,7 @@ export function createGfx(canvas) {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NoToneMapping;
   renderer.autoClear = true;
+  renderer.info.autoReset = false;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(HEX.paper);
   scene.fog = new THREE.Fog(HEX.paper, 70, 330);
@@ -113,6 +114,7 @@ export function createGfx(canvas) {
       this.makeTarget(); this.resize();
     },
     render() {
+      renderer.info.reset();
       renderer.setRenderTarget(rt); renderer.render(scene, camera);
       renderer.setRenderTarget(null); renderer.render(postScene, postCam);
     },

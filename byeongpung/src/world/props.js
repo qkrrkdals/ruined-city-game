@@ -84,9 +84,9 @@ export function ruin() {
 // 벼루(먹범의 싸움터) 바닥과 테두리
 export function inkstone(r = 25.4) {
   seedGeo(61); const p = [];
-  p.push(cyl(r, r + 0.4, 0.3, 36, 0x2c2d34, { p: [0, -0.13, 0] }, 0.06));
-  p.push(torus(r, 0.75, 5, 40, 0x1b1b21, { p: [0, 0.15, 0], r: [Math.PI / 2, 0, 0] }, 0.08));
-  for (const rr of [8.5, 17]) p.push(torus(rr, 0.09, 3, 40, 0x1d1e24, { p: [0, 0.03, 0], r: [Math.PI / 2, 0, 0] }, 0.05));
+  p.push(cyl(r, r + 0.4, 0.3, 36, 0x74767c, { p: [0, -0.13, 0] }, 0.05));
+  p.push(torus(r, 0.75, 5, 40, 0x2a2b31, { p: [0, 0.15, 0], r: [Math.PI / 2, 0, 0] }, 0.08));
+  for (const rr of [8.5, 17]) p.push(torus(rr, 0.09, 3, 40, 0x3c3d44, { p: [0, 0.03, 0], r: [Math.PI / 2, 0, 0] }, 0.05));
   const pool = cyl(9.2, 9.2, 0.05, 28, 0x08080c, { p: [0, 0.04, -13.5] }, 0.02);
   return [[merge(p), W], [merge([pool]), K]];
 }

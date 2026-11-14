@@ -68,7 +68,7 @@ export function buildSouthAndVillage(H) {
   W.anchor('brush', 1.5, 223);
   H.perch('meet', 6, 216, 0.8);
   // ── 첫 터 ──
-  H.enc('first', 'first', [[I, -3, 4], [I, 2, 1], [I, 5, 5]]);
+  H.enc('first', 'first', [[I, -3, 4], [I, 2, 1], [I, 5, 5]], { once: true }); // 연적 바로 옆이라 다시 번지지 않는다
   S.add('first', ...at('first', 3, -10), 95, { spawn: at('first', 1, -5) });
   H.perch('first', ...at('first', 7.5, -7.5));
   K.jar('j_first', ...at('first', -10, -5), 40);

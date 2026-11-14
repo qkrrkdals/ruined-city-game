@@ -8,17 +8,18 @@ const VERT = /* glsl */`
 attribute float aT; attribute float aV;
 uniform float uA0; uniform float uA1; uniform float uR0; uniform float uR1; uniform float uLine; uniform float uLen; uniform float uWidth;
 uniform vec3 uC; uniform vec3 uE1; uniform vec3 uE2;
-varying vec2 vUv;
+varying vec2 vUv; varying float vDist;
 void main() {
   vec3 p;
   if (uLine > 0.5) p = uC + uE1 * (aT * uLen) + uE2 * ((aV - 0.5) * uWidth);
   else { float a = mix(uA0, uA1, aT); p = uC + (cos(a) * uE1 + sin(a) * uE2) * mix(uR0, uR1, aV); }
   vUv = vec2(aT, aV);
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+  vec4 mv = modelViewMatrix * vec4(p, 1.0); vDist = -mv.z;
+  gl_Position = projectionMatrix * mv;
 }`;
 const FRAG = /* glsl */`
 uniform sampler2D uTex; uniform float uProg; uniform float uFade; uniform float uDry; uniform vec3 uColor; uniform float uOpacity; uniform float uFlat;
-varying vec2 vUv;
+varying vec2 vUv; varying float vDist;
 void main() {
   float u = vUv.x, v = vUv.y;
   float rev = 1.0 - smoothstep(uProg - 0.03, uProg + 0.01, u);
@@ -27,7 +28,7 @@ void main() {
   float w = abs(v - 0.56) / (0.44 * prof + 0.001);
   float body = 1.0 - smoothstep(0.72, 1.0, w);
   float hair = texture2D(uTex, vec2(u * 0.92 + 0.04, clamp((v - 0.56) / (prof + 0.001) * 0.5 + 0.5, 0.0, 1.0))).a;
-  float a = body * rev * tail * mix(1.0, hair, uDry) * uOpacity * (1.0 - uFade * 0.5);
+  float a = body * rev * tail * mix(1.0, hair, uDry) * uOpacity * (1.0 - uFade * 0.5) * smoothstep(0.9, 3.4, vDist); // 카메라 코앞에서는 옅게
   if (a < 0.012) discard;
   gl_FragColor = vec4(uColor, a);
 }`;

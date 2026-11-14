@@ -11,6 +11,7 @@ import { startMove, updateMove, tryActions, moveAngles } from './player_act.js';
 import { P } from '../gfx/particles.js';
 import { Slash } from '../gfx/slash.js';
 import { HEX } from '../gfx/palette.js';
+import { createRibbon } from '../gfx/ribbon.js';
 import { clamp01, damp, dampAngle, approachAngle, smoothstep, lerp, ease, rand } from '../core/util.js';
 
 const _w = { x: 0, z: 0 }, _v = new THREE.Vector3();
@@ -19,6 +20,7 @@ const pc = CFG.player;
 export function createPlayer() {
   const rig = buildHumanoid('hero');
   const group = new THREE.Group(); group.add(rig.root); G.gfx.scene.add(group);
+  const scarf = createRibbon(HEX.indigo), _an = new THREE.Vector3(), _bk = new THREE.Vector3();
   const p = {
     group, rig, pos: new THREE.Vector3(), vel: new THREE.Vector3(), yaw: Math.PI, yawGoal: Math.PI,
     st: 'move', t: 0, move: null, hit: new Set(), alive: true, armed: true, frozen: false,
@@ -34,7 +36,7 @@ export function createPlayer() {
     gainInk(a) { const before = this.ink; this.ink = Math.min(this.inkMax, this.ink + a * this.inkGain); if (Math.floor(this.ink) > Math.floor(before)) G.audio.play('inkFull'); },
     healBy(a) { this.hp = Math.min(this.maxHp, this.hp + a); },
     setState(st, blend = 0.1) { this.st = st; this.t = 0; this.blend(blend); this.rig.root.rotation.y = 0; this.rig.root.scale.set(1, 1, 1); if (st !== 'attack' && st !== 'finisher') { this.move = null; this.jumpY = 0; } },
-    place(x, z, yaw) { this.pos.set(x, F.h(x, z), z); this.vel.set(0, 0, 0); if (yaw !== undefined) { this.yaw = this.yawGoal = yaw; } this.group.position.copy(this.pos); },
+    place(x, z, yaw) { scarf.reset(); this.pos.set(x, F.h(x, z), z); this.vel.set(0, 0, 0); if (yaw !== undefined) { this.yaw = this.yawGoal = yaw; } this.group.position.copy(this.pos); },
     faceTo(x, z) { this.yaw = this.yawGoal = Math.atan2(x - this.pos.x, z - this.pos.z); },
     fullRestore() { this.hp = this.maxHp; this.heals = this.healsMax; this.dodges = pc.dodge.charges; },
     respawn(x, z, yaw) { this.alive = true; this.fullRestore(); this.ink = Math.min(this.ink, this.inkMax); this.inv = 1.5; this.setState('move', 0); this.place(x, z, yaw); G.cam.target = null; },
@@ -172,6 +174,9 @@ export function createPlayer() {
       group.rotation.y = this.yaw;
       pose(this, dt, sp);
       rig.j.weapon.visible = this.armed;
+      // 목도리: 목 뒤에 매여 뒤로 나부낀다
+      rig.j.head.getWorldPosition(_an); _bk.set(-Math.sin(this.yaw), 0, -Math.cos(this.yaw)); _an.addScaledVector(_bk, 0.12); _an.y -= 0.04;
+      scarf.update(dt || 0.001, _an, _bk, this.pos.y);
       // 일필휘지 준비: 붓끝에 붉은 기운
       if (this.boostT > 0 && Math.random() < dt * 24) { tipPos(this, _v); P.sparks(_v, 1, 2, HEX.red); }
     },

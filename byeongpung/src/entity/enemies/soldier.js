@@ -21,21 +21,21 @@ function slamRing(e, r) {
 
 export const HUMANOID = {
   soldier: {
-    kind: 'soldier', model: 'soldier', hp: 70, posture: 55, radius: 0.45, height: 1.75, speed: 3.4, aggro: 15, pref: 2.5, strafe: 0.3, poise: 1, flinchMax: 4, staggerTime: 3.2, ink: 20,
+    kind: 'soldier', model: 'soldier', hp: 85, posture: 60, radius: 0.45, height: 1.75, speed: 3.4, aggro: 15, pref: 2.5, strafe: 0.3, poise: 1, flinchMax: 4, staggerTime: 3.2, ink: 20,
     attacks: [
       { id: 'thrust', anim: 'thrust', range: [0.4, 3.3], w: 3, windup: 0.62, strike: 0.14, recover: 0.78, cd: [1.3, 2.5], lunge: 1.5, shape: { kind: 'line', len: 3.3, w: 0.62 }, dmg: 14, track: 5, hitAt: 0.3 },
       { id: 'sweep', anim: 'swing', sp: { tilt: 8 * D, a0: 110 * D, a1: -80 * D, lead: 'L' }, range: [0, 2.3], w: 2, windup: 0.72, strike: 0.18, recover: 0.82, cd: [1.5, 2.8], shape: { kind: 'sector', r: 3.0, half: 75 * D }, dmg: 12, track: 4, hitAt: 0.35 },
     ],
   },
   shield: {
-    kind: 'shield', model: 'shield', hp: 85, posture: 72, radius: 0.48, height: 1.75, speed: 3.0, aggro: 15, pref: 2.1, strafe: 0.25, poise: 1, flinchMax: 3, staggerTime: 3.4, ink: 28, shield: true,
+    kind: 'shield', model: 'shield', hp: 100, posture: 78, radius: 0.48, height: 1.75, speed: 3.0, aggro: 15, pref: 2.1, strafe: 0.25, poise: 1, flinchMax: 3, staggerTime: 3.4, ink: 28, shield: true,
     attacks: [
       { id: 'slash', anim: 'swing', sp: { tilt: 30 * D, a0: 115 * D, a1: -70 * D, lead: 'R', grip: 0, rh: 0.42 }, range: [0, 2.2], w: 3, windup: 0.6, strike: 0.16, recover: 0.95, cd: [1.4, 2.6], shape: { kind: 'sector', r: 2.6, half: 68 * D }, dmg: 15, track: 5, hitAt: 0.35 },
       { id: 'bash', anim: 'bash', range: [1.6, 4.2], w: 2, windup: 0.5, strike: 0.22, recover: 0.9, cd: [2, 3.4], lunge: 2.8, shape: { kind: 'line', len: 1.5, w: 0.8 }, dmg: 10, power: 2, track: 6, hitAt: 0.2 },
     ],
   },
   elite: {
-    kind: 'elite', model: 'elite', hp: 175, posture: 100, radius: 0.5, height: 1.95, speed: 3.9, aggro: 17, pref: 2.6, strafe: 0.45, poise: 2, flinchPower: 2, flinchMax: 2, staggerTime: 3.4, ink: 62, mass: 1.5,
+    kind: 'elite', model: 'elite', hp: 230, posture: 120, radius: 0.5, height: 1.95, speed: 3.9, aggro: 17, pref: 2.6, strafe: 0.45, poise: 2, flinchPower: 2, flinchMax: 2, staggerTime: 3.4, ink: 62, mass: 1.5,
     attacks: [
       { id: 'c1', anim: 'swing', sp: { tilt: 20 * D, a0: 118 * D, a1: -78 * D, lead: 'L' }, range: [0, 2.9], w: 4, windup: 0.56, strike: 0.15, recover: 0.5, cd: [1.2, 2.2], lunge: 0.9, shape: { kind: 'sector', r: 3.1, half: 78 * D }, dmg: 17, track: 6, hitAt: 0.35, chain: 'c2' },
       { id: 'c2', anim: 'swing', sp: { tilt: -16 * D, a0: -115 * D, a1: 82 * D, lead: 'R' }, range: [99, 99], windup: 0.5, strike: 0.15, recover: 0.5, lunge: 1.0, shape: { kind: 'sector', r: 3.1, half: 78 * D }, dmg: 17, track: 6, hitAt: 0.35, chain: 'c3' },
@@ -44,7 +44,7 @@ export const HUMANOID = {
     ],
   },
   general: {
-    kind: 'general', model: 'general', boss: true, hp: 1000, posture: 200, radius: 0.85, height: 2.75, speed: 3.1, aggro: 30, lose: 80, leash: 60, pref: 3.2, strafe: 0.3, poise: 3, staggerTime: 4.2, finFrac: 0.2, ink: 300, mass: 4, turn: 4.5,
+    kind: 'general', model: 'general', boss: true, hp: 1700, posture: 320, radius: 0.85, height: 2.75, speed: 3.1, aggro: 30, lose: 80, leash: 60, pref: 3.2, strafe: 0.3, poise: 3, staggerTime: 4.2, finFrac: 0.14, ink: 300, mass: 4, turn: 4.5,
     attacks: [
       { id: 'sweep', anim: 'swing', sp: { tilt: 6 * D, a0: 125 * D, a1: -100 * D, lead: 'L' }, range: [0, 4.2], w: 4, windup: 0.9, strike: 0.2, recover: 0.95, cd: [0.9, 1.8], lunge: 1.2, shape: { kind: 'sector', r: 4.8, half: 88 * D }, ground: true, dmg: 22, power: 2, track: 4, hitAt: 0.4, chain: 'slam', chainCond: (e) => e.hp < e.maxHp * 0.6 },
       { id: 'slam', anim: 'swing', sp: { tilt: 90 * D, a0: 132 * D, a1: -36 * D, lead: 'R', cy: 1.25 }, range: [1.5, 5], w: 3, windup: 1.1, strike: 0.18, recover: 1.25, cd: [1, 2], lunge: 1.0, shape: { kind: 'line', len: 5.6, w: 1.15 }, ground: true, dmg: 30, power: 3, track: 3.5, commit: 0.3, hitAt: 0.6, onStrikeEnd: (e) => slamRing(e, 4.2) },

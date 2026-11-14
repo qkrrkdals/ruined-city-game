@@ -44,11 +44,11 @@ export class Enemy {
       const mk = (c, o = 1) => new THREE.MeshBasicMaterial({ color: c, fog: false, depthTest: false, transparent: true, opacity: o });
       barMats = [mk(HEX.paper, 0.75), mk(HEX.ink), mk(HEX.red)];
     }
-    const w = this.boss ? 0 : Math.min(2.2, 0.8 + this.maxHp / 160);
+    const w = this.boss ? 0 : Math.min(1.6, 0.6 + this.maxHp / 240);
     const b = new THREE.Group(); b.visible = false; this.bar = b; this.barW = w;
     const bg = new THREE.Mesh(barGeo, barMats[0]), hp = new THREE.Mesh(barGeo, barMats[1]), ps = new THREE.Mesh(barGeo, barMats[2]);
-    bg.scale.set(w + 0.06, 0.15, 1); bg.position.set(-w / 2 - 0.03, 0, 0); hp.position.set(-w / 2, 0.025, 0.001); ps.position.set(-w / 2, -0.045, 0.001);
-    hp.scale.set(w, 0.07, 1); ps.scale.set(0.001, 0.035, 1);
+    bg.scale.set(w + 0.05, 0.11, 1); bg.position.set(-w / 2 - 0.025, 0, 0); hp.position.set(-w / 2, 0.018, 0.001); ps.position.set(-w / 2, -0.034, 0.001);
+    hp.scale.set(w, 0.05, 1); ps.scale.set(0.001, 0.026, 1);
     bg.renderOrder = 8; hp.renderOrder = 9; ps.renderOrder = 9;
     b.add(bg, hp, ps); b.userData = { hp, ps }; G.gfx.scene.add(b);
   }

@@ -36,7 +36,7 @@ function bambooGeo(white) {
   return merge(g);
 }
 function rockGeo(v, white) { seedGeo(90 + v); const g = jitter(new THREE.IcosahedronGeometry(1, v === 0 ? 1 : 0).scale(1, 0.72, 0.85).translate(0, 0.5, 0), 0.17); return paintY(g, white ? 0xe9e2d2 : HEX.stoneDark, white ? 0xf6f2e8 : HEX.stone, 0, 1.2, 0.08); }
-function grassGeo() { seedGeo(12); const g = []; for (let i = 0; i < 3; i++) { const a = i * 2.1, c = Math.cos(a), s = Math.sin(a), h = 0.4 + i * 0.1; g.push(tris([[[c * -0.07, 0, s * -0.07], [c * 0.07, 0, s * 0.07], [c * 0.16 + s * 0.1, h, s * 0.16 - c * 0.1]]], 0xffffff, null, 0.12)); } return merge(g); }
+function grassGeo() { seedGeo(12); const g = []; for (let i = 0; i < 3; i++) { const a = i * 2.1, c = Math.cos(a), s = Math.sin(a), h = 0.28 + i * 0.07; g.push(tris([[[c * -0.07, 0, s * -0.07], [c * 0.07, 0, s * 0.07], [c * 0.16 + s * 0.1, h, s * 0.16 - c * 0.1]]], 0xffffff, null, 0.12)); } return merge(g); }
 function reedGeo() { seedGeo(15); const g = []; for (let i = 0; i < 4; i++) { const a = i * 1.7, c = Math.cos(a) * 0.14, s = Math.sin(a) * 0.14, h = 1.5 + i * 0.25; g.push(tris([[[c - 0.03, 0, s], [c + 0.03, 0, s], [c * 2.2, h, s * 2.2]]], HEX.reed, null, 0.1)); if (i % 2) g.push(cone(0.05, 0.3, 4, 0x8a6a48, { p: [c * 2.2, h, s * 2.2] })); } return merge(g); }
 function lotusGeo(flower) { seedGeo(18); const g = [cyl(0.55, 0.55, 0.03, 7, HEX.leaf, { p: [0, 0.02, 0] }, 0.1)]; if (flower) for (let i = 0; i < 5; i++) { const a = i * 1.257; g.push(cone(0.1, 0.34, 4, HEX.lotus, { p: [Math.cos(a) * 0.1, 0.34, Math.sin(a) * 0.1], r: [Math.sin(a) * 0.5, 0, -Math.cos(a) * 0.5] }, 0.08)); } return merge(g); }
 function bushGeo() { seedGeo(22); return paintY(jitter(new THREE.IcosahedronGeometry(0.7, 0).scale(1, 0.7, 1).translate(0, 0.4, 0), 0.12), 0x4c6a4a, 0x7fa06a, 0, 0.9, 0.1); }
@@ -101,6 +101,7 @@ export function buildScatter(scene) {
       continue;
     }
     if (zone === 2 && dg < -3 && Math.hypot(px, pz) < 30) continue; // 마을 마당은 비운다
+    if (Math.hypot(px, pz + 233) < 26.5) continue;                  // 벼루못 바닥도 비운다
     if (dg < 4.5 && path < 0.3 && d > -40 && rr < (zone === 5 ? 0.25 : 0.62)) put('grass', px, y, pz, ry, 0.9 + R() * 0.9, 1, 0.88 + R() * 0.24);
   }
   const group = new THREE.Group(); group.name = 'scatter';

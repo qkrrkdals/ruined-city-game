@@ -3,8 +3,8 @@ module.exports = async (page, h, args) => {
   const kinds = (args[0] || 'inkling,inkling,inkling,soldier').split(',');
   const secs = +(args[1] || 30);
   await h.ev((kinds) => {
-    const g = window.__game; g.tp('first', 0, 0.32, 6.4);
-    const p = g.G.player; p.arts.dot = p.arts.wave = p.arts.smash = true;
+    const g = window.__game; g.start({ flags: { firstFight: true, shrine1: true }, arts: ['dot', 'wave', 'smash'] }); g.G.spawner.encs.forEach((e) => (e.manual = true)); g.G.spawner.reset(true);
+    g.tp([-14, 96], 0, 0.32, 6.4);
     kinds.forEach((k, i) => g.spawn(k, (i - (kinds.length - 1) / 2) * 2.2, 7 + (i % 2) * 1.5));
     g.bot(true, { arts: true, heavy: true });
   }, kinds);
