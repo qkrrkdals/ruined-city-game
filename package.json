@@ -11,7 +11,8 @@
     "bp:dev": "npm run bp:fonts && vite --config byeongpung/vite.config.js",
     "bp:build": "npm run bp:fonts && vite build --config byeongpung/vite.config.js && node byeongpung/scripts/pack.mjs",
     "bp:check": "node byeongpung/scripts/check.cjs",
-    "bp:fonts": "node byeongpung/scripts/fonts.mjs"
+    "bp:fonts": "node byeongpung/scripts/fonts.mjs",
+    "bp:release": "npm run bp:fonts && vite build --config byeongpung/vite.config.js && node byeongpung/scripts/pack.mjs --release"
   },
   "dependencies": {
     "@fontsource/gaegu": "^5.3.0",
