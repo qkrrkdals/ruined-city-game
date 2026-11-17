@@ -47,7 +47,7 @@ export function createAutoplay(o = {}) {
         G.ui.menus.close(); return;
       }
       if (st === 'dead') { if (!this.wasDead) { this.wasDead = true; this.deaths++; this.note(`죽음 hp0 zone=${F.zone(p.pos.x, p.pos.z)} boss=${G.story.boss ? G.story.boss.key : ''}`); } return; }
-      if (this.wasDead && st === 'play') { this.wasDead = false; this.replan(); }
+      if (this.wasDead && st === 'play') { this.wasDead = false; this.replan(); const pr = G.prog; let n = 0; while (pr.ink >= pr.cost() && n++ < 20) pr.upgrade(['atk', 'hp', 'atk', 'ink'][upI++ % 4]); p.fullRestore(); }
       if (st !== 'play' || !p.alive || G.story.busy()) return;
       // ── 싸움 ──
       let best = null, bd = 1e9, threat = null, fin = null;

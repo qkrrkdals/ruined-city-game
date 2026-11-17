@@ -39,7 +39,7 @@ function land(e, r, dmg, power) {
 }
 
 export const TOAD = {
-  kind: 'toad', nameKey: 'toad', boss: true, hp: 2600, posture: 360, radius: 1.9, height: 2.6, speed: 1.7, aggro: 40, lose: 99, leash: 99, pref: 5.5, strafe: 0.2, poise: 3, staggerTime: 4.4, finFrac: 0.13, ink: 300, mass: 8, turn: 3.2, wake: 40,
+  kind: 'toad', nameKey: 'toad', boss: true, hp: 2600, posture: 360, radius: 1.9, height: 2.6, speed: 1.7, aggro: 40, lose: 99, leash: 99, pref: 5.5, strafe: 0.2, poise: 3, staggerTime: 4.4, finFrac: 0.13, postureTaken: 0.45, ink: 300, mass: 8, turn: 3.2, wake: 40,
   attacks: [
     { id: 'leap', range: [5, 24], w: 5, windup: 0.9, strike: 0.85, recover: 1.35, cd: [0.8, 1.8], track: 4, power: 3,
       onStrike: (e) => {
@@ -49,7 +49,7 @@ export const TOAD = {
         e.landFx = Slash.arc({ pos: _a.set(e.to.x, F.h(e.to.x, e.to.z), e.to.z), c: [0, 0.16, 0], tilt: 0, a0: 0, a1: Math.PI * 2, r0: 0.7, r1: 4.4, color: HEX.red, reveal: 0.3, hold: 0.55, fade: 0.2, flat: 1, opacity: 0.6, dry: 0.75 });
       },
       onUpdate: (e) => { const u = clamp01(e.t / 0.85); e.pos.x = lerp(e.from.x, e.to.x, u); e.pos.z = lerp(e.from.z, e.to.z, u); e.jumpY = 6 * Math.sin(u * Math.PI); e.vel.set(0, 0, 0); },
-      onStrikeEnd: (e) => { land(e, 4.4, 24, 3); shockwave(e); }, onEnd: (e) => { e.solid = true; e.jumpY = 0; } },
+      onStrikeEnd: (e) => { land(e, 4.4, 28, 3); shockwave(e); }, onEnd: (e) => { e.solid = true; e.jumpY = 0; } },
     { id: 'tongue', range: [2.5, 11.5], w: 4, windup: 0.62, strike: 0.2, recover: 0.9, cd: [0.8, 1.8], shape: { kind: 'line', len: 12, w: 0.85 }, ground: true, dmg: 18, power: 2, track: 5, hitAt: 0.35 },
     { id: 'spit', range: [7, 24], w: 3, cond: (e) => e.hp < e.maxHp * 0.75, windup: 0.8, strike: 0.2, recover: 0.9, cd: [1, 2], track: 5,
       onStrike: (e) => {
@@ -59,7 +59,7 @@ export const TOAD = {
         G.audio.play('croak');
       } },
     { id: 'slam', range: [0, 3.4], w: 4, windup: 0.75, strike: 0.42, recover: 1.1, cd: [0.8, 1.6], shape: null, groundShape: { kind: 'circle', r: 4.0 }, ground: true, track: 3, power: 2,
-      onStrike: (e) => { e.jumpV = 5.5; }, onStrikeEnd: (e) => land(e, 4.0, 20, 2) },
+      onStrike: (e) => { e.jumpV = 5.5; }, onStrikeEnd: (e) => land(e, 4.0, 24, 2) },
     { id: 'summon', range: [0, 99], w: 50, cond: (e) => e.hp < e.maxHp * 0.5 && !e.summoned, windup: 1.1, strike: 0.2, recover: 0.8, cd: [1, 1.5], track: 2,
       onStrike: (e) => {
         e.summoned = true; G.audio.play('croak');

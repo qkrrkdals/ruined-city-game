@@ -12,6 +12,8 @@ import { P } from '../gfx/particles.js';
 import { Slash } from '../gfx/slash.js';
 import { HEX } from '../gfx/palette.js';
 import { createRibbon } from '../gfx/ribbon.js';
+import { blotTexture } from '../gfx/textures.js';
+import { patch } from '../gfx/materials.js';
 import { clamp01, damp, dampAngle, approachAngle, smoothstep, lerp, ease, rand } from '../core/util.js';
 
 const _w = { x: 0, z: 0 }, _v = new THREE.Vector3();
@@ -21,6 +23,10 @@ export function createPlayer() {
   const rig = buildHumanoid('hero');
   const group = new THREE.Group(); group.add(rig.root); G.gfx.scene.add(group);
   const scarf = createRibbon(HEX.indigo), _an = new THREE.Vector3(), _bk = new THREE.Vector3();
+  // 발밑 먹 그림자
+  const sgeo = new THREE.PlaneGeometry(1.5, 1.5); sgeo.rotateX(-Math.PI / 2);
+  const shadow = new THREE.Mesh(sgeo, patch(new THREE.MeshBasicMaterial({ map: blotTexture(false), color: HEX.ink, transparent: true, opacity: 0.32, depthWrite: false }), { keep: true }));
+  shadow.renderOrder = 1; G.gfx.scene.add(shadow);
   const p = {
     group, rig, pos: new THREE.Vector3(), vel: new THREE.Vector3(), yaw: Math.PI, yawGoal: Math.PI,
     st: 'move', t: 0, move: null, hit: new Set(), alive: true, armed: true, frozen: false,
@@ -172,6 +178,7 @@ export function createPlayer() {
       // 모델
       group.position.set(this.pos.x, this.pos.y + this.jumpY, this.pos.z);
       group.rotation.y = this.yaw;
+      shadow.position.set(this.pos.x, this.pos.y + 0.05, this.pos.z); shadow.scale.setScalar(Math.max(0.35, 1 - this.jumpY * 0.2));
       pose(this, dt, sp);
       rig.j.weapon.visible = this.armed;
       // 목도리: 목 뒤에 매여 뒤로 나부낀다

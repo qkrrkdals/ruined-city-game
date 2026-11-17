@@ -60,7 +60,7 @@ export function startMove(p, id, o = {}) {
   p.vfxDone = false; p.hitDone = false; p.endDone = false; p.jumpY = 0; p.combatT = 0;
   p.rig.root.rotation.y = 0; p.rig.root.scale.set(1, 1, 1);
   p.blend(0.07);
-  p.empowered = p.boostT > 0 && !m.fin; if (p.empowered) { p.boostT = 0; G.audio.play('boost'); }
+  p.empowered = p.boostT > 0 && !m.fin; if (p.empowered) { p.boostT = 0; G.audio.play('boost'); if (G.ui) G.ui.flashWord('boost'); }
   if (m.fin) return;
   // 조준: 입력 방향(없으면 보는 방향) 근처의 적을 향해 몸을 돌리고 거리를 맞춰 내딛는다
   const dirYaw = o.wish ? Math.atan2(o.wish.x, o.wish.z) : p.yaw;

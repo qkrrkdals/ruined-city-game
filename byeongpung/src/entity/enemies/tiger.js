@@ -26,11 +26,11 @@ function behind(e) { const p = G.player; rel(e.pos.x, e.pos.z, e.yaw, p.pos.x, p
 function surface(e) { e.sunk = false; e.hittable = true; e.targetable = true; e.solid = true; if (e.blot) e.blot.visible = false; }
 
 export const TIGER = {
-  kind: 'tiger', nameKey: 'tigerBoss', boss: true, hp: 5600, posture: 460, radius: 1.7, height: 2.5, speed: 4.6, aggro: 70, lose: 999, leash: 999, pref: 4.4, strafe: 0.28, poise: 3, staggerTime: 4.8, finFrac: 0.1, ink: 0, mass: 10, turn: 3.8, wake: 70, accel: 16,
+  kind: 'tiger', nameKey: 'tigerBoss', boss: true, hp: 5600, posture: 460, radius: 1.7, height: 2.5, speed: 4.6, aggro: 70, lose: 999, leash: 999, pref: 4.4, strafe: 0.28, poise: 3, staggerTime: 4.8, finFrac: 0.1, postureTaken: 0.45, ink: 0, mass: 10, turn: 3.8, wake: 70, accel: 16,
   attacks: [
-    { id: 'swipeR', range: [0, 4.7], w: 5, windup: 0.62, strike: 0.2, recover: 0.72, cd: [0.5, 1.3], lunge: 1.6, shape: FRONT, dmg: 22, power: 2, track: 5, hitAt: 0.35, chain: 'swipeL', chainCond: (e) => Math.random() < (e.phase2 ? 0.8 : 0.45) },
-    { id: 'swipeL', range: [99, 99], windup: 0.52, strike: 0.2, recover: 0.82, cd: [0.6, 1.4], lunge: 1.8, shape: FRONT, dmg: 22, power: 2, track: 5, hitAt: 0.35, chain: 'pounce', chainCond: (e) => e.phase2 && Math.random() < 0.35 },
-    { id: 'bite', range: [3.2, 8.6], w: 4, windup: 0.72, strike: 0.24, recover: 0.86, cd: [0.6, 1.4], lunge: 5.0, shape: { kind: 'line', len: 3.6, w: 1.4 }, dmg: 26, power: 2, track: 5.5, hitAt: 0.15 },
+    { id: 'swipeR', range: [0, 4.7], w: 5, windup: 0.62, strike: 0.2, recover: 0.72, cd: [0.5, 1.3], lunge: 1.6, shape: FRONT, dmg: 25, power: 2, track: 5, hitAt: 0.35, chain: 'swipeL', chainCond: (e) => Math.random() < (e.phase2 ? 0.8 : 0.45) },
+    { id: 'swipeL', range: [99, 99], windup: 0.52, strike: 0.2, recover: 0.82, cd: [0.6, 1.4], lunge: 1.8, shape: FRONT, dmg: 25, power: 2, track: 5, hitAt: 0.35, chain: 'pounce', chainCond: (e) => e.phase2 && Math.random() < 0.35 },
+    { id: 'bite', range: [3.2, 8.6], w: 4, windup: 0.72, strike: 0.24, recover: 0.86, cd: [0.6, 1.4], lunge: 5.0, shape: { kind: 'line', len: 3.6, w: 1.4 }, dmg: 30, power: 2, track: 5.5, hitAt: 0.15 },
     { id: 'pounce', range: [6.5, 23], w: 4, windup: 0.95, strike: 0.72, recover: 1.3, cd: [0.8, 1.8], track: 5, power: 3,
       onStrike: (e) => {
         const p = G.player; e.from = e.pos.clone(); e.to = new THREE.Vector3(p.pos.x + p.vel.x * 0.25, 0, p.pos.z + p.vel.z * 0.25);
@@ -40,17 +40,17 @@ export const TIGER = {
         Slash.arc({ pos: _a.set(e.to.x, F.h(e.to.x, e.to.z), e.to.z), c: [0, 0.16, 0], tilt: 0, a0: 0, a1: Math.PI * 2, r0: 0.8, r1: 4.9, color: HEX.red, reveal: 0.25, hold: 0.47, fade: 0.2, flat: 1, opacity: 0.6, dry: 0.75 });
       },
       onUpdate: (e) => { const u = clamp01(e.t / 0.72); e.pos.x = lerp(e.from.x, e.to.x, u); e.pos.z = lerp(e.from.z, e.to.z, u); e.jumpY = 3.7 * Math.sin(u * Math.PI); e.vel.set(0, 0, 0); },
-      onStrikeEnd: (e) => land(e, 4.9, 32), onEnd: (e) => { e.solid = true; e.jumpY = 0; } },
+      onStrikeEnd: (e) => land(e, 4.9, 36), onEnd: (e) => { e.solid = true; e.jumpY = 0; } },
     { id: 'tail', range: [0, 6.6], w: 30, cond: behind, windup: 0.55, strike: 0.36, recover: 0.8, cd: [0.5, 1.2], shape: { kind: 'circle', r: 6.4 }, ground: true, dmg: 20, power: 2, track: 0.5, hitAt: 0.4 },
     { id: 'roar', range: [0, 7.5], w: 3, cond: (e) => e.roarCd <= 0, windup: 0.85, strike: 0.5, recover: 0.9, cd: [0.8, 1.5], shape: { kind: 'circle', r: 9.5 }, ground: true, dmg: 6, power: 3, track: 2, hitAt: 0.1,
       onStrike: (e) => { e.roarCd = 15; G.audio.play('roar'); G.cam.shake(0.6); ringFx(e, 2, 18); ringFx(e, 1, 12, 0x16161f); } },
-    { id: 'blades', range: [5, 34], w: 4, cond: (e) => e.phase2, windup: 1.05, strike: 0.3, recover: 1.1, cd: [1, 2], track: 4,
+    { id: 'blades', range: [0, 34], w: 5, cond: (e) => e.phase2, windup: 1.05, strike: 0.3, recover: 1.1, cd: [1, 2], track: 4,
       onStrike: (e) => {
         const p = G.player, base = Math.atan2(p.pos.x - e.pos.x, p.pos.z - e.pos.z), n = e.hp < e.maxHp * 0.3 ? 7 : 5;
         for (let i = 0; i < n; i++) { const yaw = base + (i - (n - 1) / 2) * 0.3; G.shots.blade({ x: e.pos.x + Math.sin(yaw) * 2.6, z: e.pos.z + Math.cos(yaw) * 2.6, yaw, speed: 21, range: 36, delay: 0.5 + i * 0.045, dmg: 20, r: 1.15, power: 2, owner: e }); }
         G.fx.flash(e.mats, 0.3, 0.6, HEX.red); G.audio.play('roar', { short: true });
       } },
-    { id: 'dive', range: [0, 60], w: 3, cond: (e) => e.phase2 && e.diveCd <= 0, windup: 0.75, strike: 3.0, recover: 1.35, cd: [1, 2], track: 0, armor: true,
+    { id: 'dive', range: [0, 60], w: 7, cond: (e) => e.phase2 && e.diveCd <= 0, windup: 0.75, strike: 3.0, recover: 1.35, cd: [1, 2], track: 0, armor: true,
       onStrike: (e) => { e.sunk = true; e.hittable = false; e.targetable = false; e.solid = false; e.diveCd = 17; e.ringed = false; e.erupted = false; e.trailT = 0; P.inkBurst(e.pos, 30, 7, null, HEX.ink, 4); P.splat(e.pos.x, e.pos.z, 7); G.audio.play('splat'); },
       onUpdate: (e, dt) => {
         const p = G.player; e.vel.set(0, 0, 0);

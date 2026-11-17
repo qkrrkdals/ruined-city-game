@@ -11,7 +11,7 @@ import { patch } from '../gfx/materials.js';
 import { approachAngle, wrapAngle, rand, randSign, clamp, clamp01, damp } from '../core/util.js';
 
 const _d = new THREE.Vector3(), _p = new THREE.Vector3(), R = { f: 0, r: 0, dist: 0, ang: 0 };
-let shadowMat = null, barGeo = null, barMats = null;
+let shadowMat = null, shadowGeo = null, barGeo = null, barMats = null;
 const KB = [0, 5.5, 9, 13]; // 세기별 넉백 속도
 
 export class Enemy {
@@ -30,8 +30,8 @@ export class Enemy {
     this.build();
     // 발밑 먹 그림자
     if (!shadowMat) shadowMat = patch(new THREE.MeshBasicMaterial({ map: blotTexture(false), color: HEX.ink, transparent: true, opacity: 0.34, depthWrite: false }), { keep: true });
-    const sg = new THREE.PlaneGeometry(1, 1); sg.rotateX(-Math.PI / 2);
-    this.shadow = new THREE.Mesh(sg, shadowMat); this.shadow.scale.setScalar(this.radius * 3.4); this.shadow.renderOrder = 1; this.group.add(this.shadow);
+    if (!shadowGeo) { shadowGeo = new THREE.PlaneGeometry(1, 1); shadowGeo.rotateX(-Math.PI / 2); }
+    this.shadow = new THREE.Mesh(shadowGeo, shadowMat); this.shadow.scale.setScalar(this.radius * 3.4); this.shadow.renderOrder = 1; this.group.add(this.shadow);
     this.makeBar();
     if (this.ambush) { this.st = 'sleep'; this.targetable = false; this.hittable = false; this.solid = false; this.model.visible = false; this.shadow.visible = false; }
     this.sync();
@@ -89,9 +89,10 @@ export class Enemy {
       return { dmg };
     }
     if (!this.staggered) {
-      this.posture += info.pos; this.postureT = 0;
+      this.posture += info.pos * (this.def.postureTaken || 1); this.postureT = 0;
       if (this.posture >= this.postureMax) { this.stagger(); return { dmg }; }
-      if (!this.armored() && (info.power || 1) >= (this.def.flinchPower || 1)) {
+      // 우두머리(poise 3)는 맞아도 움찔하지 않는다 — 흐트러뜨려야만 멈춘다
+      if (!this.armored() && (this.def.poise || 1) < 3 && (info.power || 1) >= (this.def.flinchPower || 1)) {
         this.flinchN = this.flinchT < 2 ? this.flinchN + 1 : 1; this.flinchT = 0;
         if (this.flinchN > (this.def.flinchMax || 4)) { this.revenge = true; this.flinchN = 0; this.cd = 0; }
         else this.flinch(info);

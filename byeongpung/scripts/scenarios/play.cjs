@@ -1,8 +1,9 @@
 // 전체 플레이 점검: 새 게임부터 결말까지 자동 플레이를 돌린다.
-//   인자: [god|real] [최대 분]   환경 변수 SHOTS=1 이면 주요 순간을 찍는다.
+//   인자: [god|real] [최대 분] [회피 성공률 0~1]   환경 변수 SHOTS=1 이면 주요 순간을 찍는다.
 module.exports = async (page, h, args) => {
   const god = (args[0] || 'god') === 'god', maxMin = +(args[1] || 60);
-  await h.ev((god) => { const g = window.__game; g.G.flow.newGame(); g.autoplay({ god }); }, god);
+  const skill = args[2] !== undefined ? +args[2] : 0.85; // 회피 성공률(서툰 사람 흉내: 0.3)
+  await h.ev(([god, skill]) => { const g = window.__game; g.G.flow.newGame(); g.autoplay({ god, skill }); }, [god, skill]);
   const out = { god, lines: [] }; let last = null, lastGi = -1, sameN = 0, shotN = 0, prevBoss = '';
   for (let i = 0; i < maxMin * 6; i++) {
     const s = await h.ev(() => { const g = window.__game; g.sim(600); return g.autoStatus(); });

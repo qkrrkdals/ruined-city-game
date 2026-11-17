@@ -25,7 +25,7 @@ export function installChapter(S) {
     objective() {
       const f = fl(), a = G.prog.arts;
       if (!f.brush) return { key: 'brush', target: A('brush') };
-      if (!f.firstFight) return { key: 'first', target: N('first') };
+      if (!f.firstFight && !f.shrine1) return { key: 'first', target: N('first') };
       if (!f.shrine1) return { key: 'shrine', target: G.shrines.get('first') };
       if (!f.village) return { key: 'village', target: N('vsouth') };
       if (!f.jang) return { key: 'talk', target: A('jang') };

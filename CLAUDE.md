@@ -92,7 +92,7 @@ scripts/check.cjs  docs/DESIGN.md
   문장이 바뀌면 글꼴 조각도 다시 만들어지므로 반드시 `bp:build` 로 빌드. 배포용 파일 갱신은 `node byeongpung/scripts/pack.mjs --release`.
 - 규칙은 위와 같다: 문장은 `src/data/text.ko.json`, 외부 에셋 금지(코드 생성), 파일 400줄 이하, Ctrl·Tab 금지, 한국어 커밋.
 - 점검: `node byeongpung/scripts/check.cjs byeongpung/scripts/scenarios/<이름>.cjs`.
-  `play`(처음부터 결말까지 자동 플레이. 푸시 전 필수) `ui` `audio` `world` `combat` `boss` `moments` `live` `death` `poses`.
+  `play`(처음부터 결말까지 자동 플레이. 푸시 전 필수. 인자: real 90 0.3 = 서툰 봇) `ui` `audio` `world` `combat` `boss` `bossdiag`(보스 공격·명중 통계) `moments` `live` `inputs` `quality` `death` `poses`.
   렌더링은 멈춰 두고 `__game.sim(n)` 으로 시간을 흘린다(SwiftShader 는 초당 1프레임 수준).
 - 디버그 훅(`#debug`): `__game.start({flags, arts})` `tp` `spawn` `bot` `autoplay` `autoStatus` `audioTest` `poseRig/pose`.
 
@@ -102,4 +102,6 @@ scripts/check.cjs  docs/DESIGN.md
 - 자동 플레이로 처음부터 결말까지 완주 확인(오류 0). 죽음→부활, 저장→이어 그리기, 입력 배선도 시나리오로 확인.
 - 사람이 직접 확인해야 하는 것: 조작감·난이도·소리(크기는 숫자로만 맞춤)·실제 GPU 성능.
   난이도 숫자는 `src/core/config.js` 와 각 적 파일의 정의(hp·posture·attacks), 소리 크기는 `src/systems/audio/sfx.js`.
+- 난이도 메모: 자동 플레이 봇(회피 성공률 30%)도 죽지 않고 완주한다. 봇은 쉬지 않고 공격하므로 사람보다 훨씬 빨리 잡는다(묵장 40초·먹범 90초).
+  우두머리는 맞아도 움찔하지 않고(poise 3), 흐트러짐은 `postureTaken: 0.45` 로 더디게 찬다.
 - 아이디어(미구현): 제2폭, 적 추가, 주인공 손 IK 다듬기, 자동 품질 조절.
