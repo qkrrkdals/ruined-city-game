@@ -35,3 +35,7 @@ PC 브라우저(키보드·마우스) 전용입니다. 헤드폰을 쓰면 더 �
 ---
 
 You wake up with no memory in Clearhaven, a ruined city swallowed by green. Head for the clock tower as afternoon turns to night and night to dawn. The handwriting on the notes looks familiar, and the person in the photos wears your yellow cardigan. Your flashlight shows the way, but it also draws the Remnants. A first-person low-poly pastel exploration-mystery game for desktop browsers (20–30 minutes). Korean and English supported; everything—models, textures, sound—is generated in code.
+
+## 두 번째 게임: 마르지 않는 병풍
+
+수묵 로우폴리 액션 RPG(1장 데모). [`byeongpung/`](byeongpung/README.md) 폴더에 있다. `byeongpung/play.html` 을 브라우저로 열면 바로 할 수 있다.

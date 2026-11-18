@@ -80,3 +80,28 @@ scripts/check.cjs  docs/DESIGN.md
 
 ## 나중에 할 것 (사양 외 아이디어)
 - (없음)
+
+---
+
+# 두 번째 게임: 마르지 않는 병풍 (`byeongpung/`)
+
+같은 저장소의 별도 폴더에 있는 새 게임. 위의 "9시 47분"과 코드·빌드가 분리되어 있다(위 게임은 건드리지 않음).
+- 3D 로우폴리 수묵 액션 RPG, 제1폭 「까치와 범」(1장 데모). 기획서 `byeongpung/DESIGN.md`, 안내 `byeongpung/README.md`.
+- 실행: `byeongpung/play.html` 을 브라우저로 열면 된다(HTML 한 장). `main` 병합 후엔 Pages 의 `/ruined-city-game/byeongpung/`.
+- 빌드: `npm run bp:build`(글꼴 자르기 → Vite → `pack.mjs` 로 한 장 묶기). `npm run build` 는 두 게임을 모두 빌드한다.
+  문장이 바뀌면 글꼴 조각도 다시 만들어지므로 반드시 `bp:build` 로 빌드. 배포용 파일 갱신은 `node byeongpung/scripts/pack.mjs --release`.
+- 규칙은 위와 같다: 문장은 `src/data/text.ko.json`, 외부 에셋 금지(코드 생성), 파일 400줄 이하, Ctrl·Tab 금지, 한국어 커밋.
+- 점검: `node byeongpung/scripts/check.cjs byeongpung/scripts/scenarios/<이름>.cjs`.
+  `play`(처음부터 결말까지 자동 플레이. 푸시 전 필수. 인자: real 90 0.3 = 서툰 봇) `ui` `audio` `world` `combat` `boss` `bossdiag`(보스 공격·명중 통계) `moments` `live` `inputs` `quality` `death` `poses`.
+  렌더링은 멈춰 두고 `__game.sim(n)` 으로 시간을 흘린다(SwiftShader 는 초당 1프레임 수준).
+- 디버그 훅(`#debug`): `__game.start({flags, arts})` `tp` `spawn` `bot` `autoplay` `autoStatus` `audioTest` `poseRig/pose`.
+
+## 병풍: 현재 상태
+- 구현: 지도 전체(여백·솔숲·붓골·대숲·갈대늪·벼룻길·벼루못), 적 8종 + 묵장·먹두꺼비·먹범, 전투(4연타·모아 치기·연계·여백·획 3종·맺음),
+  성장(덧칠·붓 손질·도장 6·이슬), 연적 6곳(색 복원·저장), 대화·쪽글 8·낱장 부탁, 먹문, 결말, 합성 사운드·음악, 설정·지도·이어 그리기.
+- 자동 플레이로 처음부터 결말까지 완주 확인(오류 0). 죽음→부활, 저장→이어 그리기, 입력 배선도 시나리오로 확인.
+- 사람이 직접 확인해야 하는 것: 조작감·난이도·소리(크기는 숫자로만 맞춤)·실제 GPU 성능.
+  난이도 숫자는 `src/core/config.js` 와 각 적 파일의 정의(hp·posture·attacks), 소리 크기는 `src/systems/audio/sfx.js`.
+- 난이도 메모: 자동 플레이 봇(회피 성공률 30%)도 죽지 않고 완주한다. 봇은 쉬지 않고 공격하므로 사람보다 훨씬 빨리 잡는다(묵장 40초·먹범 90초).
+  우두머리는 맞아도 움찔하지 않고(poise 3), 흐트러짐은 `postureTaken: 0.45` 로 더디게 찬다.
+- 아이디어(미구현): 제2폭, 적 추가, 주인공 손 IK 다듬기, 자동 품질 조절.
